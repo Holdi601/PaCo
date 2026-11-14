@@ -14,6 +14,7 @@ namespace PaCo.Client;
 ///   PaCo.exe --service            → Windows service (LocalSystem)
 ///   PaCo.exe --agent {pipe}       → session agent (SYSTEM in a child's session, started by the service)
 ///   PaCo.exe --uninstall          → uninstall (from "Apps &amp; Features")
+///   PaCo.exe --update             → replace installed version, keep all settings (admin)
 ///   PaCo.exe --install [--server URL --code CODE] --child user=Name [--child …] [--make-standard user]
 ///                                 → unattended install (automated tests, scripted setups); server/code
 ///                                   default to the configuration embedded in a downloaded PaCo-Setup.exe
@@ -31,6 +32,7 @@ internal static class Program
                 "--agent" when args.Length >= 2 => AgentApp.Run(args[1]),
                 "--uninstall" => RunUninstall(),
                 "--install" => RunSilentInstall(args),
+                "--update" => RunSilentUpdate(),
                 _ => RunSetup(),
             };
         }
@@ -97,6 +99,16 @@ internal static class Program
             return 1;
         Installer.UninstallAsync(new Progress<string>(s => Log.Info(s))).GetAwaiter().GetResult();
         MessageBox.Show("PaCo wurde entfernt.", "PaCo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return 0;
+    }
+
+    /// <summary>Replaces the installed program with this exe, keeping pairing, rules and usage.</summary>
+    private static int RunSilentUpdate()
+    {
+        if (!Installer.IsInstalled) throw new InvalidOperationException("PaCo ist nicht installiert.");
+        SecureStore.EnsureDataDir();
+        Log.Info($"Unbeaufsichtigtes Update auf {ServerApi.Version}");
+        Installer.InstallBinariesAndServiceAsync(new Progress<string>(s => Log.Info(s))).GetAwaiter().GetResult();
         return 0;
     }
 

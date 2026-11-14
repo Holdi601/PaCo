@@ -204,14 +204,8 @@ internal sealed class SyncWorker(Runtime rt) : BackgroundService
         {
             var sent = req.Events.Select(e => e.Id).ToHashSet();
             rt.State.PendingEvents.RemoveAll(e => sent.Contains(e.Id));
-            // Server time at the middle of the request vs. our clock.
-            var localMid = sentAt + (receivedAt - sentAt) / 2;
-            var offset = (resp.ServerUtcNow - localMid).TotalSeconds;
-            if (Math.Abs(offset - rt.State.ServerOffsetSeconds) > 5)
-            {
-                Log.Info($"Uhrabweichung zum Server: {offset:F0} s");
-                rt.State.ServerOffsetSeconds = Math.Abs(offset) < 2 ? 0 : offset;
-            }
+            // Server time now ≈ server timestamp + half the round trip.
+            rt.ConfirmServerTime(resp.ServerUtcNow + (receivedAt - sentAt) / 2);
             var tz = FamilyClock.Resolve(rt.Policies.Current?.TimeZoneId ?? "Europe/Berlin");
             rt.State.Prune(FamilyClock.Day(rt.Now(), tz));
             rt.MarkDirty();

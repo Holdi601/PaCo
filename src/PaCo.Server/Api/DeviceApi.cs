@@ -184,7 +184,10 @@ public static class DeviceApi
     {
         if (usage.Count == 0) return;
         var childIds = await db.Children.IgnoreQueryFilters().Where(c => c.FamilyId == device.FamilyId).Select(c => c.Id).ToListAsync(ct);
-        var reports = usage.Where(u => childIds.Contains(u.ChildId)).Take(100).ToList();
+        var family = await db.Families.SingleAsync(f => f.Id == device.FamilyId, ct);
+        var today = FamilyClock.Day(now, FamilyClock.Resolve(family.TimeZoneId));
+        // Days in the future can only come from a clock set forward – ignore them (the client merges them back).
+        var reports = usage.Where(u => childIds.Contains(u.ChildId) && u.Day <= today && u.Day >= today.AddDays(-14)).Take(100).ToList();
         var days = reports.Select(r => r.Day).Distinct().ToList();
         var rows = await db.UsageDays.IgnoreQueryFilters()
             .Where(u => u.DeviceId == device.Id && u.FamilyId == device.FamilyId && days.Contains(u.Day)).ToListAsync(ct);

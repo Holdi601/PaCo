@@ -6,13 +6,21 @@ namespace PaCo.Client.Service;
 /// <summary>Shared service state. All access to <see cref="State"/> goes through <see cref="Gate"/>.</summary>
 internal sealed class Runtime
 {
+    private readonly System.Diagnostics.Stopwatch _mono = System.Diagnostics.Stopwatch.StartNew();
+
     public Runtime(DeviceSecrets device)
     {
         Device = device;
         Policies = new PolicyStore(device);
         Policies.LoadFromDisk();
         State = ClientState.Load();
+        var notes = new List<string>();
+        Clock = new TrustedClock(() => DateTimeOffset.UtcNow, () => _mono.Elapsed, State.LastUtc, State.ServerOffsetSeconds, notes);
+        foreach (var n in notes) State.AddEvent(DeviceEventKind.ClockTampering, n);
     }
+
+    /// <summary>Tamper-resistant clock (monotonic while running, never backwards, server-confirmed).</summary>
+    public TrustedClock Clock { get; }
 
     public DeviceSecrets Device { get; }
 
@@ -33,27 +41,51 @@ internal sealed class Runtime
     private DateTime _lastSave = DateTime.MinValue;
     private bool _dirty;
 
-    /// <summary>
-    /// Trusted "now": local UTC corrected by the server offset measured at the last sync. Never goes backwards
-    /// below the highest time seen before (clock set back → stays at the old value).
-    /// </summary>
+    /// <summary>Trusted "now" (see <see cref="TrustedClock"/>). Call under <see cref="Gate"/>.</summary>
     public DateTimeOffset Now()
     {
-        var raw = DateTimeOffset.UtcNow;
-        // Only the Windows clock itself going backwards is suspicious (offset corrections from the server are not).
-        // LastUtc is default (MinValue) on a fresh install – compare without arithmetic on it to avoid underflow.
-        if (State.LastUtc != default && raw.AddMinutes(2) < State.LastUtc)
+        var notes = new List<string>();
+        var t = Clock.Now(notes);
+        foreach (var n in notes)
         {
-            State.AddEvent(DeviceEventKind.ClockTampering, $"Windows-Uhr wurde zurückgestellt (von {State.LastUtc:u} auf {raw:u}).");
-            State.LastUtc = raw; // report; already booked usage stays booked
+            State.AddEvent(DeviceEventKind.ClockTampering, n);
             MarkDirty();
         }
-        else if (raw > State.LastUtc)
-        {
-            State.LastUtc = raw;
-        }
-        return raw.AddSeconds(State.ServerOffsetSeconds);
+        State.LastUtc = Clock.LastTrusted;
+        return t;
     }
+
+    /// <summary>
+    /// Adopts the server time after a sync. If the local clock was ahead (e.g. BIOS clock set forward to get a
+    /// "new day"), usage booked on future days is moved to the real day and the parents are warned.
+    /// </summary>
+    public void ConfirmServerTime(DateTimeOffset serverUtc)
+    {
+        var wasVerified = Clock.Verified;
+        var diff = Clock.Confirm(serverUtc);
+        State.ServerOffsetSeconds = Clock.OffsetSeconds;
+        State.LastUtc = Clock.LastTrusted;
+        if (Math.Abs(diff.TotalMinutes) >= 2)
+        {
+            var text = diff < TimeSpan.Zero
+                ? $"Die Uhr des PCs ging {FormatSpan(-diff)} vor – korrigiert mit der Serverzeit."
+                : $"Die Uhr des PCs ging {FormatSpan(diff)} nach – korrigiert mit der Serverzeit.";
+            if (diff < -TimeSpan.FromMinutes(10)) State.AddEvent(DeviceEventKind.ClockTampering, text);
+            else Log.Info(text);
+        }
+
+        var tz = FamilyClock.Resolve(Policies.Current?.TimeZoneId ?? "Europe/Berlin");
+        var merged = TrustedClock.MergeFutureDays(State.Usage, FamilyClock.Day(serverUtc, tz),
+            key => (Guid.ParseExact(key[..key.IndexOf('|')], "N"), DateOnly.ParseExact(key[(key.IndexOf('|') + 1)..], "yyyy-MM-dd")),
+            ClientState.Key);
+        if (merged > 0)
+            State.AddEvent(DeviceEventKind.ClockTampering, "Nutzung an einem „zukünftigen“ Tag (vorgestellte Uhr) wurde dem echten Tag angerechnet.");
+        if (!wasVerified) Log.Info($"Zeit vom Server bestätigt: {serverUtc:u}");
+        MarkDirty();
+    }
+
+    private static string FormatSpan(TimeSpan t) =>
+        t.TotalHours >= 1 ? $"{(int)t.TotalHours} Std {t.Minutes} Min" : $"{(int)t.TotalMinutes} Min";
 
     public void MarkDirty() => _dirty = true;
 
