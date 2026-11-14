@@ -119,6 +119,14 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
             Assert.Contains("bet365.com", lena.GetWeb().BlockedSites);
         }
 
+        // Saving with empty optional fields (no blocked apps/sites) must work too.
+        form["BlockedApps"] = "";
+        form["BlockedSites"] = "";
+        form.Remove("AddPresets");
+        form["BlockOtherBrowsers"] = "false";
+        var savedEmpty = await PostFormAsync(parent, editUrl, await parent.GetStringAsync(editUrl), form);
+        Assert.Equal(HttpStatusCode.Redirect, savedEmpty.StatusCode);
+
         // --- Quick actions on the dashboard ---
         dash = await parent.GetStringAsync("/Dashboard");
         Assert.Contains("Lena", dash);

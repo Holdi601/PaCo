@@ -52,14 +52,15 @@ public sealed class EditModel(PaCoDb db) : PageModel
     [BindProperty]
     public List<DayInput> Days { get; set; } = [];
 
+    // Optional fields must be nullable – otherwise ASP.NET treats them as [Required].
     [BindProperty]
-    public string BlockedApps { get; set; } = "";
+    public string? BlockedApps { get; set; }
 
     [BindProperty]
     public bool BlockOtherBrowsers { get; set; }
 
     [BindProperty]
-    public string BlockedSites { get; set; } = "";
+    public string? BlockedSites { get; set; }
 
     [BindProperty]
     public List<string> AddPresets { get; set; } = [];
