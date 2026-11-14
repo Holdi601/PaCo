@@ -61,7 +61,7 @@ internal static class Installer
             await api.AssignAsync(new AssignRequest { Assignments = assignments }, ct);
             progress.Report("Regeln werden geladen …");
             var rt = new Runtime(device);
-            await new SyncWorker(rt).SyncOnceAsync(api, ct);
+            await new SyncWorker(rt, installUpdates: false).SyncOnceAsync(api, ct);
             if (rt.Policies.Current is null) throw new InvalidOperationException("Es konnten keine Regeln vom Server geladen werden.");
         }
 
@@ -82,18 +82,31 @@ internal static class Installer
         progress.Report("Programm wird installiert …");
         Directory.CreateDirectory(Paths.InstallDir);
         var self = Environment.ProcessPath!;
+        var backup = Paths.InstalledExe + ".bak";
+        var replaced = false;
         if (!string.Equals(Path.GetFullPath(self), Path.GetFullPath(Paths.InstalledExe), StringComparison.OrdinalIgnoreCase))
         {
-            // The service may still hold the file for a moment after stopping.
+            // Copy next to the target first, then swap atomically – a crash never leaves a half-written exe.
+            var staged = Paths.InstalledExe + ".new";
+            File.Copy(self, staged, overwrite: true);
             for (var i = 0; ; i++)
             {
                 try
                 {
-                    File.Copy(self, Paths.InstalledExe, overwrite: true);
+                    if (File.Exists(Paths.InstalledExe))
+                    {
+                        File.Replace(staged, Paths.InstalledExe, backup, ignoreMetadataErrors: true);
+                        replaced = true;
+                    }
+                    else
+                    {
+                        File.Move(staged, Paths.InstalledExe);
+                    }
                     break;
                 }
                 catch (IOException) when (i < 20)
                 {
+                    // The service may still hold the file for a moment after stopping.
                     await Task.Delay(500);
                 }
             }
@@ -133,10 +146,33 @@ internal static class Installer
         }
 
         progress.Report("Dienst wird gestartet …");
+        try
+        {
+            await StartAndVerifyAsync();
+            Log.Info($"Dienst läuft (Version {ServerApi.Version})");
+        }
+        catch (Exception ex) when (replaced && File.Exists(backup))
+        {
+            // New version does not start: roll back to the previous exe so the child's PC stays protected.
+            Log.Error("Neue Version startet nicht – stelle vorherige Version wieder her", ex);
+            await StopServiceAsync();
+            File.Copy(backup, Paths.InstalledExe, overwrite: true);
+            await StartAndVerifyAsync();
+            Log.Warn("Vorherige Version wiederhergestellt");
+            throw;
+        }
+    }
+
+    /// <summary>Starts the service and checks it is still running a few seconds later (no crash loop).</summary>
+    private static async Task StartAndVerifyAsync()
+    {
         using var sc = new ServiceController(Paths.ServiceName);
-        sc.Start();
+        if (sc.Status != ServiceControllerStatus.Running) sc.Start();
         sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(30));
-        Log.Info("Dienst läuft");
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        sc.Refresh();
+        if (sc.Status != ServiceControllerStatus.Running)
+            throw new InvalidOperationException($"Dienst läuft nach dem Start nicht mehr (Status {sc.Status}).");
     }
 
     public static async Task UninstallAsync(IProgress<string> progress)

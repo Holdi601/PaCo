@@ -32,6 +32,8 @@ builder.Services.AddSingleton<TlsCertificateProvider>();
 builder.Services.AddScoped<PolicyBuilder>();
 builder.Services.AddScoped<ParentActions>();
 builder.Services.AddScoped<AccountAdmin>();
+builder.Services.AddHttpClient("github", c => c.Timeout = TimeSpan.FromMinutes(5));
+builder.Services.AddScoped<GitHubUpdates>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = AccountAdmin.InviteLifetime);
 
 builder.Services.AddDataProtection()

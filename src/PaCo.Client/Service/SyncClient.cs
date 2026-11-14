@@ -48,6 +48,16 @@ internal sealed class ServerApi : IDisposable
         return (await resp.Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options, ct))!;
     }
 
+    /// <summary>Downloads the plain client exe offered by the server into <paramref name="target"/>.</summary>
+    public async Task DownloadClientAsync(string target, CancellationToken ct = default)
+    {
+        using var resp = await _http.GetAsync(ApiRoutes.ClientDownload.TrimStart('/'), HttpCompletionOption.ResponseHeadersRead, ct);
+        await EnsureAsync(resp, ct);
+        await using var src = await resp.Content.ReadAsStreamAsync(ct);
+        await using var dst = File.Create(target);
+        await src.CopyToAsync(dst, ct);
+    }
+
     private static async Task EnsureAsync(HttpResponseMessage resp, CancellationToken ct)
     {
         if (resp.IsSuccessStatusCode) return;
@@ -71,8 +81,64 @@ internal sealed class ServerException(HttpStatusCode status, string message) : E
 }
 
 /// <summary>Exchanges usage/events for fresh signed rules every 30 s.</summary>
-internal sealed class SyncWorker(Runtime rt) : BackgroundService
+internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : BackgroundService
 {
+    private readonly bool _installUpdates = installUpdates;
+    private string? _lastUpdateVersion;
+    private TimeSpan _lastUpdateAttempt = Mono.Never;
+
+    /// <summary>
+    /// Installs a server-signed update: verify signature (pinned server key) → download → verify SHA-256 and size
+    /// → start the new exe with --update (it replaces the program atomically and rolls back on failure).
+    /// </summary>
+    private async Task TryUpdateAsync(ServerApi api, SignedEnvelope envelope, CancellationToken ct)
+    {
+        UpdateManifest m;
+        try
+        {
+            m = PolicySigning.Verify<UpdateManifest>(envelope, rt.Device.PolicyPublicKeyPem);
+        }
+        catch (PolicySignatureException ex)
+        {
+            lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, "Update abgelehnt: " + ex.Message);
+            return;
+        }
+        if (m.DeviceId != rt.Device.DeviceId || !UpdateManifest.IsNewer(m.Version, ServerApi.Version)) return;
+        // At most one attempt per version every 30 minutes.
+        if (_lastUpdateVersion == m.Version && Mono.Since(_lastUpdateAttempt) < TimeSpan.FromMinutes(30)) return;
+        _lastUpdateVersion = m.Version;
+        _lastUpdateAttempt = Mono.Now;
+
+        var dir = Path.Combine(Paths.DataDir, "update");
+        Directory.CreateDirectory(dir);
+        var file = Path.Combine(dir, $"PaCo-{m.Version}.exe");
+        Log.Info($"Update {ServerApi.Version} → {m.Version}: lade herunter …");
+        await api.DownloadClientAsync(file, ct);
+
+        string sha;
+        await using (var fs = File.OpenRead(file)) sha = Convert.ToHexStringLower(await System.Security.Cryptography.SHA256.HashDataAsync(fs, ct));
+        var size = new FileInfo(file).Length;
+        if (sha != m.Sha256 || size != m.Size)
+        {
+            File.Delete(file);
+            lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, $"Update {m.Version} verworfen: Prüfsumme stimmt nicht.");
+            return;
+        }
+
+        lock (rt.Gate)
+        {
+            rt.State.AddEvent(DeviceEventKind.Info, $"Update auf Version {m.Version} wird installiert.");
+            rt.SaveIfNeeded(force: true);
+        }
+        Log.Info($"Update {m.Version} geprüft (SHA-256 {sha[..12]}…) – starte Installation");
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(file, "--update")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = dir,
+        });
+    }
+
     private static readonly TimeSpan Interval = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan ActiveInterval = TimeSpan.FromSeconds(15);
     private List<WindowsAccount> _accounts = [];
@@ -199,6 +265,9 @@ internal sealed class SyncWorker(Runtime rt) : BackgroundService
             lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, ex.Message);
             Log.Error("Regeln abgelehnt", ex);
         }
+
+        if (resp.Update is { } update && _installUpdates)
+            await TryUpdateAsync(api, update, ct);
 
         lock (rt.Gate)
         {

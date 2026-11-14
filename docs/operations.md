@@ -41,6 +41,21 @@ Get-Content C:\ProgramData\PaCo\paco.log -Tail 50
 | Kopplungscode ungültig | Er ist 24 h gültig und nur einmal verwendbar. Auf der Website ein neues Installationsprogramm laden. |
 | SmartScreen-Warnung beim Setup | Das Programm ist nicht signiert: *Weitere Informationen → Trotzdem ausführen*. |
 
+## Client-Updates
+
+1. **Neue Version veröffentlichen** (Entwickler): `<Version>` in `Directory.Build.props` erhöhen, committen,
+   Tag setzen und pushen (`git tag v1.2.0 && git push --tags`). GitHub Actions testet, baut `PaCo-Setup.exe` und
+   legt sie zusammen mit der SHA-256-Prüfsumme als Release an.
+2. **Auf dem Server holen** (Super-Admin): *Verwaltung → Auf GitHub nach Updates suchen*. Der Server lädt das
+   Release, prüft die Prüfsumme und bietet die Version ab sofort an, auch für neue Installationen.
+3. **Verteilen**: *Verwaltung → Alle Geräte aktualisieren* oder pro Gerät durch die Eltern unter
+   *Geräte → Update installieren*.
+
+Sicherheit: Die Kinder-PCs laden Updates **nur von deinem Server**. Jedes Update kommt mit einem Manifest
+(Version, SHA-256, Größe), das der Server mit seinem Signaturschlüssel signiert. Der PC prüft Signatur und Prüfsumme,
+ersetzt das Programm atomar und startet den Dienst neu. Startet die neue Version nicht, wird automatisch die
+vorherige wiederhergestellt.
+
 ## Backup
 
 Der Datenordner (`PACO_DATA_DIR`) enthält alles:

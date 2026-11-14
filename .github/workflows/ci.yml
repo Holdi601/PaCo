@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Build (inkl. Windows-Client)
+        run: dotnet build PaCo.slnx -c Release -p:EnableWindowsTargeting=true
+      - name: Tests
+        run: dotnet test tests/PaCo.Tests -c Release --no-build

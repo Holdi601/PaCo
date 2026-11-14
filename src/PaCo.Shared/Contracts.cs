@@ -165,8 +165,32 @@ public sealed record SyncResponse
 
     public DateTimeOffset ServerUtcNow { get; init; }
 
-    /// <summary>Newest client version the server offers; client self-updates if higher.</summary>
+    /// <summary>Newest client version the server offers (informational).</summary>
     public string? LatestClientVersion { get; init; }
+
+    /// <summary>
+    /// Present only when a parent/admin requested an update for this device: a server-signed
+    /// <see cref="UpdateManifest"/>. The client verifies signature and SHA-256 before installing.
+    /// </summary>
+    public SignedEnvelope? Update { get; init; }
+}
+
+/// <summary>Signed description of a client build the device may install.</summary>
+public sealed record UpdateManifest
+{
+    public Guid DeviceId { get; init; }
+
+    public string Version { get; init; } = "";
+
+    /// <summary>Lower-case hex SHA-256 of PaCo-Setup.exe (without any appended setup payload).</summary>
+    public string Sha256 { get; init; } = "";
+
+    public long Size { get; init; }
+
+    public DateTimeOffset IssuedUtc { get; init; }
+
+    public static bool IsNewer(string? candidate, string? current) =>
+        System.Version.TryParse(candidate, out var c) && (!System.Version.TryParse(current, out var cur) || c > cur);
 }
 
 /// <summary>

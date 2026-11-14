@@ -131,6 +131,9 @@ public sealed class Device : IFamilyScoped
 
     public bool Revoked { get; set; }
 
+    /// <summary>A parent/admin asked this device to install the newest client version.</summary>
+    public bool UpdateRequested { get; set; }
+
     /// <summary>JSON array of child ids using the PC at the last sync.</summary>
     public string ActiveChildrenJson { get; set; } = "[]";
 

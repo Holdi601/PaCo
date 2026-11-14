@@ -16,8 +16,37 @@ public sealed record FamilyRow(Family Family, int Parents, int Children, int Dev
 /// never sees children's names, rules or statistics.
 /// </summary>
 public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, AccountAdmin admin, IOptions<ServerOptions> options,
-    TimeProvider clock, ILogger<IndexModel> log) : PageModel
+    TimeProvider clock, ClientPackage client, GitHubUpdates github, ILogger<IndexModel> log) : PageModel
 {
+    public ClientPackage.Build? ClientBuild => client.Current;
+
+    public int DevicesOutdated { get; private set; }
+
+    public int DevicesTotal { get; private set; }
+
+    public async Task<IActionResult> OnPostCheckUpdatesAsync(CancellationToken ct)
+    {
+        var r = await github.CheckAndDownloadAsync(ct);
+        TempData[r.Ok ? "Message" : "Error"] = r.Message;
+        return RedirectToPage();
+    }
+
+    /// <summary>Requests the newest client on every outdated device of every family.</summary>
+    public async Task<IActionResult> OnPostUpdateAllAsync()
+    {
+        var devices = await db.Devices.IgnoreQueryFilters().Where(d => !d.Revoked).ToListAsync();
+        var n = 0;
+        foreach (var d in devices.Where(d => PaCo.Shared.UpdateManifest.IsNewer(client.Version, d.ClientVersion)))
+        {
+            d.UpdateRequested = true;
+            n++;
+        }
+        await db.SaveChangesAsync();
+        log.LogInformation("Update auf {Version} für {Count} Geräte angefordert", client.Version, n);
+        TempData["Message"] = n == 0 ? "Alle Geräte sind aktuell." : $"{n} Gerät(e) installieren Version {client.Version} beim nächsten Kontakt.";
+        return RedirectToPage();
+    }
+
     public IReadOnlyList<FamilyRow> Families { get; private set; } = [];
 
     public IReadOnlyList<ParentUser> Parents { get; private set; } = [];
@@ -52,6 +81,9 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         // Admin has no family context: count explicitly across families.
         var children = await db.Children.IgnoreQueryFilters().GroupBy(c => c.FamilyId).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N);
         var devices = await db.Devices.IgnoreQueryFilters().Where(d => !d.Revoked).GroupBy(d => d.FamilyId).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N);
+        var versions = await db.Devices.IgnoreQueryFilters().Where(d => !d.Revoked).Select(d => d.ClientVersion).ToListAsync();
+        DevicesTotal = versions.Count;
+        DevicesOutdated = versions.Count(v => PaCo.Shared.UpdateManifest.IsNewer(client.Version, v));
         var all = await users.Users.Include(u => u.Family).OrderBy(u => u.Email).ToListAsync();
         var adminIds = (await users.GetUsersInRoleAsync(PaCoRoles.SuperAdmin)).Select(u => u.Id).ToHashSet();
 

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PaCo.Server.Data;
 using PaCo.Server.Services;
+using PaCo.Shared;
 
 namespace PaCo.Server.Pages.Devices;
 
@@ -72,6 +73,19 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         await db.SaveChangesAsync();
         return RedirectToPage();
     }
+
+    /// <summary>Asks the device to install the newest client version at its next contact.</summary>
+    public async Task<IActionResult> OnPostUpdateAsync(Guid deviceId)
+    {
+        var d = await db.Devices.FirstOrDefaultAsync(x => x.Id == deviceId && !x.Revoked);
+        if (d is null) return NotFound();
+        d.UpdateRequested = true;
+        await db.SaveChangesAsync();
+        TempData["Message"] = $"{d.Name} installiert Version {client.Version} beim nächsten Kontakt (online: innerhalb von 30 Sekunden).";
+        return RedirectToPage();
+    }
+
+    public bool UpdateAvailable(Device d) => UpdateManifest.IsNewer(client.Version, d.ClientVersion);
 
     public async Task<IActionResult> OnPostRevokeAsync(Guid deviceId)
     {

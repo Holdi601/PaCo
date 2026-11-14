@@ -1,0 +1,39 @@
+name: Release
+
+# Push a tag like v1.2.3 (must match <Version> in Directory.Build.props).
+# Produces PaCo-Setup.exe + PaCo-Setup.exe.sha256 as release assets. PaCo servers fetch them via
+# "Verwaltung → Auf GitHub nach Updates suchen", verify the checksum and sign them for their devices.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Version prüfen
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          grep -q "<Version>$V</Version>" Directory.Build.props || { echo "::error::Tag $V passt nicht zu Directory.Build.props"; exit 1; }
+      - name: Tests
+        run: dotnet test tests/PaCo.Tests -c Release
+      - name: Windows-Client bauen (self-contained, eine Datei)
+        run: |
+          dotnet publish src/PaCo.Client -c Release -o out -p:EnableWindowsTargeting=true
+          mv out/PaCo.exe PaCo-Setup.exe
+          sha256sum PaCo-Setup.exe > PaCo-Setup.exe.sha256
+          cat PaCo-Setup.exe.sha256
+      - name: Release erstellen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" PaCo-Setup.exe PaCo-Setup.exe.sha256 \
+            --title "PaCo $GITHUB_REF_NAME" \
+            --notes "Windows-Client $GITHUB_REF_NAME. Installation/Update über die eigene PaCo-Weboberfläche (Verwaltung → Auf GitHub nach Updates suchen)."

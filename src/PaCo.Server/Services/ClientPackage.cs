@@ -1,36 +1,88 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using PaCo.Shared;
 
 namespace PaCo.Server.Services;
 
-/// <summary>The Windows client installer offered for download, personalised with server URL and pairing code.</summary>
+/// <summary>
+/// The Windows client offered for download and for updates. Two sources: the build bundled in the Docker image
+/// (/app/client) and builds fetched from GitHub releases (DataDir/client-updates). The newest version wins.
+/// </summary>
 public sealed class ClientPackage(IOptions<ServerOptions> options)
 {
-    private string ExePath => Path.GetFullPath(options.Value.ClientPath);
+    private readonly Lock _gate = new();
+    private (string Path, DateTime Write, string Sha)? _shaCache;
 
-    public bool Available => File.Exists(ExePath);
+    public sealed record Build(string Path, string Version, string Source);
 
-    /// <summary>Version from "version.txt" next to the exe (written by the Docker build).</summary>
-    public string? Version
+    public string UpdatesDir => Path.Combine(options.Value.DataDir, "client-updates");
+
+    private Build? Bundled
     {
         get
         {
-            var file = Path.Combine(Path.GetDirectoryName(ExePath)!, "version.txt");
-            return File.Exists(file) ? File.ReadAllText(file).Trim() : null;
+            var exe = Path.GetFullPath(options.Value.ClientPath);
+            if (!File.Exists(exe)) return null;
+            var vfile = Path.Combine(Path.GetDirectoryName(exe)!, "version.txt");
+            var v = File.Exists(vfile) ? File.ReadAllText(vfile).Trim() : "0.0.0";
+            return new Build(exe, v, "Docker-Image");
         }
     }
+
+    private IEnumerable<Build> Downloaded
+    {
+        get
+        {
+            if (!Directory.Exists(UpdatesDir)) yield break;
+            foreach (var f in Directory.GetFiles(UpdatesDir, "PaCo-Setup-*.exe"))
+            {
+                var v = Path.GetFileNameWithoutExtension(f)["PaCo-Setup-".Length..];
+                if (System.Version.TryParse(v, out _)) yield return new Build(f, v, "GitHub");
+            }
+        }
+    }
+
+    /// <summary>The newest available build.</summary>
+    public Build? Current =>
+        Downloaded.Append(Bundled).Where(b => b is not null).Select(b => b!)
+            .OrderByDescending(b => System.Version.Parse(b.Version)).FirstOrDefault();
+
+    public bool Available => Current is not null;
+
+    public string? Version => Current?.Version;
+
+    /// <summary>SHA-256 (hex) of the current build, cached per file.</summary>
+    public string? Sha256
+    {
+        get
+        {
+            var b = Current;
+            if (b is null) return null;
+            var write = File.GetLastWriteTimeUtc(b.Path);
+            lock (_gate)
+            {
+                if (_shaCache is { } c && c.Path == b.Path && c.Write == write) return c.Sha;
+                using var fs = File.OpenRead(b.Path);
+                var sha = Convert.ToHexStringLower(SHA256.HashData(fs));
+                _shaCache = (b.Path, write, sha);
+                return sha;
+            }
+        }
+    }
+
+    public long Size => Current is { } b ? new FileInfo(b.Path).Length : 0;
 
     /// <summary>Installer with embedded server URL and one-time pairing code.</summary>
     public Stream OpenPersonalised(string serverUrl, string pairingCode)
     {
         var trailer = SetupPayload.Encode(new SetupPayload { ServerUrl = serverUrl, PairingCode = pairingCode });
-        return new ConcatStream(File.OpenRead(ExePath), trailer);
+        return new ConcatStream(File.OpenRead(Current!.Path), trailer);
     }
 
     /// <summary>Plain client exe (used by installed clients for self-update).</summary>
-    public Stream OpenPlain() => File.OpenRead(ExePath);
+    public Stream OpenPlain() => File.OpenRead(Current!.Path);
 
-    /// <summary>Read-only stream = file followed by a small byte array, without copying the 70 MB exe into memory.</summary>
+    /// <summary>Read-only stream = file followed by a small byte array, without copying the exe into memory.</summary>
     private sealed class ConcatStream(FileStream file, byte[] tail) : Stream
     {
         private long _pos;

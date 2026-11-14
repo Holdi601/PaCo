@@ -123,7 +123,7 @@ public static class DeviceApi
         return Results.Ok(children.OrderBy(c => c.Name).Select(c => new ChildRef(c.Id, c.Name)).ToList());
     }
 
-    private static async Task<IResult> SyncAsync(HttpContext http, SyncRequest req, PaCoDb db, PolicyBuilder policies, ClientPackage client, TimeProvider clock, CancellationToken ct)
+    private static async Task<IResult> SyncAsync(HttpContext http, SyncRequest req, PaCoDb db, PolicyBuilder policies, ClientPackage client, SigningKeyStore keys, TimeProvider clock, CancellationToken ct)
     {
         var device = await AuthenticateAsync(http, db, ct);
         if (device is null) return Results.Unauthorized();
@@ -143,6 +143,22 @@ public static class DeviceApi
             await UpsertUsageAsync(db, device, req.Usage, now, ct);
             await StoreEventsAsync(db, device, req.Events, ct);
         }
+        // Update requested and a newer build available → hand out a signed manifest.
+        SignedEnvelope? update = null;
+        if (device.UpdateRequested && !device.Revoked)
+        {
+            if (UpdateManifest.IsNewer(client.Version, device.ClientVersion) && client.Sha256 is { } sha)
+            {
+                update = keys.Sign(new UpdateManifest
+                {
+                    DeviceId = device.Id, Version = client.Version!, Sha256 = sha, Size = client.Size, IssuedUtc = now,
+                });
+            }
+            else
+            {
+                device.UpdateRequested = false; // already up to date
+            }
+        }
         await db.SaveChangesAsync(ct);
 
         return Results.Ok(new SyncResponse
@@ -150,6 +166,7 @@ public static class DeviceApi
             Policy = await policies.BuildSignedAsync(device, ct),
             ServerUtcNow = now,
             LatestClientVersion = client.Version,
+            Update = update,
         });
     }
 

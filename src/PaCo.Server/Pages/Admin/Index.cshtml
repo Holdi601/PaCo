@@ -152,6 +152,29 @@
     </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-header">PaCo-Client (Windows)</div>
+    <div class="card-body">
+        <p class="mb-2">
+            Angebotene Version: <strong>@(Model.ClientBuild?.Version ?? "keine")</strong>
+            <span class="text-muted">(@Model.ClientBuild?.Source)</span><br />
+            Geräte: @Model.DevicesTotal, davon veraltet: <strong>@Model.DevicesOutdated</strong>
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            <form method="post" asp-page-handler="CheckUpdates">
+                <button class="btn btn-outline-primary">Auf GitHub nach Updates suchen</button>
+            </form>
+            @if (Model.DevicesOutdated > 0)
+            {
+                <form method="post" asp-page-handler="UpdateAll">
+                    <button class="btn btn-primary" data-confirm="Alle veralteten Geräte (alle Familien) auf Version @Model.ClientBuild?.Version aktualisieren?">Alle Geräte aktualisieren</button>
+                </form>
+            }
+        </div>
+        <div class="form-text">Updates werden von GitHub geladen, per Prüfsumme kontrolliert und vom Server signiert. Die PCs installieren nur signierte Updates dieses Servers.</div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">Super-Admins</div>
     <ul class="list-group list-group-flush">

@@ -55,6 +55,23 @@
             </div>
         </div>
         <div class="card-body">
+            @if (!d.Revoked && Model.UpdateAvailable(d))
+            {
+                <div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2 py-2">
+                    @if (d.UpdateRequested)
+                    {
+                        <span>⏳ Update auf Version @Model.ClientVersion wird beim nächsten Kontakt installiert …</span>
+                    }
+                    else
+                    {
+                        <span>Neue PaCo-Version @Model.ClientVersion verfügbar (installiert: @(d.ClientVersion ?? "?")).</span>
+                        <form method="post" asp-page-handler="Update">
+                            <input type="hidden" name="deviceId" value="@d.Id" />
+                            <button class="btn btn-sm btn-primary">Update installieren</button>
+                        </form>
+                    }
+                </div>
+            }
             @if (!d.Revoked)
             {
                 <h3 class="h6">Windows-Konten</h3>

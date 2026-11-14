@@ -21,6 +21,9 @@ public sealed class ServerOptions
     /// <summary>HTTPS port when <see cref="TlsCertPath"/> is set.</summary>
     public int HttpsPort { get; set; } = 8790;
 
+    /// <summary>GitHub repository ("owner/name") whose releases provide client updates.</summary>
+    public string UpdateRepository { get; set; } = "Holdi601/PaCo";
+
     /// <summary>Requests per IP and 5 minutes on sign-in pages (brute-force protection).</summary>
     public int AccountRateLimit { get; set; } = 30;
 }

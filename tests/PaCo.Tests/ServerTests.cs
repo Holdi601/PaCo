@@ -174,6 +174,47 @@ public class DeviceApiTests : IClassFixture<PaCoFactory>
     }
 
     [Fact]
+    public async Task UpdateIsOfferedSignedOnlyWhenRequested()
+    {
+        var (_, code) = await NewFamilyWithPairingCodeAsync();
+        var http = _f.Https();
+        var paired = (await (await http.PostAsJsonAsync(ApiRoutes.Pair, new PairRequest { PairingCode = code, ClientVersion = "1.0.0" }, PaCoJson.Options))
+            .Content.ReadFromJsonAsync<PairResponse>(PaCoJson.Options))!;
+        http.DefaultRequestHeaders.Authorization = new("Device", $"{paired.DeviceId}:{paired.DeviceToken}");
+
+        // A newer build "downloaded from GitHub".
+        var dir = Path.Combine(_f.DataDir, "client-updates");
+        Directory.CreateDirectory(dir);
+        var bytes = RandomNumberGenerator.GetBytes(4096);
+        await File.WriteAllBytesAsync(Path.Combine(dir, "PaCo-Setup-9.9.9.exe"), bytes);
+
+        async Task<SyncResponse> Sync(string version) =>
+            (await (await http.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest { ClientVersion = version }, PaCoJson.Options))
+                .Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options))!;
+
+        Assert.Null((await Sync("1.0.0")).Update); // not requested yet
+
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            (await db.Devices.IgnoreQueryFilters().SingleAsync(d => d.Id == paired.DeviceId)).UpdateRequested = true;
+            await db.SaveChangesAsync();
+        }
+
+        var resp = await Sync("1.0.0");
+        Assert.NotNull(resp.Update);
+        var manifest = PolicySigning.Verify<UpdateManifest>(resp.Update!, paired.PolicyPublicKeyPem);
+        Assert.Equal("9.9.9", manifest.Version);
+        Assert.Equal(paired.DeviceId, manifest.DeviceId);
+        Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(bytes)), manifest.Sha256);
+        Assert.Equal(bytes, await http.GetByteArrayAsync(ApiRoutes.ClientDownload));
+
+        // After the update the device reports the new version → nothing offered any more.
+        Assert.Null((await Sync("9.9.9")).Update);
+        File.Delete(Path.Combine(dir, "PaCo-Setup-9.9.9.exe"));
+    }
+
+    [Fact]
     public async Task RejectsWrongTokenAndForeignChild()
     {
         var (_, codeA) = await NewFamilyWithPairingCodeAsync();
