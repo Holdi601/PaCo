@@ -30,6 +30,15 @@ public class AlertTests
     public void NoFalsePositives(string text) => Assert.Empty(All.Find(text));
 
     [Fact]
+    public void OverlappingPhrasesOfSameCategoryReportedOnce()
+    {
+        var hits = All.Find("Ich will nicht mehr leben. Und er hat gesagt: sag es niemandem.");
+        Assert.Single(hits, h => h.Category == AlertCategory.SelfHarm);
+        Assert.Equal("will nicht mehr leben", hits.Single(h => h.Category == AlertCategory.SelfHarm).Keyword);
+        Assert.Single(hits, h => h.Category == AlertCategory.Grooming);
+    }
+
+    [Fact]
     public void SnippetIsShortAndAroundTheHit()
     {
         var text = new string('a', 500) + " ich will sterben " + new string('b', 500);

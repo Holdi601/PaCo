@@ -43,6 +43,8 @@ internal sealed class AlertScanner : IDisposable
         var m = new AlertKeywords.Matcher(settings);
         _matcher = m.IsEmpty ? null : m;
         _scanText = settings.ScanWindowText;
+        _lastKey = null;
+        Log.Info(_matcher is null ? "Alarm-Prüfung aus" : $"Alarm-Prüfung aktiv ({m.Count} Stichwörter, Fenstertext: {(settings.ScanWindowText ? "ja" : "nein")})");
     }
 
     private void Run()
@@ -122,14 +124,23 @@ internal sealed class AlertScanner : IDisposable
             try
             {
                 var type = el.Current.ControlType;
+                // Window chrome carries no content – skip it (cleaner snippets, faster).
+                if (type == ControlType.StatusBar || type == ControlType.MenuBar || type == ControlType.TitleBar ||
+                    type == ControlType.ScrollBar || type == ControlType.ToolBar)
+                    continue;
                 if (type == ControlType.Text || type == ControlType.Edit || type == ControlType.Document ||
                     type == ControlType.ListItem || type == ControlType.DataItem || type == ControlType.Hyperlink)
                 {
-                    var name = el.Current.Name;
+                    // A document's Name is just a label like "Text Editor"; its content comes below.
+                    var name = type == ControlType.Document ? null : el.Current.Name;
                     if (!string.IsNullOrWhiteSpace(name)) sb.Append(name).Append('\n');
-                    if (type == ControlType.Edit && el.TryGetCurrentPattern(ValuePattern.Pattern, out var vp))
+                    if (type == ControlType.Edit || type == ControlType.Document)
                     {
-                        var v = ((ValuePattern)vp).Current.Value;
+                        // Single-line fields expose ValuePattern; editors/rich text (Notepad, Word, chat inputs) TextPattern.
+                        string? v = null;
+                        if (el.TryGetCurrentPattern(ValuePattern.Pattern, out var vp)) v = ((ValuePattern)vp).Current.Value;
+                        if (string.IsNullOrWhiteSpace(v) && el.TryGetCurrentPattern(TextPattern.Pattern, out var tp))
+                            v = ((TextPattern)tp).DocumentRange.GetText(Math.Max(0, MaxChars - sb.Length));
                         if (!string.IsNullOrWhiteSpace(v)) sb.Append(v).Append('\n');
                     }
                 }

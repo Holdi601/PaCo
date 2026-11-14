@@ -21,6 +21,16 @@ kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.
   andere Browser sperren
 - Statistik: 14-Tage-Verlauf, Programme pro Tag, Ereignisse (gesperrt, abgemeldet, falscher Code …)
 - Warnungen: Kinderkonto mit Admin-Rechten, Gerät lange offline, Uhr verstellt, Deinstallation
+- **Alarme**: Stichwörter (Suizid, Drogen, Gewalt, sexuelle Inhalte, Mobbing, Grooming, Extremismus, eigene) in
+  Suchen, Fenstertiteln und Chats werden **lokal** erkannt. Gemeldet wird nur der Treffer mit kurzem Ausschnitt,
+  **sofort als Push aufs Handy** über ein selbst gehostetes [ntfy](https://ntfy.sh). Bei Suizid-Stichwörtern sieht das
+  Kind ein Hilfsangebot.
+- **Bildschirmfoto auf Knopfdruck**: verschlüsselt gespeichert, nur für die eigene Familie sichtbar, nach 7 Tagen gelöscht.
+  Das Kind wird optional informiert.
+- **Familie**: Eltern laden weitere Elternteile in ihre Familie ein.
+- **Sicherheits-Check** des Kinder-PCs (beim Einrichten und täglich): Standardkonto, Admin-Passwort, UAC,
+  Virenschutz, Firewall, SmartScreen, Gastkonto, Auto-Login. Wo möglich mit automatischer Korrektur.
+- **Auto-Update** der PCs auf Knopfdruck. Updates kommen nur über den eigenen Server und nur signiert.
 
 **Für den Server-Betreiber (Super-Admin)**
 - Familien anlegen, Eltern per **Einladungslink** einladen (7 Tage gültig, einmalig). Es gibt keine offene Registrierung.

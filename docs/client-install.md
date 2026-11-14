@@ -19,7 +19,13 @@ Dauer: ca. 5 Minuten. Du brauchst den PC des Kindes und das **Administrator-Kont
    Falls „Der Computer wurde durch Windows geschützt“ erscheint: **Weitere Informationen → Trotzdem ausführen**.
 4. **Verbinden** klicken.
 5. Für jedes Windows-Konto auswählen, zu welchem Kind es gehört, oder „kein Kind“ für Erwachsene.
-6. **Installieren**. Fertig.
+6. **Sicherheits-Check**: PaCo prüft, ob das Kinderkonto ein Standardkonto ist, ob Admin-Konten ein Passwort haben,
+   ob Virenschutz, Firewall und SmartScreen laufen usw. Mit dem Haken bei „Empfohlene Korrekturen automatisch
+   anwenden“ behebt PaCo, was es selbst beheben kann. **Rote Punkte ohne Automatik bitte selbst erledigen**, vor
+   allem ein Passwort für jedes Admin-Konto.
+7. **Installieren**. Fertig.
+
+Danach auf der Website unter **Handy-Benachrichtigungen** die ntfy-App einrichten, damit Alarme sofort aufs Handy kommen.
 
 Die Regeln gelten sofort für alle angemeldeten Kinder und ab der nächsten Anmeldung für alle anderen.
 

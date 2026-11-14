@@ -18,6 +18,16 @@ PaCo geht von zwei Gegnern aus: **Angreifern aus dem Internet** (der Server ist 
 | Geräte | Eigenes zufälliges Token pro Gerät (256 Bit), nur der SHA-256-Hash wird gespeichert. Kopplungscode einmalig, 24 h gültig. |
 | Container | Läuft als Nicht-Root, read-only Dateisystem, `no-new-privileges`, alle Capabilities entfernt |
 
+## Alarme, Bildschirmfotos, Push
+
+| Thema | Umsetzung |
+|---|---|
+| Datensparsamkeit | Stichwörter werden **auf dem PC** geprüft. Zum Server gehen nur Treffer mit max. 300 Zeichen Ausschnitt, nie ganze Chats. Es gibt keinen Keylogger. |
+| Bildschirmfotos | Nur auf ausdrücklichen Klick der Eltern. Sie werden mit ASP.NET Data Protection **verschlüsselt** außerhalb von `wwwroot` gespeichert und nach 7 Tagen gelöscht. Der Abruf läuft nur über eine angemeldete Seite mit Familienfilter: Eine fremde oder erratene ID ergibt „nicht gefunden“. |
+| IDs | Zufällige GUIDs (122 Bit). Selbst eine bekannte ID gibt keinen Zugriff (Familienfilter, getestet). |
+| Upload | Geräte können nur zu offenen Anfragen der eigenen Familie für ein eigenes Kind hochladen, nur JPEG, max. 6 MB. |
+| Push | Eigener ntfy-Server: anonym nur Lesen, Senden nur mit PaCos Token. Das Thema pro Familie ist geheim (128 Bit) und kann rotiert werden. iPhone-Weckrufe über ntfy.sh enthalten keinen Inhalt. |
+
 ## Kinder-PC
 
 | Angriff durch das Kind | Gegenmaßnahme |

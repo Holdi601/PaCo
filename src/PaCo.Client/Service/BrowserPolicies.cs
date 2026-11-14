@@ -31,8 +31,10 @@ internal static class BrowserPolicies
         WriteChromium(hive, Roots[1], sid, web, sites, edge: false);
         WriteFirefox(hive, Roots[2], sid, web, sites);
 
+        // Re-applied every minute against tampering; only log real changes.
+        if (!Applied.TryGetValue(sid, out var previous) || previous != hash)
+            Log.Info($"Browser-Regeln für {sid} gesetzt ({sites.Count} gesperrte Seiten)");
         Applied[sid] = hash;
-        Log.Info($"Browser-Regeln für {sid} gesetzt ({sites.Count} gesperrte Seiten)");
     }
 
     public static void Remove(string sid)

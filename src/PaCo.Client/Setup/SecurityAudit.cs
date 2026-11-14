@@ -93,18 +93,19 @@ internal static class SecurityAudit
 
     private static void CheckAntivirus(List<SecurityFinding> f)
     {
-        bool defenderOn = false;
+        bool defenderOn = false, defenderKnown = false, centerKnown = false;
         int sigAge = -1;
         try
         {
             using var s = new ManagementObjectSearcher(@"root\Microsoft\Windows\Defender", "SELECT RealTimeProtectionEnabled, AntivirusEnabled, AntivirusSignatureAge FROM MSFT_MpComputerStatus");
             foreach (ManagementObject o in s.Get())
             {
+                defenderKnown = true;
                 defenderOn = (bool)(o["RealTimeProtectionEnabled"] ?? false) && (bool)(o["AntivirusEnabled"] ?? false);
                 sigAge = Convert.ToInt32(o["AntivirusSignatureAge"] ?? -1);
             }
         }
-        catch (ManagementException) { /* Defender not available (third-party AV) */ }
+        catch (Exception ex) when (ex is ManagementException or COMException) { /* Defender not available (third-party AV) or not ready */ }
 
         var others = new List<string>();
         try
@@ -112,13 +113,21 @@ internal static class SecurityAudit
             using var s = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT displayName, productState FROM AntiVirusProduct");
             foreach (ManagementObject o in s.Get())
             {
+                centerKnown = true;
                 var state = Convert.ToInt32(o["productState"] ?? 0);
                 var enabled = ((state >> 12) & 0xF) == 1;
                 var name = o["displayName"]?.ToString() ?? "?";
                 if (enabled && !name.Contains("Defender", StringComparison.OrdinalIgnoreCase)) others.Add(name);
             }
         }
-        catch (ManagementException) { }
+        catch (Exception ex) when (ex is ManagementException or COMException) { }
+
+        if (!defenderKnown && !centerKnown)
+        {
+            // Windows security services not (yet) answering – do not raise a false alarm.
+            f.Add(new SecurityFinding("av-unknown", SecuritySeverity.Info, "Virenschutz-Status konnte gerade nicht abgefragt werden – wird beim nächsten Check erneut geprüft."));
+            return;
+        }
 
         if (defenderOn)
             f.Add(sigAge is > 7

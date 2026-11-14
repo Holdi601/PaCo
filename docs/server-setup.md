@@ -48,9 +48,24 @@ Beim ersten Start erzeugt der Server den **Signaturschlüssel** `policy-signing-
 vertrauen genau diesem Schlüssel. Geht er verloren, müssen alle Geräte neu gekoppelt werden, deshalb gehört er ins
 Backup (siehe [Betrieb](operations.md)).
 
+## Push-Benachrichtigungen (ntfy)
+
+Der Compose-Stack startet zusätzlich einen eigenen [ntfy](https://ntfy.sh)-Server (Container `paco-ntfy`). Einmalig:
+
+```bash
+# in deploy/.env: PACO_NTFY_PUBLIC_URL=https://<adresse>:8792, PACO_NTFY_DIR=/pfad/zu/paco-ntfy
+docker compose -f deploy/docker-compose.yml up -d ntfy
+docker exec -it paco-ntfy ntfy user add --role=admin paco     # Passwort vergeben (wird nicht weiter gebraucht)
+docker exec paco-ntfy ntfy token add paco                     # Token → PACO_NTFY_TOKEN in deploy/.env
+docker compose -f deploy/docker-compose.yml up -d
+```
+
+Anonyme Nutzer dürfen nur **lesen**, gesendet wird nur mit PaCos Token. Jede Familie bekommt ein geheimes, zufälliges
+Thema. Die Eltern richten die App über **Handy-Benachrichtigungen** auf der Website ein (Anleitung mit QR-Code).
+
 ## 3. Router
 
-Leite den TCP-Port (`PACO_PORT`) auf den Server weiter. Test von außen, z. B. vom Handy ohne WLAN:
+Leite die TCP-Ports `PACO_PORT` (Website, Standard 8790) und `PACO_NTFY_PORT` (Push, Standard 8792) auf den Server weiter. Test von außen, z. B. vom Handy ohne WLAN:
 `https://<adresse>:8790` muss die Anmeldeseite zeigen, mit gültigem Schloss-Symbol.
 
 ## 4. Super-Admin anlegen

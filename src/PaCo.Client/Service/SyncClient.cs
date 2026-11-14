@@ -189,6 +189,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
 
     private readonly HashSet<Guid> _handledScreenshots = [];
     private TimeSpan _lastAudit = Mono.Never;
+    private readonly TimeSpan _started = Mono.Now;
 
     public async Task SyncOnceAsync(ServerApi api, CancellationToken ct)
     {
@@ -214,7 +215,8 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
 
         // Security check of the PC at start and then daily.
         List<SecurityFinding>? security = null;
-        if (_installUpdates && Mono.Since(_lastAudit) > TimeSpan.FromHours(24))
+        // First check 10 minutes after start: right after boot Windows security services are not ready yet.
+        if (_installUpdates && Mono.Since(_lastAudit) > TimeSpan.FromHours(24) && Mono.Since(_started) > TimeSpan.FromMinutes(10))
         {
             try
             {

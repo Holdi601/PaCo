@@ -130,6 +130,8 @@ public static class AlertKeywords
 
         public bool IsEmpty => _rules.Count == 0;
 
+        public int Count => _rules.Count;
+
         private void Add(AlertCategory cat, string keyword)
         {
             var k = keyword.Trim();
@@ -148,10 +150,15 @@ public static class AlertKeywords
             if (_rules.Count == 0 || string.IsNullOrWhiteSpace(text)) return result;
             var norm = Normalize(text, out var map);
             var tokens = Tokenize(norm);
-            foreach (var rule in _rules)
+            // Longest phrases first, so "will nicht mehr leben" wins over the overlapping "nicht mehr leben".
+            var covered = new List<(AlertCategory Cat, int From, int To)>();
+            foreach (var rule in _rules.OrderByDescending(r => r.Words.Length))
             {
                 var at = IndexOf(tokens, rule.Words, rule.Prefix);
                 if (at < 0) continue;
+                var to = at + rule.Words.Length - 1;
+                if (covered.Any(c => c.Cat == rule.Cat && at <= c.To && to >= c.From)) continue;
+                covered.Add((rule.Cat, at, to));
                 var start = map[tokens[at].Start];
                 result.Add(new AlertMatch(rule.Cat, rule.Display, Snippet(text, start, snippetRadius)));
             }
