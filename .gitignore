@@ -48,3 +48,6 @@ client/*.exe
 # Logs
 *.log
 logs/
+
+# Local end-to-end test tooling (contains host details) – never commit
+/.local-e2e/
