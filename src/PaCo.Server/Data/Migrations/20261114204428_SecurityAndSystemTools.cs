@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -28,7 +28,7 @@ namespace PaCo.Server.Data.Migrations
                 table: "Children",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
         }
 
         /// <inheritdoc />

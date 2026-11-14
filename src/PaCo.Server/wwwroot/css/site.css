@@ -143,4 +143,8 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--paco-acce
 .dropdown-menu { border-radius: 12px; border-color: var(--paco-border); box-shadow: var(--paco-shadow); background: var(--paco-surface); }
 
 .auth-card { max-width: 440px; margin: 6vh auto 0; }
+
+details > summary { cursor: pointer; user-select: none; }
+details > summary:hover { color: var(--bs-body-color) !important; }
+.min-w-0 { min-width: 0; }
 .page-title { font-weight: 700; letter-spacing: -.02em; }
