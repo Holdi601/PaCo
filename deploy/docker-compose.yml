@@ -1,4 +1,7 @@
 # PaCo server + ntfy (push notifications). Configure via deploy/.env (copy .env.example – never commit .env).
+# Fixed project name: otherwise Compose uses the folder name ("deploy"), which may clash with other stacks.
+name: paco
+
 services:
   paco:
     build:
