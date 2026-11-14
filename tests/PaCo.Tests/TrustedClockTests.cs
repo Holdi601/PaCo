@@ -46,6 +46,27 @@ public class TrustedClockTests
     }
 
     [Fact]
+    public void ForwardThenBackIsUndoneEvenOffline()
+    {
+        var f = new Fake();
+        var notes = new List<string>();
+        var c = Create(f);
+        c.Confirm(f.Raw);
+        var real = f.Raw;
+        f.Raw += TimeSpan.FromDays(1); // set forward …
+        c.Now(notes);
+        f.Run(TimeSpan.FromMinutes(1));
+        f.Raw -= TimeSpan.FromDays(1); // … and back (or time sync corrects it)
+        var t = c.Now(notes);
+        Assert.Equal(real + TimeSpan.FromMinutes(1), t);
+        Assert.Empty(notes);
+        // A further step back beyond the undone jump is ignored again.
+        f.Raw -= TimeSpan.FromHours(3);
+        Assert.Equal(real + TimeSpan.FromMinutes(1), c.Now(notes));
+        Assert.Single(notes);
+    }
+
+    [Fact]
     public void BiosClockSetBackWhileOffCannotGoBeforeLastTrusted()
     {
         var f = new Fake();

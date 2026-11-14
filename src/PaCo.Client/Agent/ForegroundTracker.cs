@@ -6,7 +6,7 @@ namespace PaCo.Client.Agent;
 /// <summary>Samples the foreground app once per second and aggregates seconds per process.</summary>
 internal sealed class ForegroundTracker
 {
-    private sealed record ProcInfo(string Name, string Display, DateTime Cached);
+    private sealed record ProcInfo(string Name, string Display, TimeSpan Cached);
 
     private readonly Dictionary<int, ProcInfo> _cache = [];
     private readonly Dictionary<string, (string Display, int Seconds, string? Title)> _pending = new(StringComparer.OrdinalIgnoreCase);
@@ -50,7 +50,7 @@ internal sealed class ForegroundTracker
 
     private ProcInfo? Resolve(int pid)
     {
-        if (_cache.TryGetValue(pid, out var c) && DateTime.UtcNow - c.Cached < TimeSpan.FromMinutes(5)) return c;
+        if (_cache.TryGetValue(pid, out var c) && Mono.Now - c.Cached < TimeSpan.FromMinutes(5)) return c;
         try
         {
             using var p = Process.GetProcessById(pid);
@@ -63,7 +63,7 @@ internal sealed class ForegroundTracker
                 display = !string.IsNullOrWhiteSpace(vi.FileDescription) ? vi.FileDescription!.Trim()
                     : !string.IsNullOrWhiteSpace(vi.ProductName) ? vi.ProductName!.Trim() : name;
             }
-            return _cache[pid] = new ProcInfo(name, display, DateTime.UtcNow);
+            return _cache[pid] = new ProcInfo(name, display, Mono.Now);
         }
         catch
         {

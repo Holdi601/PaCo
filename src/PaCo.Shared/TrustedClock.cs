@@ -21,6 +21,9 @@ public sealed class TrustedClock
     private DateTimeOffset _lastRaw;
     private TimeSpan _lastMono;
 
+    /// <summary>Forward jumps accepted since the last server confirmation (may be undone by a later backward jump).</summary>
+    private TimeSpan _unverifiedForward;
+
     /// <param name="raw">Windows UTC clock.</param>
     /// <param name="mono">Monotonic elapsed time (e.g. Stopwatch).</param>
     /// <param name="lastTrusted">Highest trusted time persisted before (default on first start).</param>
@@ -60,21 +63,34 @@ public sealed class TrustedClock
         var r = _raw();
         var m = _mono();
         var jump = (r - _lastRaw) - (m - _lastMono);
+        var undone = false;
         if (jump > JumpTolerance)
         {
             // Sleep/hibernate or clock set forward: accept, but only provisionally.
             _anchor += jump;
+            _unverifiedForward += jump;
             Verified = false;
         }
         else if (jump < -JumpTolerance)
         {
-            notices?.Add($"Windows-Uhr wurde um {(int)(-jump).TotalMinutes} Minuten zurückgestellt – wird ignoriert.");
+            // A backward jump may only revert a previous *unverified* forward jump (e.g. clock set forward and
+            // back again, or time sync correcting it). Anything beyond that is ignored – time never goes back.
+            var back = -jump;
+            var undo = back < _unverifiedForward ? back : _unverifiedForward;
+            if (undo > TimeSpan.Zero)
+            {
+                _anchor -= undo;
+                _unverifiedForward -= undo;
+                undone = true;
+            }
+            if (back - undo > JumpTolerance)
+                notices?.Add($"Windows-Uhr wurde um {(int)(back - undo).TotalMinutes} Minuten zurückgestellt – wird ignoriert.");
         }
         _lastRaw = r;
         _lastMono = m;
 
         var t = _anchor + (m - _anchorMono);
-        if (t > LastTrusted) LastTrusted = t;
+        if (undone || t > LastTrusted) LastTrusted = t;
         else t = LastTrusted; // never backwards
         return t;
     }
@@ -90,6 +106,7 @@ public sealed class TrustedClock
         _lastMono = m;
         OffsetSeconds = (serverUtc - _lastRaw).TotalSeconds;
         LastTrusted = serverUtc; // may move back if the local clock was ahead – the server is the authority
+        _unverifiedForward = TimeSpan.Zero;
         Verified = true;
         return serverUtc - local;
     }

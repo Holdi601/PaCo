@@ -88,18 +88,27 @@ internal sealed class PolicyStore(DeviceSecrets device)
         }
     }
 
-    /// <summary>Verifies signature and device id; rejects policies older than the current one (replay).</summary>
+    private string? _contentKey;
+
+    /// <summary>
+    /// Verifies signature and device id; rejects policies older than the current one (replay).
+    /// Returns true only if the rules actually changed (not just the issue timestamp).
+    /// </summary>
     public bool Accept(SignedEnvelope env, bool persist = true)
     {
         var doc = PolicySigning.Verify<PolicyDocument>(env, device.PolicyPublicKeyPem);
         if (doc.DeviceId != device.DeviceId) throw new PolicySignatureException("Regeln gehören zu einem anderen Gerät.");
+        var key = PaCoJson.Serialize(doc with { IssuedUtc = default });
+        bool changed;
         lock (_gate)
         {
             if (Current is not null && doc.IssuedUtc < Current.IssuedUtc) return false;
             Current = doc;
+            changed = key != _contentKey;
+            _contentKey = key;
         }
         if (persist) SecureStore.WriteAtomic(Paths.PolicyFile, PaCoJson.SerializeToUtf8(env));
-        Changed?.Invoke();
-        return true;
+        if (changed) Changed?.Invoke();
+        return changed;
     }
 }

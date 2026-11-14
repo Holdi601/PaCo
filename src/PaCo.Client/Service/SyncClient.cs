@@ -76,7 +76,7 @@ internal sealed class SyncWorker(Runtime rt) : BackgroundService
     private static readonly TimeSpan Interval = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan ActiveInterval = TimeSpan.FromSeconds(15);
     private List<WindowsAccount> _accounts = [];
-    private DateTime _accountsAt = DateTime.MinValue;
+    private TimeSpan _accountsAt = Mono.Never;
     private DateOnly _adminWarnDay;
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -113,12 +113,12 @@ internal sealed class SyncWorker(Runtime rt) : BackgroundService
 
     public async Task SyncOnceAsync(ServerApi api, CancellationToken ct)
     {
-        if (DateTime.UtcNow - _accountsAt > TimeSpan.FromMinutes(10))
+        if (Mono.Now - _accountsAt > TimeSpan.FromMinutes(10))
         {
             try
             {
                 _accounts = LocalAccounts.List();
-                _accountsAt = DateTime.UtcNow;
+                _accountsAt = Mono.Now;
             }
             catch (Exception ex)
             {

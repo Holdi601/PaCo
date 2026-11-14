@@ -28,20 +28,20 @@ internal sealed class Enforcer : BackgroundService
         public double Fraction;
         public DateOnly WarnDay;
         public HashSet<int> Warned = [];
-        public DateTime LastStatus = DateTime.MinValue;
+        public TimeSpan LastStatus = Mono.Never;
         public bool? LastAllowed;
         public Guid ChildId;
-        public DateTime LastBlockedNotice = DateTime.MinValue;
+        public TimeSpan LastBlockedNotice = Mono.Never;
         public string? CurrentApp;
-        public DateTime CurrentAppAt = DateTime.MinValue;
+        public TimeSpan CurrentAppAt = Mono.Never;
     }
 
     private readonly Runtime _rt;
     private readonly AgentManager _agents;
     private readonly Dictionary<int, Track> _tracks = [];
     private readonly Lock _tracksGate = new();
-    private DateTime _lastBrowserForce = DateTime.MinValue;
-    private DateTime _lastAppScan = DateTime.MinValue;
+    private TimeSpan _lastBrowserForce = Mono.Never;
+    private TimeSpan _lastAppScan = Mono.Never;
     private bool _revokedHandled;
 
     public Enforcer(Runtime rt)
@@ -108,10 +108,10 @@ internal sealed class Enforcer : BackgroundService
         DateTimeOffset now;
         lock (_rt.Gate) now = _rt.Now();
 
-        var forceBrowser = DateTime.UtcNow - _lastBrowserForce > TimeSpan.FromMinutes(1);
-        if (forceBrowser) _lastBrowserForce = DateTime.UtcNow;
-        var scanApps = DateTime.UtcNow - _lastAppScan > TimeSpan.FromSeconds(2);
-        if (scanApps) _lastAppScan = DateTime.UtcNow;
+        var forceBrowser = Mono.Now - _lastBrowserForce > TimeSpan.FromMinutes(1);
+        if (forceBrowser) _lastBrowserForce = Mono.Now;
+        var scanApps = Mono.Now - _lastAppScan > TimeSpan.FromSeconds(2);
+        if (scanApps) _lastAppScan = Mono.Now;
 
         var active = new HashSet<Guid>();
         var locked = new HashSet<Guid>();
@@ -168,9 +168,9 @@ internal sealed class Enforcer : BackgroundService
                 if (killed.Count > 0)
                 {
                     lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, $"Gesperrtes Programm beendet: {string.Join(", ", killed)}", child.ChildId);
-                    if (DateTime.UtcNow - track.LastBlockedNotice > TimeSpan.FromSeconds(30))
+                    if (Mono.Now - track.LastBlockedNotice > TimeSpan.FromSeconds(30))
                     {
-                        track.LastBlockedNotice = DateTime.UtcNow;
+                        track.LastBlockedNotice = Mono.Now;
                         await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.Notify, Title = "Programm gesperrt", Text = $"{string.Join(", ", killed)} ist von deinen Eltern gesperrt." });
                     }
                 }
@@ -190,7 +190,7 @@ internal sealed class Enforcer : BackgroundService
                 {
                     ChildId = child.ChildId, Allowed = eval.Allowed, RemainingSeconds = child.Paused ? null : eval.RemainingSeconds,
                     Reason = eval.Reason, UsedTodaySeconds = usedToday, Active = inUse && eval.Allowed, LockShown = lockShown, WindowsUser = s.UserName,
-                    CurrentApp = inUse && DateTime.UtcNow - track.CurrentAppAt < TimeSpan.FromSeconds(15) ? track.CurrentApp : null,
+                    CurrentApp = inUse && Mono.Now - track.CurrentAppAt < TimeSpan.FromSeconds(15) ? track.CurrentApp : null,
                 };
             }
         }
@@ -219,9 +219,9 @@ internal sealed class Enforcer : BackgroundService
         var connected = agent?.Connected == true;
 
         // Status for the tray, on change or every 5 s.
-        if (connected && (track.LastAllowed != eval.Allowed || DateTime.UtcNow - track.LastStatus > TimeSpan.FromSeconds(5)))
+        if (connected && (track.LastAllowed != eval.Allowed || Mono.Now - track.LastStatus > TimeSpan.FromSeconds(5)))
         {
-            track.LastStatus = DateTime.UtcNow;
+            track.LastStatus = Mono.Now;
             track.LastAllowed = eval.Allowed;
             await _agents.SendAsync(s.SessionId, new IpcMessage
             {
@@ -386,7 +386,7 @@ internal sealed class Enforcer : BackgroundService
                     if (_tracks.TryGetValue(sessionId, out var tr) && samples.Count > 0)
                     {
                         tr.CurrentApp = samples.MaxBy(x => x.Seconds)!.DisplayName;
-                        tr.CurrentAppAt = DateTime.UtcNow;
+                        tr.CurrentAppAt = Mono.Now;
                     }
                 }
                 lock (_rt.Gate)

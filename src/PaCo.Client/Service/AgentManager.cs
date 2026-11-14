@@ -16,7 +16,7 @@ internal sealed class AgentConnection : IDisposable
 
     public IpcChannel? Channel { get; set; }
 
-    public DateTime StartedUtc { get; } = DateTime.UtcNow;
+    public TimeSpan StartedUtc { get; } = Mono.Now;
 
     public bool Connected => Channel is not null && Pipe.IsConnected && !Process.HasExited;
 
@@ -35,7 +35,7 @@ internal sealed class AgentConnection : IDisposable
 internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage) : IDisposable
 {
     private readonly Dictionary<int, AgentConnection> _agents = [];
-    private readonly Dictionary<int, (int Failures, DateTime NextTry)> _backoff = [];
+    private readonly Dictionary<int, (int Failures, TimeSpan NextTry)> _backoff = [];
     private readonly Lock _gate = new();
 
     public AgentConnection? Get(int sessionId)
@@ -55,14 +55,14 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage) : IDis
         {
             if (_agents.TryGetValue(sessionId, out var a))
             {
-                if (!a.Process.HasExited && (a.Connected || DateTime.UtcNow - a.StartedUtc < TimeSpan.FromSeconds(20))) return;
+                if (!a.Process.HasExited && (a.Connected || Mono.Now - a.StartedUtc < TimeSpan.FromSeconds(20))) return;
                 Log.Warn($"Agent in Sitzung {sessionId} läuft nicht mehr (exited={a.Process.HasExited}) – starte neu");
                 a.Dispose();
                 _agents.Remove(sessionId);
                 Fail(sessionId);
             }
 
-            if (_backoff.TryGetValue(sessionId, out var b) && DateTime.UtcNow < b.NextTry) return;
+            if (_backoff.TryGetValue(sessionId, out var b) && Mono.Now < b.NextTry) return;
 
             NamedPipeServerStream? pipe = null;
             try
@@ -88,7 +88,7 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage) : IDis
     private void Fail(int sessionId)
     {
         var f = _backoff.GetValueOrDefault(sessionId).Failures + 1;
-        _backoff[sessionId] = (f, DateTime.UtcNow.AddSeconds(Math.Min(30, 2 * f)));
+        _backoff[sessionId] = (f, Mono.Now + TimeSpan.FromSeconds(Math.Min(30, 2 * f)));
     }
 
     private async Task AcceptAsync(AgentConnection conn)

@@ -38,7 +38,7 @@ internal sealed class Runtime
     /// <summary>Live status per child of the last enforcement tick.</summary>
     public Dictionary<Guid, ChildLiveStatus> Live { get; } = [];
 
-    private DateTime _lastSave = DateTime.MinValue;
+    private TimeSpan _lastSave = Mono.Never;
     private bool _dirty;
 
     /// <summary>Trusted "now" (see <see cref="TrustedClock"/>). Call under <see cref="Gate"/>.</summary>
@@ -93,12 +93,12 @@ internal sealed class Runtime
     public void SaveIfNeeded(bool force = false)
     {
         if (!_dirty && !force) return;
-        if (!force && DateTime.UtcNow - _lastSave < TimeSpan.FromSeconds(10)) return;
+        if (!force && Mono.Now - _lastSave < TimeSpan.FromSeconds(10)) return;
         try
         {
             State.Save();
             _dirty = false;
-            _lastSave = DateTime.UtcNow;
+            _lastSave = Mono.Now;
         }
         catch (Exception ex)
         {
