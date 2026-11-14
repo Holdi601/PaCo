@@ -142,7 +142,7 @@ internal sealed class SetupForm : Form
                 return new AccountAssignment { Sid = r.Account.Sid, ChildId = c.ChildId, NewChildName = c.NewName };
             }).ToList();
             var demote = rows.Where(r => r.MakeStandard?.Checked == true).Select(r => r.Account.Sid).ToList();
-            await RunInstallAsync(assignments, demote);
+            await ShowSecurityPageAsync(assignments, demote, chosen.Select(r => r.Account.Sid).ToList());
         };
         var scroll = new Panel { Dock = DockStyle.Top, Height = 220, AutoScroll = true };
         scroll.Controls.Add(table);
@@ -156,14 +156,56 @@ internal sealed class SetupForm : Form
         public override string ToString() => Label;
     }
 
-    // ---------- Page 3: install ----------
-    private async Task RunInstallAsync(List<AccountAssignment> assignments, List<string> demote)
+    // ---------- Page 3: security check ----------
+    private async Task ShowSecurityPageAsync(List<AccountAssignment> assignments, List<string> demote, List<string> childSids)
+    {
+        Show(null, Para("Sicherheits-Check läuft …", 40));
+        var findings = await Task.Run(() => SecurityAudit.Run(childSids));
+        // Child accounts chosen for conversion count as fixed.
+        findings = findings.Where(x => !(x.Code.StartsWith("child-admin:") && demote.Contains(x.Code["child-admin:".Length..]))).ToList();
+
+        var intro = Para("Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:", 40);
+        var list = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 250, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
+        foreach (var x in findings.OrderByDescending(x => x.Severity))
+        {
+            var (icon, color) = x.Severity switch
+            {
+                SecuritySeverity.Critical => ("✖", Color.Firebrick),
+                SecuritySeverity.Warning => ("▲", Color.DarkOrange),
+                SecuritySeverity.Info => ("ℹ", Color.SteelBlue),
+                _ => ("✔", Color.SeaGreen),
+            };
+            list.Controls.Add(new Label
+            {
+                Text = $"{icon}  {x.Text}{(x.Fixable ? "  (automatisch behebbar)" : "")}", ForeColor = color, AutoSize = true, MaximumSize = new Size(660, 0),
+                Padding = new Padding(0, 3, 0, 3),
+            });
+        }
+        var fixBox = new CheckBox
+        {
+            Text = "Empfohlene Korrekturen automatisch anwenden", Checked = true, Dock = DockStyle.Top, Height = 32,
+            Visible = findings.Any(x => x.Fixable && x.Severity != SecuritySeverity.Ok),
+        };
+        var critical = findings.Count(x => x.Severity == SecuritySeverity.Critical && !x.Fixable);
+        var hint = Para(critical > 0 ? "Rote Punkte ohne automatische Korrektur bitte selbst beheben (z. B. Passwort für das Admin-Konto setzen) – PaCo zeigt sie auch auf der Website an." : "", 44, Color.Firebrick);
+        var next = Button("Installieren");
+        next.Click += async (_, _) => await RunInstallAsync(assignments, demote, fixBox.Checked ? findings : []);
+        Show(next, intro, list, fixBox, hint);
+    }
+
+    // ---------- Page 4: install ----------
+    private async Task RunInstallAsync(List<AccountAssignment> assignments, List<string> demote, List<SecurityFinding> fixes)
     {
         var status = Para("Installiere …", 60);
         var bar = new ProgressBar { Dock = DockStyle.Top, Style = ProgressBarStyle.Marquee, Height = 24 };
         Show(null, status, bar);
         try
         {
+            if (fixes.Count > 0)
+            {
+                status.Text = "Sicherheits-Korrekturen werden angewendet …";
+                await Task.Run(() => SecurityAudit.Fix(fixes));
+            }
             await Installer.InstallAsync(_serverUrl, _pair!, assignments, demote, new Progress<string>(s => status.Text = s));
             ShowDonePage();
         }

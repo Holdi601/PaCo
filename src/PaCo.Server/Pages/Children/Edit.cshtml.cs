@@ -74,6 +74,27 @@ public sealed class EditModel(PaCoDb db) : PageModel
     [BindProperty]
     public bool BlockPrivateBrowsing { get; set; }
 
+    [BindProperty]
+    public bool AlertsEnabled { get; set; }
+
+    [BindProperty]
+    public bool ScanWindowText { get; set; }
+
+    [BindProperty]
+    public bool ShowHelpToChild { get; set; }
+
+    [BindProperty]
+    public List<AlertCategory> AlertCategories { get; set; } = [];
+
+    [BindProperty]
+    public string? CustomKeywords { get; set; }
+
+    [BindProperty]
+    public bool NotifyChildOnScreenshot { get; set; }
+
+    [BindProperty]
+    public bool BlockSystemTools { get; set; }
+
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var child = await db.Children.FirstOrDefaultAsync(c => c.Id == id);
@@ -124,6 +145,17 @@ public sealed class EditModel(PaCoDb db) : PageModel
             BlockPrivateBrowsing = BlockPrivateBrowsing,
         });
 
+        child.SetAlerts(new AlertSettings
+        {
+            Enabled = AlertsEnabled,
+            ScanWindowText = ScanWindowText,
+            ShowHelpToChild = ShowHelpToChild,
+            Categories = AlertCategories.Where(c => c != AlertCategory.Custom).Distinct().ToArray(),
+            CustomKeywords = SplitLines(CustomKeywords).Where(k => k.Length is >= 2 and <= 100).Distinct(StringComparer.OrdinalIgnoreCase).Take(200).ToArray(),
+        });
+        child.NotifyChildOnScreenshot = NotifyChildOnScreenshot;
+        child.BlockSystemTools = BlockSystemTools;
+
         await db.SaveChangesAsync();
         TempData["Message"] = $"Regeln für {child.Name} gespeichert. Online-PCs übernehmen sie innerhalb von 30 Sekunden.";
         return RedirectToPage(new { id });
@@ -161,6 +193,14 @@ public sealed class EditModel(PaCoDb db) : PageModel
         ForceSafeSearch = web.ForceSafeSearch;
         YouTubeRestricted = web.YouTubeRestricted;
         BlockPrivateBrowsing = web.BlockPrivateBrowsing;
+        var alerts = c.GetAlerts();
+        AlertsEnabled = alerts.Enabled;
+        ScanWindowText = alerts.ScanWindowText;
+        ShowHelpToChild = alerts.ShowHelpToChild;
+        AlertCategories = alerts.Categories.ToList();
+        CustomKeywords = string.Join("\n", alerts.CustomKeywords);
+        NotifyChildOnScreenshot = c.NotifyChildOnScreenshot;
+        BlockSystemTools = c.BlockSystemTools;
     }
 
     private static IEnumerable<string> SplitLines(string? s) =>

@@ -86,6 +86,10 @@
                     </div>
                 </div>
 
+                @if (Model.UnreadAlerts.GetValueOrDefault(c.Id) is > 0 and var n)
+                {
+                    <a asp-page="/Alerts" asp-route-child="@c.Id" class="alert alert-danger d-block py-2 mb-3 text-decoration-none">⚠ @n neue@(n == 1 ? "r" : "") Alarm@(n == 1 ? "" : "e") – ansehen</a>
+                }
                 <div class="small mb-3">
                     @if (s.IsOnLockScreen) { <span class="status-blocked"><span class="dot"></span> sieht gerade den Sperrbildschirm</span> }
                     else if (s.IsActive) { <span class="status-ok"><span class="dot dot-live"></span> ist gerade am PC</span> }
@@ -204,9 +208,16 @@
                     </ul>
                 }
 
-                <div class="d-flex gap-2 border-top pt-3">
+                <div class="d-flex flex-wrap gap-2 border-top pt-3">
                     <a asp-page="/Children/Stats" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Statistik</a>
                     <a asp-page="/Children/Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Regeln</a>
+                    @if (s.IsActive || s.IsOnLockScreen)
+                    {
+                        <form method="post" asp-page-handler="Screenshot">
+                            <input type="hidden" name="child" value="@c.Id" />
+                            <button class="btn btn-sm btn-outline-primary">📷 Bildschirmfoto</button>
+                        </form>
+                    }
                 </div>
             </div>
         </div>

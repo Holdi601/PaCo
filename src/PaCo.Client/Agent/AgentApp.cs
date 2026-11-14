@@ -55,8 +55,17 @@ internal sealed class AgentApp : ApplicationContext
             () => Send(new IpcMessage { Type = IpcMessage.RequestLogoff }));
         _sampleTimer.Tick += (_, _) => OnTick();
         _sampleTimer.Start();
+        _scanner = new AlertScanner(
+            hits => Send(new IpcMessage
+            {
+                Type = IpcMessage.AlertHits,
+                Hits = hits.Select(h => new AlertHitDto(h.Category, h.Keyword, h.Snippet, h.App, h.Title, h.Source)).ToList(),
+            }),
+            () => _lock.IsShown);
         _ = ConnectAsync();
     }
+
+    private readonly AlertScanner _scanner;
 
     private async Task ConnectAsync()
     {
@@ -112,6 +121,22 @@ internal sealed class AgentApp : ApplicationContext
                 case IpcMessage.Exit:
                     Shutdown();
                     break;
+                case IpcMessage.AlertConfig when msg.Text is { } json:
+                    _scanner.Configure(PaCoJson.Deserialize<AlertSettings>(json));
+                    break;
+                case IpcMessage.TakeScreenshot when msg.RequestId is { } rid:
+                    byte[] jpeg = [];
+                    try
+                    {
+                        jpeg = ScreenCapture.CaptureJpeg();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn($"Bildschirmfoto fehlgeschlagen: {ex.Message}");
+                    }
+                    Send(new IpcMessage { Type = IpcMessage.ScreenshotData, RequestId = rid, Text = Convert.ToBase64String(jpeg) });
+                    if (msg.Flag) _tray.ShowBalloonTip(6000, "PaCo", "Deine Eltern haben ein Bildschirmfoto angesehen.", ToolTipIcon.Info);
+                    break;
             }
         }
         catch (Exception ex)
@@ -142,6 +167,7 @@ internal sealed class AgentApp : ApplicationContext
     {
         try
         {
+            _scanner.Dispose();
             _lock.Hide();
             _tray.Visible = false;
             _tray.Dispose();

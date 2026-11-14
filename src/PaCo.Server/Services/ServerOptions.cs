@@ -21,6 +21,15 @@ public sealed class ServerOptions
     /// <summary>HTTPS port when <see cref="TlsCertPath"/> is set.</summary>
     public int HttpsPort { get; set; } = 8790;
 
+    /// <summary>ntfy base URL PaCo publishes to (e.g. http://ntfy inside the Docker network). Empty = no push.</summary>
+    public string? NtfyUrl { get; set; }
+
+    /// <summary>ntfy URL parents subscribe to from their phones (e.g. https://example.duckdns.org:8792).</summary>
+    public string? NtfyPublicUrl { get; set; }
+
+    /// <summary>ntfy access token with write permission (PaCo is the only publisher).</summary>
+    public string? NtfyToken { get; set; }
+
     /// <summary>GitHub repository ("owner/name") whose releases provide client updates.</summary>
     public string UpdateRepository { get; set; } = "Holdi601/PaCo";
 

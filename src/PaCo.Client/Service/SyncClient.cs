@@ -48,6 +48,15 @@ internal sealed class ServerApi : IDisposable
         return (await resp.Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options, ct))!;
     }
 
+    /// <summary>Uploads a screenshot (JPEG; empty = child not available) for a parent's request.</summary>
+    public async Task UploadScreenshotAsync(Guid requestId, byte[] jpeg, CancellationToken ct = default)
+    {
+        using var content = new ByteArrayContent(jpeg);
+        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+        using var resp = await _http.PostAsync($"{ApiRoutes.Screenshot.TrimStart('/')}/{requestId}", content, ct);
+        await EnsureAsync(resp, ct);
+    }
+
     /// <summary>Downloads the plain client exe offered by the server into <paramref name="target"/>.</summary>
     public async Task DownloadClientAsync(string target, CancellationToken ct = default)
     {
@@ -173,12 +182,23 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             // Faster while a child uses the PC: live view on the website and quick reaction to "+15 Min".
             var delay = failures == 0 ? (anyoneActive ? ActiveInterval : Interval)
                 : TimeSpan.FromSeconds(Math.Min(300, 30 * Math.Pow(2, Math.Min(failures - 1, 4))));
-            try { await Task.Delay(delay, ct); } catch (OperationCanceledException) { break; }
+            // Sleep until the interval is over or something urgent (alarm, screenshot) wakes us up.
+            try { await rt.WaitForSyncSignalAsync(delay, ct); } catch (OperationCanceledException) { break; }
         }
     }
 
+    private readonly HashSet<Guid> _handledScreenshots = [];
+    private TimeSpan _lastAudit = Mono.Never;
+
     public async Task SyncOnceAsync(ServerApi api, CancellationToken ct)
     {
+        // Screenshots first – a parent is waiting for them.
+        while (rt.ScreenshotUploads.TryPeek(out var shot))
+        {
+            await api.UploadScreenshotAsync(shot.RequestId, shot.Jpeg, ct);
+            rt.ScreenshotUploads.TryDequeue(out _);
+        }
+
         if (Mono.Now - _accountsAt > TimeSpan.FromMinutes(10))
         {
             try
@@ -189,6 +209,22 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             catch (Exception ex)
             {
                 Log.Error("Konten auflisten", ex);
+            }
+        }
+
+        // Security check of the PC at start and then daily.
+        List<SecurityFinding>? security = null;
+        if (_installUpdates && Mono.Since(_lastAudit) > TimeSpan.FromHours(24))
+        {
+            try
+            {
+                var sids = rt.Policies.Current?.Accounts.Select(a => a.Sid).ToList() ?? [];
+                security = await Task.Run(() => Setup.SecurityAudit.Run(sids), ct);
+                foreach (var x in security.Where(x => x.Severity >= SecuritySeverity.Warning)) Log.Warn($"Sicherheits-Check: {x.Text}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Sicherheits-Check", ex);
             }
         }
 
@@ -239,6 +275,8 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                 Live = rt.Live.Values.ToList(),
                 Usage = usage,
                 Events = rt.State.PendingEvents.Take(200).ToList(),
+                Alerts = rt.State.PendingAlerts.Take(100).ToList(),
+                Security = security,
             };
         }
 
@@ -266,6 +304,13 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             Log.Error("Regeln abgelehnt", ex);
         }
 
+        foreach (var s in resp.Screenshots.Take(10))
+        {
+            if (!_handledScreenshots.Add(s.RequestId)) continue; // already being processed
+            rt.ScreenshotRequests.Enqueue(s);
+        }
+        if (_handledScreenshots.Count > 500) _handledScreenshots.Clear();
+
         if (resp.Update is { } update && _installUpdates)
             await TryUpdateAsync(api, update, ct);
 
@@ -273,6 +318,9 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         {
             var sent = req.Events.Select(e => e.Id).ToHashSet();
             rt.State.PendingEvents.RemoveAll(e => sent.Contains(e.Id));
+            if (security is not null) _lastAudit = Mono.Now;
+            var sentAlerts = req.Alerts.Select(a => a.Id).ToHashSet();
+            rt.State.PendingAlerts.RemoveAll(a => sentAlerts.Contains(a.Id));
             // Server time now ≈ server timestamp + half the round trip.
             rt.ConfirmServerTime(resp.ServerUtcNow + (receivedAt - sentAt) / 2);
             var tz = FamilyClock.Resolve(rt.Policies.Current?.TimeZoneId ?? "Europe/Berlin");

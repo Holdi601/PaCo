@@ -72,6 +72,40 @@
                     }
                 </div>
             }
+            @if (!d.Revoked && d.SecurityCheckedUtc is not null)
+            {
+                var sec = d.GetSecurity();
+                var worst = sec.Count == 0 ? SecuritySeverity.Ok : sec.Max(x => x.Severity);
+                <details class="mb-3" open="@(worst >= SecuritySeverity.Warning)">
+                    <summary class="fw-semibold">
+                        Sicherheits-Check:
+                        @switch (worst)
+                        {
+                            case SecuritySeverity.Critical: <span class="status-blocked">✖ Handlungsbedarf</span> break;
+                            case SecuritySeverity.Warning: <span class="status-warn">▲ Hinweise</span> break;
+                            default: <span class="status-ok">✔ alles in Ordnung</span> break;
+                        }
+                        <span class="small text-muted fw-normal">(geprüft @Format.Ago(d.SecurityCheckedUtc, Model.Now))</span>
+                    </summary>
+                    <ul class="list-unstyled small mt-2 mb-0">
+                        @foreach (var x in sec.OrderByDescending(x => x.Severity))
+                        {
+                            var (icon, cls) = x.Severity switch
+                            {
+                                SecuritySeverity.Critical => ("✖", "status-blocked"),
+                                SecuritySeverity.Warning => ("▲", "status-warn"),
+                                SecuritySeverity.Info => ("ℹ", "text-muted"),
+                                _ => ("✔", "status-ok"),
+                            };
+                            <li class="mb-1"><span class="@cls">@icon</span> @x.Text</li>
+                        }
+                    </ul>
+                    @if (sec.Any(x => x.Fixable && x.Severity >= SecuritySeverity.Info))
+                    {
+                        <div class="small text-muted mt-1">Automatische Korrektur: PaCo-Setup auf dem PC im Admin-Konto erneut starten → „Aktualisieren“, oder Einrichtung neu durchlaufen.</div>
+                    }
+                </details>
+            }
             @if (!d.Revoked)
             {
                 <h3 class="h6">Windows-Konten</h3>

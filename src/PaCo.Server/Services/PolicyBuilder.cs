@@ -42,8 +42,10 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                 LockedByParent = c.LockedByParent,
                 ExpiryAction = c.ExpiryAction,
                 Days = c.GetDays(),
-                BlockedApps = c.GetBlockedApps(),
+                BlockedApps = c.BlockSystemTools ? c.GetBlockedApps().Concat(Child.SystemTools).Distinct().ToList() : c.GetBlockedApps(),
                 Web = c.GetWeb(),
+                Alerts = c.GetAlerts(),
+                NotifyChildOnScreenshot = c.NotifyChildOnScreenshot,
                 Grants = grants.Where(g => g.ChildId == c.Id).Select(g => new TimeGrant
                 {
                     Id = g.Id,

@@ -1,0 +1,62 @@
+@page "{id:guid}"
+@model PaCo.Server.Pages.Children.ScreenshotModel
+@{ ViewData["Title"] = $"Bildschirmfoto {Model.Child.Name}"; }
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="stat-label">Bildschirmfoto</div>
+        <h1 class="h3 mb-0 page-title">@Model.Child.Name</h1>
+    </div>
+    <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">Zurück</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        @switch (Model.Shot.Status)
+        {
+            case ScreenshotStatus.Pending:
+                <div class="d-flex align-items-center gap-3">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div>
+                        <div class="fw-semibold">Warte auf den PC …</div>
+                        <div class="small text-muted">Ist der PC online, kommt das Bild in wenigen Sekunden (spätestens nach ~20 s).</div>
+                    </div>
+                </div>
+                <div data-autorefresh="3"></div>
+                break;
+            case ScreenshotStatus.Done:
+                <div class="small text-muted mb-2">
+                    Aufgenommen @TimeZoneInfo.ConvertTime(Model.Shot.CompletedUtc ?? Model.Shot.RequestedUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm:ss") · wird nach 7 Tagen automatisch gelöscht
+                </div>
+                <a asp-page-handler="Image" asp-route-id="@Model.Shot.Id" target="_blank" rel="noopener">
+                    <img src="@Url.Page("./Screenshot", "Image", new { id = Model.Shot.Id })" alt="Bildschirmfoto" class="img-fluid rounded border" />
+                </a>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Shot.Id" class="mt-2 text-end">
+                    <button class="btn btn-sm btn-outline-danger" data-confirm="Bildschirmfoto löschen?">Löschen</button>
+                </form>
+                break;
+            case ScreenshotStatus.Unavailable:
+                <div class="fw-semibold">@Model.Child.Name ist gerade nicht am PC (nicht angemeldet oder Bildschirm gesperrt).</div>
+                break;
+            default:
+                <div class="fw-semibold">Keine Antwort – der PC ist wahrscheinlich aus oder offline.</div>
+                break;
+        }
+    </div>
+</div>
+
+@if (Model.History.Count > 0)
+{
+    <h2 class="h6 stat-label">Frühere Bildschirmfotos (7 Tage)</h2>
+    <div class="row g-2">
+        @foreach (var h in Model.History)
+        {
+            <div class="col-6 col-md-3">
+                <a asp-page="./Screenshot" asp-route-id="@h.Id" class="d-block small text-decoration-none">
+                    <img src="@Url.Page("./Screenshot", "Image", new { id = h.Id })" alt="Bildschirmfoto" class="img-fluid rounded border mb-1" loading="lazy" />
+                    @TimeZoneInfo.ConvertTime(h.CompletedUtc ?? h.RequestedUtc, Model.Tz).ToString("dd.MM. HH:mm")
+                </a>
+            </div>
+        }
+    </div>
+}

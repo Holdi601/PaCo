@@ -19,6 +19,8 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
 
     public DateTimeOffset Now { get; private set; }
 
+    public IReadOnlyDictionary<Guid, int> UnreadAlerts { get; private set; } = new Dictionary<Guid, int>();
+
     /// <summary>Unlock code just generated (shown once).</summary>
     [TempData]
     public string? NewCode { get; set; }
@@ -32,6 +34,8 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         FamilyName = (await actions.GetFamilyAsync()).Name;
         Children = await actions.StatusAsync();
         Warnings = await WarningsAsync();
+        UnreadAlerts = (await db.Alerts.Where(a => a.ReadUtc == null).Select(a => a.ChildId).ToListAsync())
+            .GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
     }
 
     public async Task<IActionResult> OnPostGrantAsync(Guid child, int minutes)
@@ -65,6 +69,20 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostScreenshotAsync(Guid child)
+    {
+        var c = await actions.FindChildAsync(child);
+        if (c is null) return NotFound();
+        var shot = new ScreenshotEntity
+        {
+            FamilyId = actions.FamilyId, ChildId = c.Id, RequestedBy = ParentActions.UserId(User),
+            RequestedUtc = clock.GetUtcNow(), Status = ScreenshotStatus.Pending,
+        };
+        db.Screenshots.Add(shot);
+        await db.SaveChangesAsync();
+        return RedirectToPage("/Children/Screenshot", new { id = shot.Id });
+    }
+
     public async Task<IActionResult> OnPostCodeAsync(Guid child, int minutes)
     {
         var c = await actions.FindChildAsync(child);
@@ -86,6 +104,9 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
                 "/Devices/Index"));
         foreach (var d in devices.Where(d => d.LastSeenUtc is { } s && Now - s > TimeSpan.FromDays(2)))
             list.Add(new Warning("warning", $"{d.Name} hat sich {Format.Ago(d.LastSeenUtc, Now)} zuletzt gemeldet. Ist der PC aus, ist alles ok – sonst bitte prüfen.", "/Devices/Index"));
+        foreach (var d in devices)
+            foreach (var x in d.GetSecurity().Where(x => x.Severity == SecuritySeverity.Critical && !x.Code.StartsWith("child-admin")))
+                list.Add(new Warning("danger", $"{d.Name}: {x.Text}", "/Devices/Index"));
         foreach (var d in devices.Where(d => Math.Abs(d.ClockSkewSeconds) > 600))
             list.Add(new Warning("warning", $"Die Uhr von {d.Name} geht {Math.Abs(d.ClockSkewSeconds) / 60} Minuten falsch."));
 

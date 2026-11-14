@@ -1,0 +1,65 @@
+@page
+@model PaCo.Server.Pages.AlertsModel
+@{ ViewData["Title"] = "Alarme"; }
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+    <div>
+        <div class="stat-label">Jugendschutz</div>
+        <h1 class="h3 mb-0 page-title">Alarme</h1>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <form method="get" class="d-flex gap-2">
+            <select name="child" class="form-select form-select-sm" aria-label="Kind">
+                <option value="">Alle Kinder</option>
+                @foreach (var (id, name) in Model.ChildNames)
+                {
+                    <option value="@id" selected="@(Model.Child == id)">@name</option>
+                }
+            </select>
+            <button class="btn btn-sm btn-outline-secondary">Filtern</button>
+        </form>
+        <form method="post" asp-page-handler="ReadAll" asp-route-child="@Model.Child">
+            <button class="btn btn-sm btn-outline-primary">Alle als gelesen markieren</button>
+        </form>
+        <a asp-page="/Notifications" class="btn btn-sm btn-outline-secondary">📱 Aufs Handy</a>
+    </div>
+</div>
+
+<div class="alert alert-info small">
+    PaCo prüft auf dem PC des Kindes <strong>lokal</strong> Fenstertitel (z. B. Suchen) und – wenn eingeschaltet – den sichtbaren Text im aktiven Fenster (z. B. Chats) auf Stichwörter.
+    Hier steht nur der Treffer mit einem kurzen Ausschnitt, keine kompletten Chats. Bitte sprich in Ruhe mit deinem Kind, bevor du Schlüsse ziehst – ein Treffer kann auch harmlos sein (Hausaufgaben, Nachrichten).
+    Bei akuter Gefahr: <strong>112</strong>. Beratung für Eltern: Elterntelefon <strong>0800 111 0 550</strong>.
+</div>
+
+@if (Model.Alerts.Count == 0)
+{
+    <div class="card"><div class="card-body text-muted">Keine Alarme. 👍</div></div>
+}
+
+<div class="d-flex flex-column gap-3">
+@foreach (var a in Model.Alerts)
+{
+    var urgent = a.Category is AlertCategory.SelfHarm or AlertCategory.Grooming;
+    <div class="card @(a.ReadUtc is null ? "border-danger" : "")">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+                <div>
+                    <span class="pill @(urgent ? "pill-bad" : "pill-muted")">@AlertKeywords.Label(a.Category)</span>
+                    <strong class="ms-2">@Model.ChildNames.GetValueOrDefault(a.ChildId)</strong>
+                    @if (a.ReadUtc is null) { <span class="badge bg-danger ms-1">neu</span> }
+                </div>
+                <div class="small text-muted">@TimeZoneInfo.ConvertTime(a.TimeUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm") · @Model.DeviceNames.GetValueOrDefault(a.DeviceId)</div>
+            </div>
+            <div class="mb-1">Stichwort <strong>„@a.Keyword“</strong> in <strong>@a.App</strong> <span class="text-muted small">(@a.Source)</span></div>
+            @if (!string.IsNullOrWhiteSpace(a.WindowTitle))
+            {
+                <div class="small text-muted mb-2">Fenster: @a.WindowTitle</div>
+            }
+            <blockquote class="device-list small mb-2">@a.Snippet</blockquote>
+            <form method="post" asp-page-handler="Delete" asp-route-id="@a.Id" asp-route-child="@Model.Child" class="text-end">
+                <button class="btn btn-sm btn-link text-muted" data-confirm="Diesen Alarm löschen?">löschen</button>
+            </form>
+        </div>
+    </div>
+}
+</div>

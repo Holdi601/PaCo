@@ -18,6 +18,9 @@ internal sealed class ClientState
 
     public List<DeviceEvent> PendingEvents { get; set; } = [];
 
+    /// <summary>Alarm hits not yet delivered to the server (kept across reboots / offline).</summary>
+    public List<AlertReport> PendingAlerts { get; set; } = [];
+
     /// <summary>Audio was muted by PaCo and must be restored the next time the child is allowed again.</summary>
     public bool AudioMutedByPaCo { get; set; }
 

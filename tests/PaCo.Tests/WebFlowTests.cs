@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Net;
+using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
@@ -178,6 +179,112 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
         var r = await PostFormAsync(b, "/Account/Login", login, new() { ["Email"] = mail, ["Password"] = pw });
         Assert.Equal(HttpStatusCode.OK, r.StatusCode); // stays on login page
         Assert.Contains("gesperrt", await r.Content.ReadAsStringAsync());
+    }
+
+    /// <summary>Creates a family with one fully onboarded parent and returns a logged-in browser.</summary>
+    private async Task<(HttpClient Browser, Guid FamilyId)> ParentOfNewFamilyAsync(string mail)
+    {
+        const string pw = "Eltern-Passwort-123";
+        Guid fid;
+        string key;
+        using (var scope = _f.Services.CreateScope())
+        {
+            var admin = scope.ServiceProvider.GetRequiredService<AccountAdmin>();
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<ParentUser>>();
+            fid = (await admin.CreateFamilyAsync("Fam-" + mail)).Id;
+            var u = new ParentUser { UserName = mail, Email = mail, DisplayName = mail, FamilyId = fid };
+            Assert.True((await users.CreateAsync(u, pw)).Succeeded);
+            await users.ResetAuthenticatorKeyAsync(u);
+            key = (await users.GetAuthenticatorKeyAsync(u))!;
+            await users.SetTwoFactorEnabledAsync(u, true);
+        }
+        var b = Browser();
+        await LoginAsync(b, mail, pw, key);
+        return (b, fid);
+    }
+
+    [Fact]
+    public async Task ScreenshotsAndAlertsAreStrictlyPerFamily()
+    {
+        var (a, famA) = await ParentOfNewFamilyAsync("a-parent@test.local");
+        var (b, famB) = await ParentOfNewFamilyAsync("b-parent@test.local");
+
+        // Family A: child + paired device.
+        Guid childA;
+        string tokenA;
+        Guid deviceA;
+        Guid deviceB;
+        string tokenB;
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var c = new Child { FamilyId = famA, Name = "KindA" };
+            db.Children.Add(c);
+            childA = c.Id;
+            tokenA = Secrets.DeviceToken();
+            tokenB = Secrets.DeviceToken();
+            var dA = new Device { FamilyId = famA, Name = "PC-A", TokenHash = Secrets.Sha256Hex(tokenA) };
+            var dB = new Device { FamilyId = famB, Name = "PC-B", TokenHash = Secrets.Sha256Hex(tokenB) };
+            db.Devices.AddRange(dA, dB);
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = famA, DeviceId = dA.Id, Sid = "S-1-5-21-7-7-7-1001", UserName = "kinda", ChildId = c.Id });
+            (deviceA, deviceB) = (dA.Id, dB.Id);
+            await db.SaveChangesAsync();
+        }
+
+        // Parent A requests a screenshot via the dashboard.
+        var dash = await a.GetStringAsync("/Dashboard");
+        var req = await PostFormAsync(a, "/Dashboard?handler=Screenshot", dash, new() { ["child"] = childA.ToString() });
+        var shotUrl = req.Headers.Location!.ToString();
+        var shotId = Guid.Parse(shotUrl.Split('/').Last());
+
+        var jpeg = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 1, 2, 3, 4, 5, 0xFF, 0xD9 };
+        var devB = _f.Https();
+        devB.DefaultRequestHeaders.Authorization = new("Device", $"{deviceB}:{tokenB}");
+        Assert.Equal(HttpStatusCode.NotFound, (await devB.PostAsync($"{ApiRoutes.Screenshot}/{shotId}", new ByteArrayContent(jpeg))).StatusCode);
+
+        var devA = _f.Https();
+        devA.DefaultRequestHeaders.Authorization = new("Device", $"{deviceA}:{tokenA}");
+        var sync = await (await devA.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest
+        {
+            Alerts = [new AlertReport { ChildId = childA, TimeUtc = DateTimeOffset.UtcNow, Category = AlertCategory.SelfHarm, Keyword = "suizid", App = "chrome", Snippet = "wie suizid" }],
+        }, PaCoJson.Options)).Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options);
+        Assert.Contains(sync!.Screenshots, s => s.RequestId == shotId);
+        Assert.Equal(HttpStatusCode.OK, (await devA.PostAsync($"{ApiRoutes.Screenshot}/{shotId}", new ByteArrayContent(jpeg))).StatusCode);
+
+        // Parent A sees page and image; stored file is encrypted (not a JPEG on disk).
+        Assert.Equal(HttpStatusCode.OK, (await a.GetAsync(shotUrl)).StatusCode);
+        var img = await a.GetAsync($"{shotUrl}?handler=Image");
+        Assert.Equal("image/jpeg", img.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(jpeg, await img.Content.ReadAsByteArrayAsync());
+        var onDisk = await File.ReadAllBytesAsync(Path.Combine(_f.DataDir, "screenshots", famA.ToString("N"), shotId.ToString("N") + ".bin"));
+        Assert.NotEqual(0xFF, onDisk[0]);
+
+        // Parent B (other family) gets "not found" for both – even knowing the id.
+        Assert.Equal(HttpStatusCode.NotFound, (await b.GetAsync(shotUrl)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await b.GetAsync($"{shotUrl}?handler=Image")).StatusCode);
+        // Random ids are simply not found.
+        Assert.Equal(HttpStatusCode.NotFound, (await a.GetAsync($"/Children/Screenshot/{Guid.NewGuid()}?handler=Image")).StatusCode);
+
+        // Alerts: A sees its alarm, B does not.
+        Assert.Contains("wie suizid", await a.GetStringAsync("/Alerts"));
+        Assert.DoesNotContain("wie suizid", await b.GetStringAsync("/Alerts"));
+        // B cannot delete A's alert.
+        Guid alertId;
+        using (var scope = _f.Services.CreateScope())
+            alertId = (await scope.ServiceProvider.GetRequiredService<PaCoDb>().Alerts.IgnoreQueryFilters().SingleAsync(x => x.ChildId == childA)).Id;
+        var bAlerts = await b.GetStringAsync("/Alerts");
+        Assert.Equal(HttpStatusCode.NotFound, (await PostFormAsync(b, $"/Alerts?handler=Delete&id={alertId}", bAlerts, [])).StatusCode);
+
+        // Family page lists only own parents; B cannot remove A's parent.
+        var famPage = await b.GetStringAsync("/Family");
+        Assert.DoesNotContain("a-parent@test.local", famPage);
+        Guid parentA;
+        using (var scope = _f.Services.CreateScope())
+            parentA = (await scope.ServiceProvider.GetRequiredService<UserManager<ParentUser>>().FindByEmailAsync("a-parent@test.local"))!.Id;
+        Assert.Equal(HttpStatusCode.NotFound, (await PostFormAsync(b, "/Family?handler=Remove", famPage, new() { ["userId"] = parentA.ToString() })).StatusCode);
+
+        // Notifications page renders and creates a secret topic.
+        Assert.Contains("paco-", await a.GetStringAsync("/Notifications"));
     }
 
     private async Task LoginAsync(HttpClient b, string mail, string pw, string totpKey)

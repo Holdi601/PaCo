@@ -6,7 +6,22 @@ public static class ApiRoutes
     public const string Assign = "/api/device/assign";
     public const string Sync = "/api/device/sync";
     public const string ClientDownload = "/api/device/client";
+    public const string Screenshot = "/api/device/screenshot";
 }
+
+public enum SecuritySeverity
+{
+    Ok,
+    Info,
+    Warning,
+    Critical,
+}
+
+/// <summary>Result of one security check on the child's PC.</summary>
+public sealed record SecurityFinding(string Code, SecuritySeverity Severity, string Text, bool Fixable = false);
+
+/// <summary>A parent asked for a screenshot of the child's screen.</summary>
+public sealed record ScreenshotRequest(Guid RequestId, Guid ChildId);
 
 public sealed record WindowsAccount
 {
@@ -130,6 +145,12 @@ public sealed record SyncRequest
     /// <summary>Live status per monitored child as computed on the device (includes offline codes).</summary>
     public IReadOnlyList<ChildLiveStatus> Live { get; init; } = [];
 
+    /// <summary>Latest security check of the PC (sent about once a day; null = unchanged).</summary>
+    public IReadOnlyList<SecurityFinding>? Security { get; init; }
+
+    /// <summary>Alarm hits since the last successful sync.</summary>
+    public IReadOnlyList<AlertReport> Alerts { get; init; } = [];
+
     /// <summary>Complete per-day totals for this device (idempotent: server overwrites).</summary>
     public IReadOnlyList<UsageReport> Usage { get; init; } = [];
 
@@ -173,6 +194,9 @@ public sealed record SyncResponse
     /// <see cref="UpdateManifest"/>. The client verifies signature and SHA-256 before installing.
     /// </summary>
     public SignedEnvelope? Update { get; init; }
+
+    /// <summary>Pending screenshot requests for children on this device.</summary>
+    public IReadOnlyList<ScreenshotRequest> Screenshots { get; init; } = [];
 }
 
 /// <summary>Signed description of a client build the device may install.</summary>

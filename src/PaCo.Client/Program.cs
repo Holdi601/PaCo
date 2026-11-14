@@ -15,7 +15,7 @@ namespace PaCo.Client;
 ///   PaCo.exe --agent {pipe}       → session agent (SYSTEM in a child's session, started by the service)
 ///   PaCo.exe --uninstall          → uninstall (from "Apps &amp; Features")
 ///   PaCo.exe --update             → replace installed version, keep all settings (admin)
-///   PaCo.exe --install [--server URL --code CODE] --child user=Name [--child …] [--make-standard user]
+///   PaCo.exe --install [--server URL --code CODE] --child user=Name [--child …] [--make-standard user] [--fix-security]
 ///                                 → unattended install (automated tests, scripted setups); server/code
 ///                                   default to the configuration embedded in a downloaded PaCo-Setup.exe
 /// </summary>
@@ -146,6 +146,10 @@ internal static class Program
         if (missing.Count > 0) throw new ArgumentException($"Windows-Konto nicht gefunden: {string.Join(", ", missing)}");
 
         var demoteSids = accounts.Where(a => demote.Contains(a.UserName)).Select(a => a.Sid).ToList();
+        var childSids = accounts.Where(a => children.ContainsKey(a.UserName)).Select(a => a.Sid).ToList();
+        var findings = SecurityAudit.Run(childSids);
+        foreach (var x in findings) Log.Info($"Sicherheits-Check [{x.Severity}] {x.Text}");
+        if (args.Contains("--fix-security")) SecurityAudit.Fix(findings);
         Installer.InstallAsync(server, pair, assignments, demoteSids, new Progress<string>(s => Log.Info(s))).GetAwaiter().GetResult();
         return 0;
     }

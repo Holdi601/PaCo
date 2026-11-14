@@ -35,6 +35,10 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
 
     public DbSet<DeviceEventEntity> DeviceEvents => Set<DeviceEventEntity>();
 
+    public DbSet<AlertEntity> Alerts => Set<AlertEntity>();
+
+    public DbSet<ScreenshotEntity> Screenshots => Set<ScreenshotEntity>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // SQLite cannot compare/order DateTimeOffset; store as sortable binary (all values are UTC).
@@ -71,6 +75,11 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
 
         b.Entity<DeviceEventEntity>().HasOne<Device>().WithMany().HasForeignKey(e => e.DeviceId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<DeviceEventEntity>().HasIndex(e => new { e.FamilyId, e.TimeUtc });
+
+        b.Entity<AlertEntity>().HasOne<Child>().WithMany().HasForeignKey(a => a.ChildId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<AlertEntity>().HasIndex(a => new { a.FamilyId, a.TimeUtc });
+        b.Entity<ScreenshotEntity>().HasOne<Child>().WithMany().HasForeignKey(s => s.ChildId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<ScreenshotEntity>().HasIndex(s => new { s.ChildId, s.RequestedUtc });
 
         // Tenant isolation for every family-scoped entity.
         foreach (var type in b.Model.GetEntityTypes().Where(t => typeof(IFamilyScoped).IsAssignableFrom(t.ClrType)))

@@ -22,7 +22,7 @@ done
 added=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++')
 
 # 2) Generic secret patterns
-if printf '%s\n' "$added" | grep -Eq -- '-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}|DuckDNS_Token *= *[A-Za-z0-9-]{20,}|password *= *"[^"]{6,}"'; then
+if printf '%s\n' "$added" | grep -Eq -- '-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}|tk_[A-Za-z0-9]{25,}|DuckDNS_Token *= *[A-Za-z0-9-]{20,}|password *= *"[^"]{6,}"'; then
   echo "pre-commit: BLOCKIERT – sieht nach einem Geheimnis aus (Schlüssel/Token/Passwort)."
   printf '%s\n' "$added" | grep -En -- '-----BEGIN|ghp_|github_pat_|AKIA|xox[abprs]-|DuckDNS_Token|password *=' | cut -c1-120
   fail=1

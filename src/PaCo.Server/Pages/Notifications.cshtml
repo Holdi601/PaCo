@@ -1,0 +1,113 @@
+@page
+@model PaCo.Server.Pages.NotificationsModel
+@{ ViewData["Title"] = "Handy-Benachrichtigungen"; }
+
+<div class="mb-4">
+    <div class="stat-label">Einrichtung</div>
+    <h1 class="h3 page-title">Alarme aufs Handy</h1>
+    <p class="text-muted mb-0">PaCo schickt Alarme (z. B. wenn dein Kind nach „Suizid“ sucht oder jemand im Chat „sag es niemandem“ schreibt) sofort als Push-Nachricht aufs Handy – über die kostenlose App <strong>ntfy</strong> und euren eigenen Server. Jedes Elternteil richtet das einmal auf dem eigenen Handy ein (ca. 3 Minuten).</p>
+</div>
+
+@if (!Model.Configured)
+{
+    <div class="alert alert-warning">Push-Benachrichtigungen sind auf dem Server noch nicht eingerichtet. Bitte den Server-Betreiber fragen. Alarme erscheinen trotzdem unter <a asp-page="/Alerts">Alarme</a>.</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header">Schritt 1 – App installieren</div>
+            <div class="card-body">
+                <p class="mb-2">Installiere die App <strong>ntfy</strong> (kostenlos, ohne Konto, ohne Werbung):</p>
+                <ul class="mb-0">
+                    <li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" rel="noopener noreferrer" target="_blank">Google Play</a> oder <a href="https://f-droid.org/packages/io.heckel.ntfy/" rel="noopener noreferrer" target="_blank">F-Droid</a></li>
+                    <li><strong>iPhone:</strong> <a href="https://apps.apple.com/app/ntfy/id1625396347" rel="noopener noreferrer" target="_blank">App Store</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Schritt 2 – Eure Familie abonnieren</div>
+            <div class="card-body">
+                <p><strong>Android – am schnellsten:</strong> Diese Seite am Handy öffnen und hier tippen:</p>
+                <a href="@Model.DeepLink" class="btn btn-primary mb-3">In ntfy abonnieren</a>
+                <p class="mb-2">…oder den QR-Code rechts mit der Handy-Kamera scannen.</p>
+                <hr />
+                <p class="mb-2"><strong>iPhone (und Android von Hand):</strong></p>
+                <ol class="mb-3">
+                    <li>In ntfy unten rechts auf <strong>+</strong> tippen.</li>
+                    <li>Bei <strong>Thema</strong> eintragen:
+                        <div class="input-group input-group-sm my-1">
+                            <input id="ntfy-topic" class="form-control font-monospace" value="@Model.Topic" readonly />
+                            <button class="btn btn-outline-secondary" type="button" data-copy="#ntfy-topic">Kopieren</button>
+                        </div>
+                    </li>
+                    <li><strong>„Anderen Server verwenden“</strong> einschalten und als Server eintragen:
+                        <div class="input-group input-group-sm my-1">
+                            <input id="ntfy-server" class="form-control font-monospace" value="@Model.ServerUrl" readonly />
+                            <button class="btn btn-outline-secondary" type="button" data-copy="#ntfy-server">Kopieren</button>
+                        </div>
+                    </li>
+                    <li><strong>Abonnieren</strong> tippen.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Schritt 3 – Damit nichts verloren geht</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li class="mb-1"><strong>Benachrichtigungen erlauben</strong>, wenn ntfy danach fragt.</li>
+                    <li class="mb-1"><strong>Android:</strong> Im Thema oben auf ⋮ → <em>Abo-Einstellungen</em> → <strong>„Sofortige Zustellung“</strong> einschalten. In den Android-Einstellungen für ntfy den <strong>Akku-Optimierung</strong> ausschalten (sonst kommen Nachrichten verspätet).</li>
+                    <li class="mb-1"><strong>iPhone:</strong> Einstellungen → Mitteilungen → ntfy → <em>Mitteilungen erlauben</em> und <em>Zeitkritisch</em> einschalten.</li>
+                    <li>Optional: In ntfy für dieses Thema einen eigenen, auffälligen Ton wählen.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Schritt 4 – Testen</div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Test" class="d-flex flex-wrap align-items-center gap-3">
+                    <button class="btn btn-success" @(Model.Configured ? "" : "disabled")>Test-Benachrichtigung senden</button>
+                    <span class="text-muted small">Sollte innerhalb weniger Sekunden auf allen eingerichteten Handys ankommen.</span>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card mb-4 text-center">
+            <div class="card-header">QR-Code (Android)</div>
+            <div class="card-body">
+                <div class="qr"><img src="@Model.QrDataUri" alt="QR-Code zum Abonnieren in ntfy" /></div>
+                <div class="small text-muted mt-2">Mit der Handy-Kamera scannen → „In ntfy öffnen“.</div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Wann kommt eine Nachricht?</div>
+            <div class="card-body small">
+                <ul class="mb-2">
+                    <li><strong>Alarm-Stichwörter</strong> in Suchen, Fenstertiteln oder Chats auf dem PC (welche, legst du pro Kind unter <a asp-page="/Children/Index">Kinder → Regeln</a> fest). Suizid- und Grooming-Alarme kommen mit höchster Dringlichkeit.</li>
+                    <li>Wenn PaCo auf einem PC <strong>deinstalliert</strong> wird.</li>
+                </ul>
+                <p class="mb-0 text-muted">Gleiche Treffer werden höchstens alle 30 Minuten gemeldet. Alle Alarme findest du zusätzlich unter <a asp-page="/Alerts">Alarme</a>.</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Datenschutz & Sicherheit</div>
+            <div class="card-body small">
+                <ul class="mb-3">
+                    <li>Die Nachrichten laufen über euren <strong>eigenen Server</strong>. Sie enthalten Name des Kindes, Stichwort, Programm und einen kurzen Textausschnitt.</li>
+                    <li>Das Thema ist ein <strong>geheimer Zufallsname</strong> nur für eure Familie. Nur PaCo darf dort senden. Teile es nur mit Eltern eurer Familie.</li>
+                    <li>iPhone: Apple braucht für Push einen Weckruf über ntfy.sh – dabei wird <em>kein</em> Inhalt übertragen, nur ein Signal „neue Nachricht abholen“.</li>
+                </ul>
+                <form method="post" asp-page-handler="Rotate">
+                    <button class="btn btn-sm btn-outline-danger" data-confirm="Neues geheimes Thema erzeugen? Danach müssen alle Eltern neu abonnieren.">Thema versehentlich weitergegeben? Neues erzeugen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

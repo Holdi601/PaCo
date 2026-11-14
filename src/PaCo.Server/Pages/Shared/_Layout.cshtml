@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims
+@inject FamilyInfo FamilyInfo
 @{
     var signedIn = User.Identity?.IsAuthenticated == true;
     var isAdmin = User.IsInRole(PaCoRoles.SuperAdmin);
@@ -6,6 +7,7 @@
     var onboarded = User.FindFirstValue(PaCoClaims.TwoFactor) == "1" && User.FindFirstValue(PaCoClaims.MustChangePassword) == "0";
     var path = Context.Request.Path.Value ?? "";
     string Active(string prefix) => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    var unreadAlerts = signedIn && onboarded && hasFamily ? await FamilyInfo.UnreadAlertsAsync() : 0;
 }
 <!DOCTYPE html>
 <html lang="de" data-bs-theme="light">
@@ -41,6 +43,13 @@
                             <li class="nav-item"><a class="nav-link @Active("/Dashboard")" asp-page="/Dashboard">Übersicht</a></li>
                             <li class="nav-item"><a class="nav-link @Active("/Children")" asp-page="/Children/Index">Kinder</a></li>
                             <li class="nav-item"><a class="nav-link @Active("/Devices")" asp-page="/Devices/Index">Geräte</a></li>
+                            <li class="nav-item">
+                                <a class="nav-link @Active("/Alerts")" asp-page="/Alerts">Alarme
+                                    @if (unreadAlerts > 0) { <span class="badge rounded-pill bg-danger ms-1">@unreadAlerts</span> }
+                                </a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link @Active("/Family")" asp-page="/Family">Familie</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Notifications")" asp-page="/Notifications">Handy-Benachrichtigungen</a></li>
                         }
                         @if (isAdmin)
                         {

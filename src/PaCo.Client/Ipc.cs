@@ -21,6 +21,8 @@ internal sealed record IpcMessage
     public const string RestoreAudio = "restoreAudio";
     public const string CodeResult = "codeResult";
     public const string Exit = "exit";
+    public const string AlertConfig = "alertConfig";
+    public const string TakeScreenshot = "takeScreenshot";
 
     // Agent → service
     public const string Hello = "hello";
@@ -29,6 +31,8 @@ internal sealed record IpcMessage
     public const string LockState = "lockState";
     public const string LogLine = "log";
     public const string RequestLogoff = "requestLogoff";
+    public const string AlertHits = "alertHits";
+    public const string ScreenshotData = "screenshotData";
 
     public string Type { get; init; } = "";
 
@@ -49,7 +53,13 @@ internal sealed record IpcMessage
     public int? Seconds { get; init; }
 
     public IReadOnlyList<ForegroundSample>? Samples { get; init; }
+
+    public IReadOnlyList<AlertHitDto>? Hits { get; init; }
+
+    public Guid? RequestId { get; init; }
 }
+
+internal sealed record AlertHitDto(AlertCategory Category, string Keyword, string Snippet, string App, string? Title, string Source);
 
 internal sealed record ForegroundSample(string Process, string DisplayName, int Seconds, string? WindowTitle);
 
@@ -79,7 +89,7 @@ internal sealed class IpcChannel(Stream stream) : IDisposable
         {
             var line = await _reader.ReadLineAsync(ct);
             if (line is null) return null;
-            if (line.Length is 0 or > 256 * 1024) continue;
+            if (line.Length is 0 or > 8 * 1024 * 1024) continue; // screenshots are a few hundred KB
             try
             {
                 return PaCoJson.Deserialize<IpcMessage>(line);

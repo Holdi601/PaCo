@@ -34,7 +34,12 @@ internal sealed class Enforcer : BackgroundService
         public TimeSpan LastBlockedNotice = Mono.Never;
         public string? CurrentApp;
         public TimeSpan CurrentAppAt = Mono.Never;
+        public string? SentAlertConfig;
+        public TimeSpan LastHelpHint = Mono.Never;
     }
+
+    /// <summary>Last report time per child|category|keyword|app – the same hit is reported at most every 30 min.</summary>
+    private readonly Dictionary<string, TimeSpan> _alertDedup = [];
 
     private readonly Runtime _rt;
     private readonly AgentManager _agents;
@@ -176,6 +181,14 @@ internal sealed class Enforcer : BackgroundService
                 }
             }
 
+            // Alarm keywords → agent (on change or after an agent restart).
+            var alertJson = PaCoJson.Serialize(child.Alerts);
+            if (_agents.Get(s.SessionId)?.Connected == true && track.SentAlertConfig != alertJson)
+            {
+                await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.AlertConfig, Text = alertJson });
+                track.SentAlertConfig = alertJson;
+            }
+
             await ApplyAsync(s, child, eval, track, now);
 
             var lockShown = _agents.Get(s.SessionId)?.LockShown == true;
@@ -192,6 +205,25 @@ internal sealed class Enforcer : BackgroundService
                     Reason = eval.Reason, UsedTodaySeconds = usedToday, Active = inUse && eval.Allowed, LockShown = lockShown, WindowsUser = s.UserName,
                     CurrentApp = inUse && Mono.Now - track.CurrentAppAt < TimeSpan.FromSeconds(15) ? track.CurrentApp : null,
                 };
+            }
+        }
+
+        // Screenshot requests: capture in the child's active session, otherwise report "not available".
+        while (_rt.ScreenshotRequests.TryDequeue(out var req))
+        {
+            var target = monitored.FirstOrDefault(m => m.Child.ChildId == req.ChildId && m.Session.Active && !m.Session.Locked);
+            if (target.Child is not null && _agents.Get(target.Session.SessionId)?.Connected == true)
+            {
+                Log.Info($"Bildschirmfoto angefordert für {target.Child.Name}");
+                await _agents.SendAsync(target.Session.SessionId, new IpcMessage
+                {
+                    Type = IpcMessage.TakeScreenshot, RequestId = req.RequestId, Flag = target.Child.NotifyChildOnScreenshot,
+                });
+            }
+            else
+            {
+                _rt.ScreenshotUploads.Enqueue((req.RequestId, []));
+                _rt.RequestSyncNow();
             }
         }
 
@@ -376,7 +408,7 @@ internal sealed class Enforcer : BackgroundService
                 lock (_tracksGate)
                 {
                     // Re-send state to a fresh agent.
-                    if (_tracks.TryGetValue(sessionId, out var t)) { t.LockRequested = false; t.Muted = false; t.LastAllowed = null; }
+                    if (_tracks.TryGetValue(sessionId, out var t)) { t.LockRequested = false; t.Muted = false; t.LastAllowed = null; t.SentAlertConfig = null; }
                 }
                 break;
 
@@ -418,6 +450,18 @@ internal sealed class Enforcer : BackgroundService
                 if (a is not null) a.LockShown = msg.Flag;
                 break;
 
+            case IpcMessage.AlertHits when child is not null && msg.Hits is { } hits:
+                await HandleAlertsAsync(sessionId, child, hits);
+                break;
+
+            case IpcMessage.ScreenshotData when msg.RequestId is { } rid:
+                byte[] jpeg;
+                try { jpeg = Convert.FromBase64String(msg.Text ?? ""); } catch (FormatException) { jpeg = []; }
+                Log.Info($"Bildschirmfoto aufgenommen ({jpeg.Length / 1024} KB)");
+                _rt.ScreenshotUploads.Enqueue((rid, jpeg));
+                _rt.RequestSyncNow();
+                break;
+
             case IpcMessage.RequestLogoff:
                 Log.Info($"Kind hat Abmelden gewählt (Sitzung {sessionId})");
                 Sessions.Logoff(sessionId);
@@ -428,6 +472,48 @@ internal sealed class Enforcer : BackgroundService
                 break;
         }
     }
+
+    private async Task HandleAlertsAsync(int sessionId, ChildPolicy child, IReadOnlyList<AlertHitDto> hits)
+    {
+        var fresh = new List<AlertReport>();
+        lock (_rt.Gate)
+        {
+            var now = _rt.Now();
+            foreach (var h in hits.Take(20))
+            {
+                var key = $"{child.ChildId:N}|{h.Category}|{h.Keyword}|{h.App}".ToLowerInvariant();
+                if (_alertDedup.TryGetValue(key, out var last) && Mono.Since(last) < TimeSpan.FromMinutes(30)) continue;
+                _alertDedup[key] = Mono.Now;
+                var report = new AlertReport
+                {
+                    ChildId = child.ChildId, TimeUtc = now, Category = h.Category, Keyword = Cut(h.Keyword, 100), App = Cut(h.App, 80),
+                    WindowTitle = h.Title is null ? null : Cut(h.Title, 200), Snippet = Cut(h.Snippet, 300), Source = Cut(h.Source, 40),
+                };
+                _rt.State.PendingAlerts.Add(report);
+                fresh.Add(report);
+            }
+            if (_rt.State.PendingAlerts.Count > 300) _rt.State.PendingAlerts.RemoveRange(0, _rt.State.PendingAlerts.Count - 300);
+            if (_alertDedup.Count > 2000) _alertDedup.Clear();
+            if (fresh.Count > 0) _rt.SaveIfNeeded(force: true);
+        }
+        if (fresh.Count == 0) return;
+        Log.Warn($"Alarm für {child.Name}: {string.Join(", ", fresh.Select(f => $"{f.Category}/{f.Keyword} in {f.App}"))}");
+        _rt.RequestSyncNow();
+
+        // Self-harm: gently show the child where to get help (at most every 30 minutes).
+        if (child.Alerts.ShowHelpToChild && fresh.Any(f => f.Category == AlertCategory.SelfHarm))
+        {
+            Track? track;
+            lock (_tracksGate) _tracks.TryGetValue(sessionId, out track);
+            if (track is not null && Mono.Since(track.LastHelpHint) > TimeSpan.FromMinutes(30))
+            {
+                track.LastHelpHint = Mono.Now;
+                await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.Notify, Title = "Du bist nicht allein 💙", Text = AlertKeywords.HelpText });
+            }
+        }
+    }
+
+    private static string Cut(string s, int max) => s.Length <= max ? s : s[..max];
 
     private (bool Ok, string Text) RedeemCode(ChildPolicy child, PolicyDocument policy, string code)
     {

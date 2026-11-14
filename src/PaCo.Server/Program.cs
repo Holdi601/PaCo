@@ -34,6 +34,12 @@ builder.Services.AddScoped<ParentActions>();
 builder.Services.AddScoped<AccountAdmin>();
 builder.Services.AddHttpClient("github", c => c.Timeout = TimeSpan.FromMinutes(5));
 builder.Services.AddScoped<GitHubUpdates>();
+builder.Services.AddHttpClient("ntfy", c => c.Timeout = TimeSpan.FromSeconds(15));
+builder.Services.AddSingleton<Notifier>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<Notifier>());
+builder.Services.AddSingleton<ScreenshotStore>();
+builder.Services.AddHostedService<Housekeeping>();
+builder.Services.AddScoped<FamilyInfo>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = AccountAdmin.InviteLifetime);
 
 builder.Services.AddDataProtection()
@@ -95,7 +101,9 @@ builder.Services.AddRazorPages(o =>
     o.Conventions.AuthorizePage("/Dashboard", PaCoPolicies.Parent);
     o.Conventions.AuthorizeFolder("/Children", PaCoPolicies.Parent);
     o.Conventions.AuthorizeFolder("/Devices", PaCoPolicies.Parent);
-    o.Conventions.AuthorizeFolder("/Alerts", PaCoPolicies.Parent);
+    o.Conventions.AuthorizePage("/Alerts", PaCoPolicies.Parent);
+    o.Conventions.AuthorizePage("/Notifications", PaCoPolicies.Parent);
+    o.Conventions.AuthorizePage("/Family", PaCoPolicies.Parent);
     // Super admin area: account management only, no family data.
     o.Conventions.AuthorizeFolder("/Admin", PaCoPolicies.SuperAdmin);
     // Account pages: signed in (onboarding middleware handles password/2FA setup) …

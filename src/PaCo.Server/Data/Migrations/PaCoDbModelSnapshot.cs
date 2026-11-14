@@ -143,11 +143,75 @@ namespace PaCo.Server.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PaCo.Server.Data.AlertEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("App")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("ReadUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Snippet")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("TimeUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("WindowTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("FamilyId", "TimeUtc");
+
+                    b.ToTable("Alerts");
+                });
+
             modelBuilder.Entity("PaCo.Server.Data.Child", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("AlertsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("BlockSystemTools")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("BlockedAppsJson")
                         .IsRequired()
@@ -173,6 +237,9 @@ namespace PaCo.Server.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("NotifyChildOnScreenshot")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Paused")
                         .HasColumnType("INTEGER");
@@ -238,6 +305,13 @@ namespace PaCo.Server.Data.Migrations
 
                     b.Property<bool>("Revoked")
                         .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SecurityCheckedUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecurityJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
@@ -349,6 +423,10 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NtfyTopic")
+                        .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TimeZoneId")
@@ -480,6 +558,43 @@ namespace PaCo.Server.Data.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.ScreenshotEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("CompletedUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RequestedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("RequestedUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildId", "RequestedUtc");
+
+                    b.ToTable("Screenshots");
                 });
 
             modelBuilder.Entity("PaCo.Server.Data.TimeGrantEntity", b =>
@@ -651,6 +766,15 @@ namespace PaCo.Server.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PaCo.Server.Data.AlertEntity", b =>
+                {
+                    b.HasOne("PaCo.Server.Data.Child", null)
+                        .WithMany()
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PaCo.Server.Data.Child", b =>
                 {
                     b.HasOne("PaCo.Server.Data.Family", null)
@@ -713,6 +837,15 @@ namespace PaCo.Server.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Family");
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.ScreenshotEntity", b =>
+                {
+                    b.HasOne("PaCo.Server.Data.Child", null)
+                        .WithMany()
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PaCo.Server.Data.TimeGrantEntity", b =>

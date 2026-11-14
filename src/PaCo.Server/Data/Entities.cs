@@ -23,6 +23,10 @@ public sealed class Family
     /// <summary>HMAC key for offline unlock codes (shared with the family's devices at pairing).</summary>
     public byte[] UnlockKey { get; set; } = [];
 
+    /// <summary>Secret ntfy topic for push notifications (random, unguessable; can be rotated).</summary>
+    [MaxLength(64)]
+    public string? NtfyTopic { get; set; }
+
     public DateTimeOffset CreatedUtc { get; set; } = DateTimeOffset.UtcNow;
 }
 
@@ -69,6 +73,20 @@ public sealed class Child : IFamilyScoped
 
     /// <summary>JSON <see cref="WebFilterPolicy"/>.</summary>
     public string WebJson { get; set; } = "";
+
+    /// <summary>JSON <see cref="AlertSettings"/>.</summary>
+    public string AlertsJson { get; set; } = "";
+
+    public bool NotifyChildOnScreenshot { get; set; } = true;
+
+    /// <summary>Block typical malware/bypass tools in the child's account (PowerShell, cmd, regedit, script hosts).</summary>
+    public bool BlockSystemTools { get; set; } = true;
+
+    public static readonly string[] SystemTools = ["powershell", "powershell_ise", "pwsh", "cmd", "regedit", "wscript", "cscript", "mshta"];
+
+    public AlertSettings GetAlerts() => string.IsNullOrEmpty(AlertsJson) ? new AlertSettings() : PaCoJson.Deserialize<AlertSettings>(AlertsJson);
+
+    public void SetAlerts(AlertSettings a) => AlertsJson = PaCoJson.Serialize(a);
 
     public DateTimeOffset CreatedUtc { get; set; } = DateTimeOffset.UtcNow;
 
@@ -130,6 +148,14 @@ public sealed class Device : IFamilyScoped
     public long ClockSkewSeconds { get; set; }
 
     public bool Revoked { get; set; }
+
+    /// <summary>JSON array of <see cref="SecurityFinding"/> from the device's last security check.</summary>
+    public string SecurityJson { get; set; } = "[]";
+
+    public DateTimeOffset? SecurityCheckedUtc { get; set; }
+
+    public IReadOnlyList<SecurityFinding> GetSecurity() =>
+        PaCoJson.Deserialize<SecurityFinding[]>(string.IsNullOrEmpty(SecurityJson) ? "[]" : SecurityJson);
 
     /// <summary>A parent/admin asked this device to install the newest client version.</summary>
     public bool UpdateRequested { get; set; }
@@ -271,6 +297,69 @@ public sealed class UsageDay : IFamilyScoped
 
     public Dictionary<string, AppUsage> GetApps() =>
         new(PaCoJson.Deserialize<Dictionary<string, AppUsage>>(AppsJson), StringComparer.OrdinalIgnoreCase);
+}
+
+public sealed class AlertEntity : IFamilyScoped
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public Guid FamilyId { get; set; }
+
+    public Guid ChildId { get; set; }
+
+    public Guid DeviceId { get; set; }
+
+    public DateTimeOffset TimeUtc { get; set; }
+
+    public AlertCategory Category { get; set; }
+
+    [MaxLength(100)]
+    public string Keyword { get; set; } = "";
+
+    [MaxLength(80)]
+    public string App { get; set; } = "";
+
+    [MaxLength(200)]
+    public string? WindowTitle { get; set; }
+
+    [MaxLength(300)]
+    public string Snippet { get; set; } = "";
+
+    [MaxLength(40)]
+    public string Source { get; set; } = "";
+
+    public DateTimeOffset? ReadUtc { get; set; }
+}
+
+public enum ScreenshotStatus
+{
+    Pending,
+    Done,
+    Unavailable,
+    Expired,
+}
+
+/// <summary>A parent's screenshot request. The image itself is stored encrypted on disk, never under wwwroot.</summary>
+public sealed class ScreenshotEntity : IFamilyScoped
+{
+    /// <summary>Random v4 GUID (122 bits of randomness) – unguessable, and every access is family-filtered anyway.</summary>
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public Guid FamilyId { get; set; }
+
+    public Guid ChildId { get; set; }
+
+    public Guid? DeviceId { get; set; }
+
+    public Guid RequestedBy { get; set; }
+
+    public DateTimeOffset RequestedUtc { get; set; }
+
+    public DateTimeOffset? CompletedUtc { get; set; }
+
+    public ScreenshotStatus Status { get; set; }
+
+    public int Size { get; set; }
 }
 
 public sealed class DeviceEventEntity : IFamilyScoped

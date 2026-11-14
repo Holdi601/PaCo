@@ -1,4 +1,4 @@
-# PaCo server. Configure via deploy/.env (copy .env.example – never commit .env).
+# PaCo server + ntfy (push notifications). Configure via deploy/.env (copy .env.example – never commit .env).
 services:
   paco:
     build:
@@ -15,6 +15,10 @@ services:
       PaCo__PublicUrl: ${PACO_PUBLIC_URL:?PACO_PUBLIC_URL fehlt in .env}
       PaCo__TlsCertPath: /tls/${PACO_TLS_CERT:-fullchain.pem}
       PaCo__TlsKeyPath: /tls/${PACO_TLS_KEY:-key.pem}
+      # Push notifications: PaCo publishes inside the Docker network, parents subscribe via the public URL.
+      PaCo__NtfyUrl: http://ntfy:8080
+      PaCo__NtfyPublicUrl: ${PACO_NTFY_PUBLIC_URL:-}
+      PaCo__NtfyToken: ${PACO_NTFY_TOKEN:-}
       TZ: ${PACO_TZ:-Europe/Berlin}
     volumes:
       - ${PACO_DATA_DIR:-./data}:/data
@@ -32,3 +36,42 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+
+  ntfy:
+    image: binwiederhier/ntfy:v2.37.0
+    container_name: paco-ntfy
+    command: serve
+    restart: unless-stopped
+    user: "${PACO_UID:-1000}:${PACO_GID:-1000}"
+    ports:
+      - "${PACO_NTFY_PORT:-8792}:8792"
+    environment:
+      NTFY_BASE_URL: ${PACO_NTFY_PUBLIC_URL:-https://localhost:8792}
+      NTFY_LISTEN_HTTP: ":8080"          # only inside the Docker network (PaCo → ntfy)
+      NTFY_LISTEN_HTTPS: ":8792"         # published: phones subscribe here
+      NTFY_CERT_FILE: /tls/${PACO_TLS_CERT:-fullchain.pem}
+      NTFY_KEY_FILE: /tls/${PACO_TLS_KEY:-key.pem}
+      NTFY_CACHE_FILE: /var/lib/ntfy/cache.db
+      NTFY_CACHE_DURATION: "48h"
+      NTFY_AUTH_FILE: /var/lib/ntfy/user.db
+      # Anyone who knows a (secret, random) topic may read it; only PaCo's token may publish.
+      NTFY_AUTH_DEFAULT_ACCESS: read-only
+      # iPhone push needs a wake-up via ntfy.sh (no message content is sent there).
+      NTFY_UPSTREAM_BASE_URL: https://ntfy.sh
+      NTFY_ENABLE_SIGNUP: "false"
+      NTFY_ENABLE_LOGIN: "false"
+      NTFY_WEB_ROOT: disable
+      TZ: ${PACO_TZ:-Europe/Berlin}
+    volumes:
+      - ${PACO_NTFY_DIR:-./ntfy}:/var/lib/ntfy
+      - ${PACO_TLS_DIR:?PACO_TLS_DIR fehlt in .env}:/tls:ro
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

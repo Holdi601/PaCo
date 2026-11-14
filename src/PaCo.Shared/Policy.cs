@@ -78,6 +78,11 @@ public sealed record ChildPolicy
 
     public WebFilterPolicy Web { get; init; } = new();
 
+    public AlertSettings Alerts { get; init; } = new();
+
+    /// <summary>Tell the child (small notification) when the parents take a screenshot.</summary>
+    public bool NotifyChildOnScreenshot { get; init; } = true;
+
     public DayRule RuleFor(DayOfWeek day) => Days.Count == 7 ? Days[(int)day] : DayRule.Unrestricted;
 }
 

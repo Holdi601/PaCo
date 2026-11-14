@@ -24,6 +24,62 @@ public static class DeviceApi
         app.MapPost(ApiRoutes.Assign, AssignAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery();
         app.MapPost(ApiRoutes.Sync, SyncAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery();
         app.MapGet(ApiRoutes.ClientDownload, DownloadClientAsync).RequireRateLimiting(RateLimitPair);
+        app.MapPost(ApiRoutes.Screenshot + "/{id:guid}", UploadScreenshotAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
+            .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(MaxScreenshotBytes));
+    }
+
+    private const int MaxScreenshotBytes = 6 * 1024 * 1024;
+
+    /// <summary>Device delivers a requested screenshot (JPEG) – or an empty body when the child is not at the PC.</summary>
+    private static async Task<IResult> UploadScreenshotAsync(Guid id, HttpContext http, PaCoDb db, ScreenshotStore store, TimeProvider clock, CancellationToken ct)
+    {
+        var device = await AuthenticateAsync(http, db, ct);
+        if (device is null || device.Revoked) return Results.Unauthorized();
+        // Only a pending request of the device's own family for a child mapped to this device.
+        var shot = await db.Screenshots.IgnoreQueryFilters().SingleOrDefaultAsync(s => s.Id == id && s.FamilyId == device.FamilyId, ct);
+        if (shot is null) return Results.NotFound();
+        var mapped = await db.DeviceAccounts.IgnoreQueryFilters().AnyAsync(a => a.DeviceId == device.Id && a.ChildId == shot.ChildId, ct);
+        if (!mapped) return Results.NotFound();
+        if (shot.Status != ScreenshotStatus.Pending) return Results.Ok();
+
+        using var ms = new MemoryStream();
+        await http.Request.Body.CopyToAsync(ms, ct);
+        var bytes = ms.ToArray();
+        if (bytes.Length == 0)
+        {
+            shot.Status = ScreenshotStatus.Unavailable;
+        }
+        else
+        {
+            if (bytes.Length > MaxScreenshotBytes || bytes.Length < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) return Results.BadRequest();
+            await store.SaveAsync(device.FamilyId, shot.Id, bytes, ct);
+            shot.Status = ScreenshotStatus.Done;
+            shot.Size = bytes.Length;
+        }
+        shot.DeviceId = device.Id;
+        shot.CompletedUtc = clock.GetUtcNow();
+        await db.SaveChangesAsync(ct);
+        return Results.Ok();
+    }
+
+    private static async Task StoreAlertsAsync(PaCoDb db, Device device, IReadOnlyList<AlertReport> alerts, Notifier notifier, string? baseUrl, CancellationToken ct)
+    {
+        if (alerts.Count == 0) return;
+        var children = await db.Children.IgnoreQueryFilters().Where(c => c.FamilyId == device.FamilyId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
+        var ids = alerts.Take(100).Select(a => a.Id).ToList();
+        var known = await db.Alerts.IgnoreQueryFilters().Where(a => ids.Contains(a.Id)).Select(a => a.Id).ToListAsync(ct);
+        var family = await db.Families.SingleAsync(f => f.Id == device.FamilyId, ct);
+        foreach (var r in alerts.Take(100).Where(a => !known.Contains(a.Id) && children.ContainsKey(a.ChildId)))
+        {
+            var e = new AlertEntity
+            {
+                Id = r.Id, FamilyId = device.FamilyId, ChildId = r.ChildId, DeviceId = device.Id, TimeUtc = r.TimeUtc.ToUniversalTime(),
+                Category = r.Category, Keyword = Trim(r.Keyword, 100), App = Trim(r.App, 80),
+                WindowTitle = r.WindowTitle is null ? null : Trim(r.WindowTitle, 200), Snippet = Trim(r.Snippet, 300), Source = Trim(r.Source, 40),
+            };
+            db.Alerts.Add(e);
+            if (family.NtfyTopic is { } topic) notifier.Enqueue(AlertTexts.ForAlert(topic, children[r.ChildId], e, baseUrl));
+        }
     }
 
     private static async Task<IResult> PairAsync(PairRequest req, PaCoDb db, SigningKeyStore keys, TimeProvider clock, ILoggerFactory lf, CancellationToken ct)
@@ -123,7 +179,8 @@ public static class DeviceApi
         return Results.Ok(children.OrderBy(c => c.Name).Select(c => new ChildRef(c.Id, c.Name)).ToList());
     }
 
-    private static async Task<IResult> SyncAsync(HttpContext http, SyncRequest req, PaCoDb db, PolicyBuilder policies, ClientPackage client, SigningKeyStore keys, TimeProvider clock, CancellationToken ct)
+    private static async Task<IResult> SyncAsync(HttpContext http, SyncRequest req, PaCoDb db, PolicyBuilder policies, ClientPackage client, SigningKeyStore keys,
+        Notifier notifier, Microsoft.Extensions.Options.IOptions<ServerOptions> options, TimeProvider clock, CancellationToken ct)
     {
         var device = await AuthenticateAsync(http, db, ct);
         if (device is null) return Results.Unauthorized();
@@ -135,13 +192,31 @@ public static class DeviceApi
         device.ClockSkewSeconds = (long)(req.ClientUtcNow - now).TotalSeconds;
         device.ActiveChildrenJson = PaCoJson.Serialize(req.ActiveChildren.Take(20).ToArray());
         device.LockedChildrenJson = PaCoJson.Serialize(req.LockedChildren.Take(20).ToArray());
+        if (req.Security is { } sec)
+        {
+            device.SecurityJson = PaCoJson.Serialize(sec.Take(50).Select(s => s with { Code = Trim(s.Code, 120), Text = Trim(s.Text, 300) }).ToArray());
+            device.SecurityCheckedUtc = now;
+        }
         device.LiveJson = PaCoJson.Serialize(req.Live.Take(20).Select(l => l with { WindowsUser = l.WindowsUser is { Length: > 100 } u ? u[..100] : l.WindowsUser }).ToArray());
 
         if (!device.Revoked)
         {
             await UpsertAccountsAsync(db, device, req.Accounts, now, ct);
             await UpsertUsageAsync(db, device, req.Usage, now, ct);
-            await StoreEventsAsync(db, device, req.Events, ct);
+            await StoreEventsAsync(db, device, req.Events, notifier, ct);
+            await StoreAlertsAsync(db, device, req.Alerts, notifier, options.Value.PublicUrl?.TrimEnd('/'), ct);
+        }
+
+        // Pending screenshot requests for children that use this device.
+        var screenshots = new List<ScreenshotRequest>();
+        if (!device.Revoked)
+        {
+            var since = now - Housekeeping.ScreenshotRequestTimeout;
+            var myChildren = await db.DeviceAccounts.IgnoreQueryFilters()
+                .Where(a => a.DeviceId == device.Id && a.ChildId != null).Select(a => a.ChildId!.Value).ToListAsync(ct);
+            screenshots = await db.Screenshots.IgnoreQueryFilters()
+                .Where(s => s.FamilyId == device.FamilyId && s.Status == ScreenshotStatus.Pending && s.RequestedUtc > since && myChildren.Contains(s.ChildId))
+                .Select(s => new ScreenshotRequest(s.Id, s.ChildId)).ToListAsync(ct);
         }
         // Update requested and a newer build available → hand out a signed manifest.
         SignedEnvelope? update = null;
@@ -167,6 +242,7 @@ public static class DeviceApi
             ServerUtcNow = now,
             LatestClientVersion = client.Version,
             Update = update,
+            Screenshots = screenshots,
         });
     }
 
@@ -239,8 +315,15 @@ public static class DeviceApi
         }
     }
 
-    private static async Task StoreEventsAsync(PaCoDb db, Device device, IReadOnlyList<DeviceEvent> events, CancellationToken ct)
+    private static async Task StoreEventsAsync(PaCoDb db, Device device, IReadOnlyList<DeviceEvent> events, Notifier notifier, CancellationToken ct)
     {
+        // Deinstallation is important enough for a push message.
+        if (events.Any(e => e.Kind == DeviceEventKind.Uninstalled))
+        {
+            var fam = await db.Families.SingleAsync(f => f.Id == device.FamilyId, ct);
+            if (fam.NtfyTopic is { } topic)
+                notifier.Enqueue(new PushMessage(topic, "PaCo wurde deinstalliert", $"Auf {device.Name} wurde PaCo entfernt.", 4, null));
+        }
         if (events.Count == 0) return;
         var ids = events.Take(MaxEventsPerSync).Select(e => e.Id).ToList();
         // Idempotent: the client resends events until a sync succeeds.

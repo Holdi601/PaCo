@@ -38,6 +38,26 @@ internal sealed class Runtime
     /// <summary>Live status per child of the last enforcement tick.</summary>
     public Dictionary<Guid, ChildLiveStatus> Live { get; } = [];
 
+    /// <summary>Screenshot requests from the server, consumed by the enforcer.</summary>
+    public System.Collections.Concurrent.ConcurrentQueue<ScreenshotRequest> ScreenshotRequests { get; } = new();
+
+    /// <summary>Captured screenshots (empty = child not available), uploaded by the sync worker.</summary>
+    public System.Collections.Concurrent.ConcurrentQueue<(Guid RequestId, byte[] Jpeg)> ScreenshotUploads { get; } = new();
+
+    private readonly SemaphoreSlim _syncSignal = new(0, 1);
+
+    /// <summary>Wakes the sync worker immediately (alarms, screenshots).</summary>
+    public void RequestSyncNow()
+    {
+        try
+        {
+            if (_syncSignal.CurrentCount == 0) _syncSignal.Release();
+        }
+        catch (SemaphoreFullException) { }
+    }
+
+    public Task<bool> WaitForSyncSignalAsync(TimeSpan timeout, CancellationToken ct) => _syncSignal.WaitAsync(timeout, ct);
+
     private TimeSpan _lastSave = Mono.Never;
     private bool _dirty;
 
