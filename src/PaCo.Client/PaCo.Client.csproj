@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>PaCo</AssemblyName>
+    <RootNamespace>PaCo.Client</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Allows building the Windows client inside the Linux Docker build. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- Single self-contained exe: the child's PC needs no .NET installation. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PaCo.Shared\PaCo.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.15" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.15" />
+  </ItemGroup>
+
+</Project>

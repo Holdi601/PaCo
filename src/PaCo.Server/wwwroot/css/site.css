@@ -1,0 +1,33 @@
+:root {
+  --paco: #2f5d8a;
+  --paco-light: #e8f0f8;
+}
+
+html { font-size: 15px; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body { background: #f6f7f9; }
+
+.bg-paco { background: var(--paco); }
+.text-paco { color: var(--paco); }
+
+.card { border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.card-header { background: #fff; font-weight: 600; }
+
+.status-ok { color: #1e7b34; }
+.status-warn { color: #a15c00; }
+.status-blocked { color: #b02a37; }
+
+.big-number { font-size: 2rem; font-weight: 600; line-height: 1.1; }
+
+.bar { background: var(--paco-light); border-radius: .25rem; height: .9rem; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--paco); }
+
+/* Widths for bars without inline styles (CSP): w-0 … w-100 in steps of 1. */
+.code-box { font-family: ui-monospace, Consolas, monospace; font-size: 2rem; letter-spacing: .15rem; }
+.qr img { width: 220px; height: 220px; image-rendering: pixelated; }
+
+.table-days input[type=time] { min-width: 6.5rem; }
+.table-days input[type=number] { min-width: 5.5rem; }
+
+.recovery-codes { font-family: ui-monospace, Consolas, monospace; columns: 2; }

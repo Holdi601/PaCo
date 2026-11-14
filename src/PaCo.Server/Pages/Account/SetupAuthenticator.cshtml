@@ -1,0 +1,54 @@
+@page
+@model PaCo.Server.Pages.Account.SetupAuthenticatorModel
+@{ ViewData["Title"] = "Zwei-Faktor-Anmeldung"; }
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card mt-4">
+            <div class="card-body p-4">
+                @if (Model.RecoveryCodes is not null)
+                {
+                    <h1 class="h4">Fertig – 2FA ist aktiv ✅</h1>
+                    <p>Schreib dir diese <strong>Notfall-Codes</strong> auf und bewahre sie sicher auf (nicht auf dem Handy!). Falls das Handy verloren geht, kommst du damit noch einmal hinein. Jeder Code funktioniert nur einmal.</p>
+                    <div class="recovery-codes alert alert-warning">
+                        @foreach (var c in Model.RecoveryCodes.Split('\n'))
+                        {
+                            <div>@c</div>
+                        }
+                    </div>
+                    <a asp-page="/Index" class="btn btn-primary">Ich habe die Codes notiert – weiter</a>
+                }
+                else if (Model.AlreadyEnabled)
+                {
+                    <h1 class="h4">Zwei-Faktor-Anmeldung ist aktiv</h1>
+                    <p>Neues Handy? Dann hier neu einrichten. Der alte Eintrag in der App funktioniert danach nicht mehr.</p>
+                    <form method="post" asp-page-handler="Reset">
+                        <button type="submit" class="btn btn-outline-danger">Authenticator neu einrichten</button>
+                    </form>
+                }
+                else
+                {
+                    <h1 class="h4">Authenticator-App einrichten</h1>
+                    <p class="text-muted">Zum Schutz deines Kontos ist eine zweite Bestätigung per Handy Pflicht.</p>
+                    <ol>
+                        <li class="mb-2">Installiere <strong>Google Authenticator</strong> (oder Microsoft Authenticator) auf deinem Handy.</li>
+                        <li class="mb-2">Tippe in der App auf <strong>+</strong> → <strong>QR-Code scannen</strong> und scanne diesen Code:
+                            <div class="qr my-3"><img src="@Model.QrDataUri" alt="QR-Code für die Authenticator-App" /></div>
+                            <div class="small text-muted">Scannen klappt nicht? Schlüssel manuell eingeben: <code>@Model.SharedKey</code></div>
+                        </li>
+                        <li>Gib den 6-stelligen Code ein, den die App jetzt anzeigt:</li>
+                    </ol>
+                    <form method="post" class="row g-2">
+                        <div class="col-sm-6">
+                            <input asp-for="Code" class="form-control form-control-lg text-center" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" />
+                            <span asp-validation-for="Code" class="text-danger small"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Bestätigen</button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

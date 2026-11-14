@@ -1,0 +1,209 @@
+@page
+@model PaCo.Server.Pages.DashboardModel
+@{ ViewData["Title"] = "Übersicht"; }
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h3 mb-0">Familie @Model.FamilyName</h1>
+    @if (Model.Children.Count > 1)
+    {
+        <div class="d-flex gap-2">
+            <form method="post" asp-page-handler="LockAll">
+                <input type="hidden" name="locked" value="true" />
+                <button class="btn btn-outline-danger btn-sm" data-confirm="Alle Kinder sofort sperren?">Alle sperren</button>
+            </form>
+            <form method="post" asp-page-handler="LockAll">
+                <input type="hidden" name="locked" value="false" />
+                <button class="btn btn-outline-secondary btn-sm">Alle entsperren</button>
+            </form>
+        </div>
+    }
+</div>
+
+@if (Model.NewCode is not null)
+{
+    <div class="alert alert-info text-center">
+        <div>@Model.NewCodeInfo</div>
+        <div class="code-box my-2">@Model.NewCode</div>
+        <div class="small">Das Kind tippt den Code am gesperrten Bildschirm ein.</div>
+    </div>
+}
+
+@foreach (var w in Model.Warnings)
+{
+    <div class="alert alert-@w.Level py-2">
+        @w.Text
+        @if (w.Link is not null) { <a href="@w.Link" class="alert-link ms-1">Ansehen</a> }
+    </div>
+}
+
+@if (Model.Children.Count == 0)
+{
+    <div class="card">
+        <div class="card-body p-4">
+            <h2 class="h5">Los geht's</h2>
+            <ol class="mb-3">
+                <li>Unter <a asp-page="/Devices/Index">Geräte</a> auf <strong>„Neues Gerät hinzufügen“</strong> klicken und das Installationsprogramm herunterladen.</li>
+                <li>Auf dem PC des Kindes mit dem <strong>Administrator-Konto</strong> anmelden und das Programm starten.</li>
+                <li>Die Windows-Konten der Kinder auswählen – fertig. Die Kinder erscheinen dann hier.</li>
+            </ol>
+            <a asp-page="/Devices/Index" class="btn btn-primary">Gerät hinzufügen</a>
+            <a asp-page="/Children/Index" class="btn btn-outline-secondary">Kind vorab anlegen</a>
+        </div>
+    </div>
+}
+
+<div class="row g-3">
+@foreach (var s in Model.Children)
+{
+    var c = s.Child;
+    var used = s.Today.TotalSeconds;
+    var limitSec = s.Rule.LimitMinutes is { } lm ? lm * 60L : (long?)null;
+    string badge, badgeClass;
+    if (c.Paused) { badge = "Überwachung pausiert"; badgeClass = "bg-secondary"; }
+    else if (!s.Eval.Allowed)
+    {
+        badgeClass = "bg-danger";
+        badge = s.Eval.Reason switch
+        {
+            BlockReason.LockedByParent => "Von Eltern gesperrt",
+            BlockReason.OutsideWindow => "Außerhalb der erlaubten Zeit",
+            _ => "Zeit aufgebraucht",
+        };
+    }
+    else { badge = "Darf den PC nutzen"; badgeClass = "bg-success"; }
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h2 class="h4 mb-0">@c.Name</h2>
+                    <span class="badge @badgeClass">@badge</span>
+                </div>
+                <div class="small text-muted mb-3">
+                    @if (s.IsOnLockScreen) { <span class="status-blocked">● sieht gerade den Sperrbildschirm</span> }
+                    else if (s.IsActive) { <span class="status-ok">● ist gerade am PC</span> }
+                    else if (s.DeviceCount == 0) { <span>Noch keinem PC zugeordnet</span> }
+                    else { <span>nicht am PC</span> }
+                </div>
+
+                <div class="d-flex justify-content-between align-items-end">
+                    <div>
+                        <div class="text-muted small">Heute genutzt</div>
+                        <div class="big-number">@Format.Duration(used)</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">Noch übrig</div>
+                        <div class="fs-5 fw-semibold @(s.Eval.Allowed ? "status-ok" : "status-blocked")">@(c.Paused ? "—" : Format.Remaining(s.RemainingSeconds))</div>
+                    </div>
+                </div>
+                @if (limitSec is > 0)
+                {
+                    <progress class="w-100 my-2" max="@limitSec" value="@Math.Min(used, limitSec.Value)"></progress>
+                }
+                @if (s.Devices.Count > 0)
+                {
+                    <ul class="list-unstyled small border rounded p-2 mb-2">
+                        @foreach (var d in s.Devices)
+                        {
+                            <li class="d-flex justify-content-between gap-2">
+                                <span class="text-truncate">
+                                    @if (d.Online) { <span class="status-ok" title="verbunden">●</span> }
+                                    else { <span class="text-muted" title="nicht verbunden">○</span> }
+                                    @d.Name
+                                </span>
+                                <span class="text-muted text-nowrap">
+                                    @if (!d.Online) { <span>offline · zuletzt @Format.Ago(d.LastSeenUtc, Model.Now)</span> }
+                                    else if (d.Live is { LockShown: true }) { <span class="status-blocked">Sperrbildschirm</span> }
+                                    else if (d.Live is { Active: true } l) { <span class="status-ok">aktiv@(l.CurrentApp is { } app ? $" · {app}" : "") · noch @Format.Remaining(l.RemainingSeconds)</span> }
+                                    else { <span>verbunden · nicht angemeldet</span> }
+                                    · heute @Format.Duration(d.UsedTodaySeconds)
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+                <div class="small text-muted mb-3">
+                    Heute erlaubt: @Format.Limit(s.Rule), @Format.Window(s.Rule)
+                    @if (s.TodayGrants.Count > 0)
+                    {
+                        <br /><span>Zusatzzeit heute: @string.Join(", ", s.TodayGrants.Select(g => Format.Grant(g.Minutes)))</span>
+                    }
+                </div>
+
+                <div class="mb-2 small fw-semibold">Mehr Zeit geben</div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    @foreach (var m in new[] { 15, 30, 60 })
+                    {
+                        <form method="post" asp-page-handler="Grant">
+                            <input type="hidden" name="child" value="@c.Id" />
+                            <input type="hidden" name="minutes" value="@m" />
+                            <button class="btn btn-success">+@m Min</button>
+                        </form>
+                    }
+                    <form method="post" asp-page-handler="Grant">
+                        <input type="hidden" name="child" value="@c.Id" />
+                        <input type="hidden" name="minutes" value="0" />
+                        <button class="btn btn-outline-success">Heute unbegrenzt</button>
+                    </form>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    @if (c.LockedByParent)
+                    {
+                        <form method="post" asp-page-handler="Lock">
+                            <input type="hidden" name="child" value="@c.Id" />
+                            <input type="hidden" name="locked" value="false" />
+                            <button class="btn btn-outline-primary">Sperre aufheben</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Lock">
+                            <input type="hidden" name="child" value="@c.Id" />
+                            <input type="hidden" name="locked" value="true" />
+                            <button class="btn btn-danger" data-confirm="@c.Name jetzt sofort sperren?">Jetzt sperren</button>
+                        </form>
+                    }
+                    @if (s.TodayGrants.Count > 0)
+                    {
+                        <form method="post" asp-page-handler="RevokeGrants">
+                            <input type="hidden" name="child" value="@c.Id" />
+                            <button class="btn btn-outline-secondary">Zusatzzeit zurücknehmen</button>
+                        </form>
+                    }
+                </div>
+
+                <form method="post" asp-page-handler="Code" class="input-group input-group-sm mb-3">
+                    <input type="hidden" name="child" value="@c.Id" />
+                    <span class="input-group-text">Freischaltcode</span>
+                    <select name="minutes" class="form-select" aria-label="Dauer">
+                        @foreach (var m in UnlockCodes.AllowedMinutes)
+                        {
+                            <option value="@m">@(m == 0 ? "Rest des Tages" : $"{m} Min")</option>
+                        }
+                    </select>
+                    <button class="btn btn-outline-primary">Erzeugen</button>
+                </form>
+
+                @if (s.TopApps.Count > 0)
+                {
+                    <div class="small fw-semibold mb-1">Heute am meisten genutzt</div>
+                    <ul class="list-unstyled small mb-3">
+                        @foreach (var a in s.TopApps)
+                        {
+                            <li class="d-flex justify-content-between"><span class="text-truncate me-2">@a.Name</span><span class="text-muted">@Format.Duration(a.Seconds)</span></li>
+                        }
+                    </ul>
+                }
+
+                <div class="d-flex gap-2">
+                    <a asp-page="/Children/Stats" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Statistik</a>
+                    <a asp-page="/Children/Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Regeln bearbeiten</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>
+
+<div data-autorefresh="15"></div>

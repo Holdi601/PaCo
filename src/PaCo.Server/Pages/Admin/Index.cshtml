@@ -1,0 +1,164 @@
+@page
+@model PaCo.Server.Pages.Admin.IndexModel
+@{ ViewData["Title"] = "Verwaltung"; }
+
+<h1 class="h3 mb-3">Verwaltung</h1>
+
+@if (Model.InviteLink is not null)
+{
+    <div class="alert alert-info">
+        <div class="fw-semibold mb-1">Zugangslink für @Model.InviteFor</div>
+        <div class="small mb-2">7 Tage gültig, nur einmal benutzbar. Schick ihn z. B. per WhatsApp oder Signal. Damit legt die Person ihr Passwort fest und richtet die Authenticator-App ein.</div>
+        <div class="input-group">
+            <input id="invite-link" class="form-control font-monospace small" value="@Model.InviteLink" readonly />
+            <button class="btn btn-primary" data-copy="#invite-link" type="button">Kopieren</button>
+        </div>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header">Eltern einladen</div>
+    <div class="card-body">
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+        <form method="post" asp-page-handler="Invite" class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="InviteName" class="form-label">Name</label>
+                <input asp-for="InviteName" class="form-control" placeholder="z. B. Anna" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="InviteEmail" class="form-label">E-Mail (Benutzername)</label>
+                <input asp-for="InviteEmail" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="InviteFamilyId" class="form-label">Familie</label>
+                <select asp-for="InviteFamilyId" class="form-select">
+                    <option value="">➕ Neue Familie anlegen</option>
+                    @foreach (var f in Model.Families)
+                    {
+                        <option value="@f.Family.Id">@f.Family.Name (weiteres Elternteil)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="NewFamilyName" class="form-label">Name der neuen Familie</label>
+                <input asp-for="NewFamilyName" class="form-control" placeholder="z. B. Müller" />
+                <div class="form-text">Nur nötig bei „Neue Familie“. Jede Familie sieht ausschließlich ihre eigenen Kinder und Geräte.</div>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary">Einladungslink erstellen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Eltern-Konten</div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Name / E-Mail</th><th>Familie</th><th>Status</th><th>Letzter Login</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var u in Model.Parents)
+                {
+                    var blocked = u.LockoutEnd is { } le && le > Model.Now;
+                    <tr>
+                        <td><div class="fw-semibold">@u.DisplayName</div><div class="small text-muted">@u.Email</div></td>
+                        <td>@u.Family?.Name</td>
+                        <td>
+                            @if (blocked && u.LockoutEnd == DateTimeOffset.MaxValue) { <span class="badge bg-danger">gesperrt</span> }
+                            else if (blocked) { <span class="badge bg-warning text-dark">Fehlversuche – kurz gesperrt</span> }
+                            else if (u.InvitePending) { <span class="badge bg-info text-dark">Einladung offen</span> }
+                            else if (!u.TwoFactorEnabled) { <span class="badge bg-warning text-dark">2FA fehlt</span> }
+                            else { <span class="badge bg-success">aktiv</span> }
+                        </td>
+                        <td class="small">@Format.Ago(u.LastLoginUtc, Model.Now)</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" type="button">Aktionen</button>
+                                <div class="dropdown-menu dropdown-menu-end p-2">
+                                    <form method="post" asp-page-handler="NewLink">
+                                        <input type="hidden" name="userId" value="@u.Id" />
+                                        <button class="dropdown-item" data-confirm="@(u.InvitePending ? "Neuen Einladungslink erstellen? Der alte wird ungültig." : "Passwort und 2FA zurücksetzen und neuen Zugangslink erstellen? Die Person muss sich danach neu einrichten.")">
+                                            @(u.InvitePending ? "Neuer Einladungslink" : "Zugang zurücksetzen (Passwort vergessen / Handy verloren)")
+                                        </button>
+                                    </form>
+                                    <form method="post" asp-page-handler="Block">
+                                        <input type="hidden" name="userId" value="@u.Id" />
+                                        <input type="hidden" name="blocked" value="@((!blocked).ToString().ToLowerInvariant())" />
+                                        <button class="dropdown-item">@(blocked ? "Entsperren" : "Sperren")</button>
+                                    </form>
+                                    <div class="dropdown-divider"></div>
+                                    <form method="post" asp-page-handler="MoveUser" class="px-2 pb-2">
+                                        <input type="hidden" name="userId" value="@u.Id" />
+                                        <label class="small">Andere Familie</label>
+                                        <div class="input-group input-group-sm">
+                                            <select name="familyId" class="form-select">
+                                                @foreach (var f in Model.Families)
+                                                {
+                                                    <option value="@f.Family.Id" selected="@(u.FamilyId == f.Family.Id)">@f.Family.Name</option>
+                                                }
+                                            </select>
+                                            <button class="btn btn-outline-secondary">OK</button>
+                                        </div>
+                                    </form>
+                                    <div class="dropdown-divider"></div>
+                                    <form method="post" asp-page-handler="DeleteUser">
+                                        <input type="hidden" name="userId" value="@u.Id" />
+                                        <button class="dropdown-item text-danger" data-confirm="Konto @u.Email wirklich löschen?">Konto löschen</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Parents.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-muted">Noch keine Eltern eingeladen.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Familien</div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Familie</th><th>Eltern</th><th>Kinder</th><th>Geräte</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var f in Model.Families)
+                {
+                    <tr>
+                        <td>
+                            <form method="post" asp-page-handler="RenameFamily" class="d-flex gap-2">
+                                <input type="hidden" name="familyId" value="@f.Family.Id" />
+                                <input name="name" value="@f.Family.Name" class="form-control form-control-sm" aria-label="Familienname" />
+                                <button class="btn btn-sm btn-outline-secondary">Umbenennen</button>
+                            </form>
+                        </td>
+                        <td>@f.Parents</td>
+                        <td>@f.Children</td>
+                        <td>@f.Devices</td>
+                        <td>
+                            <form method="post" asp-page-handler="DeleteFamily" class="d-flex gap-2">
+                                <input type="hidden" name="familyId" value="@f.Family.Id" />
+                                <input name="confirm" class="form-control form-control-sm" placeholder="Name zum Löschen" aria-label="Familienname zur Bestätigung" />
+                                <button class="btn btn-sm btn-outline-danger" data-confirm="Familie @f.Family.Name mit ALLEN Daten löschen? Das kann nicht rückgängig gemacht werden.">Löschen</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Super-Admins</div>
+    <ul class="list-group list-group-flush">
+        @foreach (var a in Model.Admins)
+        {
+            <li class="list-group-item">@a.Email <span class="text-muted small">· letzter Login @Format.Ago(a.LastLoginUtc, Model.Now)</span></li>
+        }
+    </ul>
+    <div class="card-body small text-muted">Super-Admins werden nur auf dem Server angelegt: <code>docker exec -it paco dotnet PaCo.Server.dll admin-create E-MAIL</code></div>
+</div>

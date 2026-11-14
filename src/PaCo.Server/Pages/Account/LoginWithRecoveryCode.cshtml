@@ -1,0 +1,25 @@
+@page
+@model PaCo.Server.Pages.Account.LoginWithRecoveryCodeModel
+@{ ViewData["Title"] = "Notfall-Code"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card mt-4">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-2">Mit Notfall-Code anmelden</h1>
+                <p class="text-muted">Gib einen der Notfall-Codes ein, die du bei der Einrichtung notiert hast. Jeder Code funktioniert nur einmal.</p>
+                @if (Model.Error is not null)
+                {
+                    <div class="alert alert-danger">@Model.Error</div>
+                }
+                <form method="post">
+                    <div class="mb-3">
+                        <input asp-for="Code" class="form-control" autocomplete="off" autofocus />
+                        <span asp-validation-for="Code" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

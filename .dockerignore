@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+/data/
+/deploy/data/
+**/paco-data/
+**/*.db*
+**/*.pem
+**/*.key
+**/.env
+.git/
+.vs/
+tests/
+deploy/.env

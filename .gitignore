@@ -1,0 +1,50 @@
+# ---- Build output ----
+bin/
+obj/
+publish/
+out/
+artifacts/
+*.user
+*.suo
+.vs/
+.idea/
+*.swp
+TestResults/
+coverage*/
+
+# ---- NEVER commit runtime data or secrets ----
+# Server data directory: SQLite database (user accounts, children, usage), signing key, data-protection keys
+# (exact paths – a generic "data/" would also hide src/PaCo.Server/Data on case-insensitive Windows)
+/data/
+/deploy/data/
+paco-data/
+design-time.db
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+# Keys and certificates
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+dp-keys/
+# Environment / local configuration with secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+appsettings.Production.json
+secrets.json
+**/secrets/
+# Client state captured during testing
+ProgramData/
+# Built client installer (built in Docker, never committed)
+client/*.exe
+*.exe
+*.msi
+# Logs
+*.log
+logs/

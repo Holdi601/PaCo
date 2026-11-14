@@ -1,0 +1,61 @@
+#!/bin/sh
+# PaCo secret guard – blocks commits that contain secrets or personal data.
+# Activate once per clone:  git config core.hooksPath .githooks
+#
+# Local, untracked extras (never committed):
+#   .git/secret-patterns.txt  – one extended regex per line (own domain, real name, home IP, …)
+#   .git/secret-envvars.txt   – names of environment variables whose VALUES must never appear (passwords)
+
+fail=0
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# 1) Forbidden files
+for f in $staged; do
+  case "$f" in
+    *.db|*.db-shm|*.db-wal|*.sqlite|*.pem|*.key|*.pfx|*.p12|*.crt|*.cer|*.exe|*.msi|*.env|.env|*/.env|.env.*|*/.env.*|*device.bin|*/paco-data/*|*dp-keys/*|*policy-signing-key*)
+      case "$f" in *.env.example) continue ;; esac
+      echo "pre-commit: BLOCKIERT – Datei darf nicht ins Repository: $f"
+      fail=1 ;;
+  esac
+done
+
+added=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++')
+
+# 2) Generic secret patterns
+if printf '%s\n' "$added" | grep -Eq -- '-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}|DuckDNS_Token *= *[A-Za-z0-9-]{20,}|password *= *"[^"]{6,}"'; then
+  echo "pre-commit: BLOCKIERT – sieht nach einem Geheimnis aus (Schlüssel/Token/Passwort)."
+  printf '%s\n' "$added" | grep -En -- '-----BEGIN|ghp_|github_pat_|AKIA|xox[abprs]-|DuckDNS_Token|password *=' | cut -c1-120
+  fail=1
+fi
+
+# 3) Values of protected environment variables (e.g. real passwords)
+if [ -f .git/secret-envvars.txt ]; then
+  while IFS= read -r name || [ -n "$name" ]; do
+    name=$(printf '%s' "$name" | tr -d '\r ')
+    [ -z "$name" ] && continue
+    value=$(printenv "$name" 2>/dev/null)
+    [ -z "$value" ] && continue
+    if printf '%s\n' "$added" | grep -Fq -- "$value"; then
+      echo "pre-commit: BLOCKIERT – der Wert der Umgebungsvariable $name steht im Commit!"
+      fail=1
+    fi
+  done < .git/secret-envvars.txt
+fi
+
+# 4) Personal patterns
+if [ -f .git/secret-patterns.txt ]; then
+  while IFS= read -r p || [ -n "$p" ]; do
+    p=$(printf '%s' "$p" | tr -d '\r')
+    [ -z "$p" ] && continue
+    case "$p" in \#*) continue ;; esac
+    if printf '%s\n' "$added" | grep -Eqi -- "$p"; then
+      echo "pre-commit: BLOCKIERT – persönliches Muster gefunden (siehe .git/secret-patterns.txt)."
+      fail=1
+    fi
+  done < .git/secret-patterns.txt
+fi
+
+if [ $fail -ne 0 ]; then
+  echo "Commit abgebrochen. Entferne die Daten oder (nur wenn sicher harmlos) passe die Muster an."
+fi
+exit $fail

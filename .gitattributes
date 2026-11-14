@@ -1,0 +1,9 @@
+* text=auto
+# Shell scripts and hooks must keep LF or they fail under sh
+.githooks/* text eol=lf
+*.sh text eol=lf
+deploy/Dockerfile text eol=lf
+deploy/*.yml text eol=lf
+deploy/.env.example text eol=lf
+*.png binary
+*.ico binary

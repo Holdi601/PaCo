@@ -1,0 +1,45 @@
+@page
+@model PaCo.Server.Pages.Account.ManageModel
+@{ ViewData["Title"] = "Mein Konto"; }
+
+<h1 class="h3 mb-3">Mein Konto</h1>
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Profil</div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">E-Mail</label>
+                        <input class="form-control" value="@Model.Email" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="DisplayName" class="form-label">Anzeigename</label>
+                        <input asp-for="DisplayName" class="form-control" />
+                        <span asp-validation-for="DisplayName" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                    <a asp-page="./ChangePassword" class="btn btn-outline-secondary">Passwort ändern</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Sicherheit</div>
+            <div class="card-body">
+                <p>Zwei-Faktor-Anmeldung: <strong class="status-ok">aktiv</strong><br />
+                   Übrige Notfall-Codes: <strong>@Model.RecoveryCodesLeft</strong></p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-page="./SetupAuthenticator" class="btn btn-outline-secondary">Neues Handy einrichten</a>
+                    <form method="post" asp-page-handler="RecoveryCodes">
+                        <button type="submit" class="btn btn-outline-secondary">Neue Notfall-Codes</button>
+                    </form>
+                    <form method="post" asp-page-handler="LogoutEverywhere">
+                        <button type="submit" class="btn btn-outline-danger">Überall abmelden</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

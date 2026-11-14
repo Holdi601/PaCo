@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PaCo.Client/PaCo.Client.csproj" />
+    <Project Path="src/PaCo.Server/PaCo.Server.csproj" />
+    <Project Path="src/PaCo.Shared/PaCo.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PaCo.Tests/PaCo.Tests.csproj" />
+  </Folder>
+</Solution>

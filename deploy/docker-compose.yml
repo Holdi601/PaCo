@@ -1,0 +1,34 @@
+# PaCo server. Configure via deploy/.env (copy .env.example – never commit .env).
+services:
+  paco:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: paco-server:latest
+    container_name: paco
+    restart: unless-stopped
+    # Same UID/GID as the owner of the data dir and the TLS files on the host.
+    user: "${PACO_UID:-1000}:${PACO_GID:-1000}"
+    ports:
+      - "${PACO_PORT:-8790}:8790"
+    environment:
+      PaCo__PublicUrl: ${PACO_PUBLIC_URL:?PACO_PUBLIC_URL fehlt in .env}
+      PaCo__TlsCertPath: /tls/${PACO_TLS_CERT:-fullchain.pem}
+      PaCo__TlsKeyPath: /tls/${PACO_TLS_KEY:-key.pem}
+      TZ: ${PACO_TZ:-Europe/Berlin}
+    volumes:
+      - ${PACO_DATA_DIR:-./data}:/data
+      - ${PACO_TLS_DIR:?PACO_TLS_DIR fehlt in .env}:/tls:ro
+    # Hardening: read-only root fs, no privileges, no capabilities.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

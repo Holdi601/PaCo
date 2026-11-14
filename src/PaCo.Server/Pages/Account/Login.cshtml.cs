@@ -1,0 +1,49 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
+using PaCo.Server.Data;
+using PaCo.Server.Services;
+
+namespace PaCo.Server.Pages.Account;
+
+[EnableRateLimiting(AccountRateLimit.Name)]
+public sealed class LoginModel(SignInManager<ParentUser> signIn, ILogger<LoginModel> log) : PageModel
+{
+    [BindProperty, Required(ErrorMessage = "Bitte E-Mail eingeben."), EmailAddress(ErrorMessage = "Ungültige E-Mail-Adresse.")]
+    public string Email { get; set; } = "";
+
+    [BindProperty, Required(ErrorMessage = "Bitte Passwort eingeben."), DataType(DataType.Password)]
+    public string Password { get; set; } = "";
+
+    [BindProperty]
+    public bool RememberMe { get; set; }
+
+    public string? Error { get; set; }
+
+    public IActionResult OnGet() => User.Identity?.IsAuthenticated == true ? RedirectToPage("/Index") : Page();
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (!ModelState.IsValid) return Page();
+
+        var result = await signIn.PasswordSignInAsync(Email.Trim(), Password, RememberMe, lockoutOnFailure: true);
+        if (result.Succeeded)
+        {
+            await LoginTracking.TouchAsync(signIn.UserManager, Email.Trim());
+            return RedirectToPage("/Index");
+        }
+        if (result.RequiresTwoFactor) return RedirectToPage("./LoginWith2fa", new { RememberMe });
+        if (result.IsLockedOut)
+        {
+            log.LogWarning("Konto gesperrt nach Fehlversuchen: {Email}", Email);
+            Error = "Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.";
+            return Page();
+        }
+
+        log.LogWarning("Fehlgeschlagener Login für {Email} von {Ip}", Email, HttpContext.Connection.RemoteIpAddress);
+        Error = "E-Mail oder Passwort ist falsch.";
+        return Page();
+    }
+}
