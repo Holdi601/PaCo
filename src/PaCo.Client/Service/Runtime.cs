@@ -41,7 +41,8 @@ internal sealed class Runtime
     {
         var raw = DateTimeOffset.UtcNow;
         // Only the Windows clock itself going backwards is suspicious (offset corrections from the server are not).
-        if (raw < State.LastUtc - TimeSpan.FromMinutes(2))
+        // LastUtc is default (MinValue) on a fresh install – compare without arithmetic on it to avoid underflow.
+        if (State.LastUtc != default && raw.AddMinutes(2) < State.LastUtc)
         {
             State.AddEvent(DeviceEventKind.ClockTampering, $"Windows-Uhr wurde zurückgestellt (von {State.LastUtc:u} auf {raw:u}).");
             State.LastUtc = raw; // report; already booked usage stays booked

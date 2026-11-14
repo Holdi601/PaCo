@@ -140,7 +140,9 @@ internal static class Log
                     File.Copy(fi.FullName, fi.FullName + ".1", overwrite: true);
                     fi.Delete();
                 }
-                File.AppendAllText(Paths.LogFile, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{level}] [{Environment.ProcessId}] {message}{Environment.NewLine}");
+                // UTF-8 with BOM (written only for a new file) so Notepad and Windows PowerShell show umlauts correctly.
+                File.AppendAllText(Paths.LogFile, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{level}] [{Environment.ProcessId}] {message}{Environment.NewLine}",
+                    new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
             }
         }
         catch
