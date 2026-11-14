@@ -2,8 +2,11 @@
 @model PaCo.Server.Pages.DashboardModel
 @{ ViewData["Title"] = "Übersicht"; }
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-    <h1 class="h3 mb-0">Familie @Model.FamilyName</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-2">
+    <div>
+        <div class="stat-label">Übersicht</div>
+        <h1 class="h3 mb-0 page-title">Familie @Model.FamilyName</h1>
+    </div>
     @if (Model.Children.Count > 1)
     {
         <div class="d-flex gap-2">
@@ -42,7 +45,7 @@
         <div class="card-body p-4">
             <h2 class="h5">Los geht's</h2>
             <ol class="mb-3">
-                <li>Unter <a asp-page="/Devices/Index">Geräte</a> auf <strong>„Neues Gerät hinzufügen“</strong> klicken und das Installationsprogramm herunterladen.</li>
+                <li>Unter <a asp-page="/Devices/Index">Geräte</a> auf <strong>„Installationsprogramm herunterladen“</strong> klicken.</li>
                 <li>Auf dem PC des Kindes mit dem <strong>Administrator-Konto</strong> anmelden und das Programm starten.</li>
                 <li>Die Windows-Konten der Kinder auswählen – fertig. Die Kinder erscheinen dann hier.</li>
             </ol>
@@ -52,17 +55,17 @@
     </div>
 }
 
-<div class="row g-3">
+<div class="row g-4">
 @foreach (var s in Model.Children)
 {
     var c = s.Child;
     var used = s.Today.TotalSeconds;
     var limitSec = s.Rule.LimitMinutes is { } lm ? lm * 60L : (long?)null;
-    string badge, badgeClass;
-    if (c.Paused) { badge = "Überwachung pausiert"; badgeClass = "bg-secondary"; }
+    string badge, pill;
+    if (c.Paused) { badge = "Überwachung pausiert"; pill = "pill-muted"; }
     else if (!s.Eval.Allowed)
     {
-        badgeClass = "bg-danger";
+        pill = "pill-bad";
         badge = s.Eval.Reason switch
         {
             BlockReason.LockedByParent => "Von Eltern gesperrt",
@@ -70,29 +73,33 @@
             _ => "Zeit aufgebraucht",
         };
     }
-    else { badge = "Darf den PC nutzen"; badgeClass = "bg-success"; }
+    else { badge = "Darf den PC nutzen"; pill = "pill-ok"; }
 
     <div class="col-md-6 col-xl-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h2 class="h4 mb-0">@c.Name</h2>
-                    <span class="badge @badgeClass">@badge</span>
+        <div class="card child-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="child-avatar">@(c.Name.Length > 0 ? c.Name[..1].ToUpperInvariant() : "?")</div>
+                    <div class="flex-grow-1 min-w-0">
+                        <h2 class="h5 mb-1 text-truncate">@c.Name</h2>
+                        <span class="pill @pill">@badge</span>
+                    </div>
                 </div>
-                <div class="small text-muted mb-3">
-                    @if (s.IsOnLockScreen) { <span class="status-blocked">● sieht gerade den Sperrbildschirm</span> }
-                    else if (s.IsActive) { <span class="status-ok">● ist gerade am PC</span> }
-                    else if (s.DeviceCount == 0) { <span>Noch keinem PC zugeordnet</span> }
-                    else { <span>nicht am PC</span> }
+
+                <div class="small mb-3">
+                    @if (s.IsOnLockScreen) { <span class="status-blocked"><span class="dot"></span> sieht gerade den Sperrbildschirm</span> }
+                    else if (s.IsActive) { <span class="status-ok"><span class="dot dot-live"></span> ist gerade am PC</span> }
+                    else if (s.DeviceCount == 0) { <span class="text-muted">Noch keinem PC zugeordnet</span> }
+                    else { <span class="text-muted"><span class="dot"></span> nicht am PC</span> }
                 </div>
 
                 <div class="d-flex justify-content-between align-items-end">
                     <div>
-                        <div class="text-muted small">Heute genutzt</div>
+                        <div class="stat-label">Heute genutzt</div>
                         <div class="big-number">@Format.Duration(used)</div>
                     </div>
                     <div class="text-end">
-                        <div class="text-muted small">Noch übrig</div>
+                        <div class="stat-label">Noch übrig</div>
                         <div class="fs-5 fw-semibold @(s.Eval.Allowed ? "status-ok" : "status-blocked")">@(c.Paused ? "—" : Format.Remaining(s.RemainingSeconds))</div>
                     </div>
                 </div>
@@ -100,28 +107,30 @@
                 {
                     <progress class="w-100 my-2" max="@limitSec" value="@Math.Min(used, limitSec.Value)"></progress>
                 }
+
                 @if (s.Devices.Count > 0)
                 {
-                    <ul class="list-unstyled small border rounded p-2 mb-2">
+                    <ul class="list-unstyled small device-list my-3">
                         @foreach (var d in s.Devices)
                         {
-                            <li class="d-flex justify-content-between gap-2">
+                            <li class="d-flex justify-content-between gap-2 py-1">
                                 <span class="text-truncate">
-                                    @if (d.Online) { <span class="status-ok" title="verbunden">●</span> }
-                                    else { <span class="text-muted" title="nicht verbunden">○</span> }
+                                    @if (d.Online) { <span class="status-ok" title="verbunden"><span class="dot"></span></span> }
+                                    else { <span class="text-muted" title="nicht verbunden"><span class="dot"></span></span> }
                                     @d.Name
                                 </span>
-                                <span class="text-muted text-nowrap">
+                                <span class="text-muted text-nowrap text-end">
                                     @if (!d.Online) { <span>offline · zuletzt @Format.Ago(d.LastSeenUtc, Model.Now)</span> }
                                     else if (d.Live is { LockShown: true }) { <span class="status-blocked">Sperrbildschirm</span> }
-                                    else if (d.Live is { Active: true } l) { <span class="status-ok">aktiv@(l.CurrentApp is { } app ? $" · {app}" : "") · noch @Format.Remaining(l.RemainingSeconds)</span> }
-                                    else { <span>verbunden · nicht angemeldet</span> }
-                                    · heute @Format.Duration(d.UsedTodaySeconds)
+                                    else if (d.Live is { Active: true } l) { <span class="status-ok">@(l.CurrentApp ?? "aktiv") · noch @Format.Remaining(l.RemainingSeconds)</span> }
+                                    else { <span>verbunden</span> }
+                                    · @Format.Duration(d.UsedTodaySeconds)
                                 </span>
                             </li>
                         }
                     </ul>
                 }
+
                 <div class="small text-muted mb-3">
                     Heute erlaubt: @Format.Limit(s.Rule), @Format.Window(s.Rule)
                     @if (s.TodayGrants.Count > 0)
@@ -130,20 +139,19 @@
                     }
                 </div>
 
-                <div class="mb-2 small fw-semibold">Mehr Zeit geben</div>
                 <div class="d-flex flex-wrap gap-2 mb-3">
                     @foreach (var m in new[] { 15, 30, 60 })
                     {
                         <form method="post" asp-page-handler="Grant">
                             <input type="hidden" name="child" value="@c.Id" />
                             <input type="hidden" name="minutes" value="@m" />
-                            <button class="btn btn-success">+@m Min</button>
+                            <button class="btn btn-chip">+@m Min</button>
                         </form>
                     }
                     <form method="post" asp-page-handler="Grant">
                         <input type="hidden" name="child" value="@c.Id" />
                         <input type="hidden" name="minutes" value="0" />
-                        <button class="btn btn-outline-success">Heute unbegrenzt</button>
+                        <button class="btn btn-chip">∞ heute</button>
                     </form>
                 </div>
 
@@ -187,7 +195,7 @@
 
                 @if (s.TopApps.Count > 0)
                 {
-                    <div class="small fw-semibold mb-1">Heute am meisten genutzt</div>
+                    <div class="stat-label mb-1">Heute am meisten genutzt</div>
                     <ul class="list-unstyled small mb-3">
                         @foreach (var a in s.TopApps)
                         {
@@ -196,9 +204,9 @@
                     </ul>
                 }
 
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 border-top pt-3">
                     <a asp-page="/Children/Stats" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Statistik</a>
-                    <a asp-page="/Children/Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Regeln bearbeiten</a>
+                    <a asp-page="/Children/Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">Regeln</a>
                 </div>
             </div>
         </div>

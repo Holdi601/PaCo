@@ -4,41 +4,51 @@
     var isAdmin = User.IsInRole(PaCoRoles.SuperAdmin);
     var hasFamily = User.HasClaim(c => c.Type == PaCoClaims.Family);
     var onboarded = User.FindFirstValue(PaCoClaims.TwoFactor) == "1" && User.FindFirstValue(PaCoClaims.MustChangePassword) == "0";
+    var path = Context.Request.Path.Value ?? "";
+    string Active(string prefix) => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 }
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light dark" />
     <title>@ViewData["Title"] – PaCo</title>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-paco mb-3">
+    <nav class="navbar navbar-expand-md paco-nav mb-4">
         <div class="container">
-            <a class="navbar-brand fw-semibold" asp-page="/Index">PaCo</a>
+            <a class="navbar-brand" asp-page="/Index"><span class="paco-logo">P</span> PaCo</a>
+            <div class="d-flex align-items-center gap-2 order-md-last">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Farbschema wechseln">◐ Auto</button>
+                @if (signedIn && onboarded)
+                {
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Menü">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                }
+            </div>
             @if (signedIn && onboarded)
             {
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Menü">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
                 <div class="collapse navbar-collapse" id="nav">
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav me-auto gap-md-1 mt-2 mt-md-0">
                         @if (hasFamily)
                         {
-                            <li class="nav-item"><a class="nav-link" asp-page="/Dashboard">Übersicht</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-page="/Children/Index">Kinder</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-page="/Devices/Index">Geräte</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Dashboard")" asp-page="/Dashboard">Übersicht</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Children")" asp-page="/Children/Index">Kinder</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Devices")" asp-page="/Devices/Index">Geräte</a></li>
                         }
                         @if (isAdmin)
                         {
-                            <li class="nav-item"><a class="nav-link" asp-page="/Admin/Index">Verwaltung</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Admin")" asp-page="/Admin/Index">Verwaltung</a></li>
                         }
                     </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link" asp-page="/Account/Manage">@User.FindFirstValue(PaCoClaims.DisplayName)</a></li>
+                    <ul class="navbar-nav gap-md-1 me-md-2">
+                        <li class="nav-item"><a class="nav-link @Active("/Account/Manage")" asp-page="/Account/Manage">@User.FindFirstValue(PaCoClaims.DisplayName)</a></li>
                         <li class="nav-item">
                             <form method="post" asp-page="/Account/Logout" class="d-inline">
                                 <button type="submit" class="btn btn-link nav-link">Abmelden</button>
@@ -49,8 +59,8 @@
             }
             else if (signedIn)
             {
-                <form method="post" asp-page="/Account/Logout" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-light">Abmelden</button>
+                <form method="post" asp-page="/Account/Logout" class="d-inline order-md-last ms-2">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Abmelden</button>
                 </form>
             }
         </div>

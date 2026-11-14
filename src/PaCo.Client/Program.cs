@@ -14,8 +14,9 @@ namespace PaCo.Client;
 ///   PaCo.exe --service            → Windows service (LocalSystem)
 ///   PaCo.exe --agent {pipe}       → session agent (SYSTEM in a child's session, started by the service)
 ///   PaCo.exe --uninstall          → uninstall (from "Apps &amp; Features")
-///   PaCo.exe --install --server URL --code CODE --child user=Name [--child …] [--make-standard user]
-///                                 → unattended install (automated tests, scripted setups)
+///   PaCo.exe --install [--server URL --code CODE] --child user=Name [--child …] [--make-standard user]
+///                                 → unattended install (automated tests, scripted setups); server/code
+///                                   default to the configuration embedded in a downloaded PaCo-Setup.exe
 /// </summary>
 internal static class Program
 {
@@ -105,8 +106,16 @@ internal static class Program
         string? Arg(string name) => args.SkipWhile(a => a != name).Skip(1).FirstOrDefault();
         IEnumerable<string> All(string name) => args.Select((a, i) => (a, i)).Where(x => x.a == name && x.i + 1 < args.Length).Select(x => args[x.i + 1]);
 
-        var server = Arg("--server") ?? throw new ArgumentException("--server fehlt");
-        var code = Arg("--code") ?? throw new ArgumentException("--code fehlt");
+        // Server and code from the command line, otherwise from the configuration embedded at download time.
+        SetupPayload? payload = null;
+        try
+        {
+            using var self = File.OpenRead(Environment.ProcessPath!);
+            payload = SetupPayload.TryRead(self);
+        }
+        catch (IOException) { }
+        var server = Arg("--server") ?? payload?.ServerUrl ?? throw new ArgumentException("--server fehlt (und keine eingebettete Konfiguration)");
+        var code = Arg("--code") ?? payload?.PairingCode ?? throw new ArgumentException("--code fehlt (und keine eingebettete Konfiguration)");
         SecureStore.EnsureDataDir();
         Log.Info($"Unbeaufsichtigte Installation: {server}");
 
