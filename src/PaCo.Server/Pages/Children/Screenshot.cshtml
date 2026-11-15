@@ -1,16 +1,16 @@
 @page "{id:guid}"
 @model PaCo.Server.Pages.Children.ScreenshotModel
-@{ ViewData["Title"] = $"Bildschirmfoto {Model.Child.Name}"; }
+@{ ViewData["Title"] = F("Bildschirmfoto {0}", Model.Child.Name); }
 
 <div class="page-head">
     <div class="page-head-main">
         <span class="page-icon is-warm" aria-hidden="true"><span class="ico ico-camera" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Bildschirmfoto</div>
+            <div class="stat-label">@T("Bildschirmfoto")</div>
             <h1 class="h3 mb-0 page-title">@Model.Child.Name</h1>
         </div>
     </div>
-    <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Übersicht</a>
+    <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>@T("Übersicht")</a>
 </div>
 
 <div class="card mb-4">
@@ -21,34 +21,34 @@
                 <div class="shot-wait" role="status">
                     <partial name="_ArtScreenshot" />
                     <div>
-                        <div class="fw-semibold d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>Warte auf den PC …</div>
-                        <div class="small text-muted">Ist der PC online, kommt das Bild in wenigen Sekunden (spätestens nach ~20 s).</div>
+                        <div class="fw-semibold d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>@T("Warte auf den PC …")</div>
+                        <div class="small text-muted">@T("Ist der PC online, kommt das Bild in wenigen Sekunden (spätestens nach ~20 s).")</div>
                     </div>
                 </div>
                 <div data-autorefresh="3"></div>
                 break;
             case ScreenshotStatus.Done:
                 <div class="small text-muted mb-2">
-                    Aufgenommen @TimeZoneInfo.ConvertTime(Model.Shot.CompletedUtc ?? Model.Shot.RequestedUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm:ss") · wird nach 7 Tagen automatisch gelöscht
+                    @F("Aufgenommen {0} · wird nach 7 Tagen automatisch gelöscht", TimeZoneInfo.ConvertTime(Model.Shot.CompletedUtc ?? Model.Shot.RequestedUtc, Model.Tz).ToString("G"))
                 </div>
                 <a asp-page-handler="Image" asp-route-id="@Model.Shot.Id" target="_blank" rel="noopener">
-                    <img src="@Url.Page("./Screenshot", "Image", new { id = Model.Shot.Id })" alt="Bildschirmfoto vom PC von @Model.Child.Name" class="img-fluid rounded border shot-img" />
+                    <img src="@Url.Page("./Screenshot", "Image", new { id = Model.Shot.Id })" alt="@F("Bildschirmfoto vom PC von {0}", Model.Child.Name)" class="img-fluid rounded border shot-img" />
                 </a>
-                <div class="small text-muted mt-1">Zum Vergrößern antippen.</div>
+                <div class="small text-muted mt-1">@T("Zum Vergrößern antippen.")</div>
                 <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Shot.Id" class="text-end">
-                    <button class="btn btn-sm btn-outline-danger" data-confirm="Bildschirmfoto löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Löschen</button>
+                    <button class="btn btn-sm btn-outline-danger" data-confirm="@T("Bildschirmfoto löschen?")"><span class="ico ico-trash" aria-hidden="true"></span>@T("Löschen")</button>
                 </form>
                 break;
             case ScreenshotStatus.Unavailable:
                 <div class="empty-inline"><span class="ico ico-monitor ico-lg" aria-hidden="true"></span><div>
-                    <div class="fw-semibold">@Model.Child.Name ist gerade nicht am PC.</div>
-                    <div class="small text-muted">Niemand ist angemeldet oder der Bildschirm ist gesperrt – dann gibt es nichts zu sehen.</div>
+                    <div class="fw-semibold">@F("{0} ist gerade nicht am PC.", Model.Child.Name)</div>
+                    <div class="small text-muted">@T("Niemand ist angemeldet oder der Bildschirm ist gesperrt – dann gibt es nichts zu sehen.")</div>
                 </div></div>
                 break;
             default:
                 <div class="empty-inline"><span class="ico ico-wifi ico-lg" aria-hidden="true"></span><div>
-                    <div class="fw-semibold">Keine Antwort vom PC.</div>
-                    <div class="small text-muted">Der PC ist wahrscheinlich aus oder hat gerade kein Internet.</div>
+                    <div class="fw-semibold">@T("Keine Antwort vom PC.")</div>
+                    <div class="small text-muted">@T("Der PC ist wahrscheinlich aus oder hat gerade kein Internet.")</div>
                 </div></div>
                 break;
         }
@@ -58,8 +58,8 @@
             <form method="post" asp-page="/Dashboard" asp-page-handler="Screenshot" class="mt-3">
                 <input type="hidden" name="child" value="@Model.Child.Id" />
                 <button class="btn btn-outline-primary">
-                    @if (Model.Shot.Status == ScreenshotStatus.Done) { <span class="ico ico-camera" aria-hidden="true"></span><span>Neues Bildschirmfoto</span> }
-                    else { <span class="ico ico-refresh" aria-hidden="true"></span><span>Nochmal versuchen</span> }
+                    @if (Model.Shot.Status == ScreenshotStatus.Done) { <span class="ico ico-camera" aria-hidden="true"></span><span>@T("Neues Bildschirmfoto")</span> }
+                    else { <span class="ico ico-refresh" aria-hidden="true"></span><span>@T("Nochmal versuchen")</span> }
                 </button>
             </form>
         }
@@ -68,14 +68,14 @@
 
 @if (Model.History.Count > 0)
 {
-    <h2 class="h6 stat-label">Frühere Bildschirmfotos (7 Tage)</h2>
+    <h2 class="h6 stat-label">@T("Frühere Bildschirmfotos (7 Tage)")</h2>
     <div class="row g-2">
         @foreach (var h in Model.History)
         {
             <div class="col-6 col-md-3">
                 <a asp-page="./Screenshot" asp-route-id="@h.Id" class="d-block small text-decoration-none shot-thumb">
                     <img src="@Url.Page("./Screenshot", "Image", new { id = h.Id })" alt="" class="img-fluid rounded border mb-1 shot-img" loading="lazy" />
-                    @TimeZoneInfo.ConvertTime(h.CompletedUtc ?? h.RequestedUtc, Model.Tz).ToString("dd.MM. HH:mm")
+                    @Format.DayMonthTime(TimeZoneInfo.ConvertTime(h.CompletedUtc ?? h.RequestedUtc, Model.Tz))
                 </a>
             </div>
         }

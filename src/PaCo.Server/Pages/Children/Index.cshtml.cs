@@ -35,7 +35,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family) : PageModel
         child.SetWeb(new WebFilterPolicy());
         db.Children.Add(child);
         await db.SaveChangesAsync();
-        TempData["Message"] = $"{child.Name} wurde angelegt. Passe jetzt die Regeln an.";
+        TempData["Message"] = Ui.F("{0} wurde angelegt. Passe jetzt die Regeln an.", child.Name);
         return RedirectToPage("./Edit", new { id = child.Id });
     }
 }

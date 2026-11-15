@@ -1,13 +1,13 @@
 @page
 @model PaCo.Server.Pages.Children.IndexModel
-@{ ViewData["Title"] = "Kinder"; }
+@{ ViewData["Title"] = T("Kinder"); }
 
 <div class="page-head">
     <div class="page-head-main">
         <span class="page-icon" aria-hidden="true"><span class="ico ico-users" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <h1 class="h3 page-title mb-1">Kinder</h1>
-            <p class="text-muted mb-0">Hier legst du pro Kind fest, wie lange und wann es an den PC darf.</p>
+            <h1 class="h3 page-title mb-1">@T("Kinder")</h1>
+            <p class="text-muted mb-0">@T("Hier legst du pro Kind fest, wie lange und wann es an den PC darf.")</p>
         </div>
     </div>
 </div>
@@ -21,16 +21,16 @@
                 <div class="person">
                     <div class="child-avatar avatar-sm av-@(c.Name.Length > 0 ? c.Name[0] % 6 : 0)" aria-hidden="true">@(c.Name.Length > 0 ? c.Name[..1].ToUpperInvariant() : "?")</div>
                     <div class="min-w-0">
-                    <div class="fw-semibold fs-5">@c.Name @if (c.Paused) { <span class="pill pill-muted ms-1">pausiert</span> }</div>
+                    <div class="fw-semibold fs-5">@c.Name @if (c.Paused) { <span class="pill pill-muted ms-1">@T("pausiert")</span> }</div>
                     <div class="small text-muted">
-                        @if (accs.Count == 0) { <span>Noch keinem Windows-Konto zugeordnet – <a asp-page="/Devices/Index">unter Geräte zuordnen</a></span> }
-                        else { @string.Join(", ", accs.Select(a => $"{a.UserName} auf {a.Device?.Name}")) }
+                        @if (accs.Count == 0) { <span>@Html.Raw(F("Noch keinem Windows-Konto zugeordnet – <a href=\"{0}\">unter Geräte zuordnen</a>", Url.Page("/Devices/Index")))</span> }
+                        else { @string.Join(", ", accs.Select(a => F("{0} auf {1}", a.UserName, a.Device?.Name))) }
                     </div>
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <a asp-page="./Edit" asp-route-id="@c.Id" class="btn btn-primary"><span class="ico ico-sliders" aria-hidden="true"></span>Regeln<span class="visually-hidden"> für @c.Name</span></a>
-                    <a asp-page="./Stats" asp-route-id="@c.Id" class="btn btn-outline-secondary"><span class="ico ico-chart" aria-hidden="true"></span>Statistik<span class="visually-hidden"> für @c.Name</span></a>
+                    <a asp-page="./Edit" asp-route-id="@c.Id" class="btn btn-primary"><span class="ico ico-sliders" aria-hidden="true"></span>@T("Regeln")<span class="visually-hidden"> @F("für {0}", c.Name)</span></a>
+                    <a asp-page="./Stats" asp-route-id="@c.Id" class="btn btn-outline-secondary"><span class="ico ico-chart" aria-hidden="true"></span>@T("Statistik")<span class="visually-hidden"> @F("für {0}", c.Name)</span></a>
                 </div>
             </div>
         }
@@ -38,26 +38,26 @@
         {
             <div class="list-group-item py-4 empty-state">
                 <partial name="_ArtWelcome" />
-                <div class="fw-semibold mb-1 empty-title">Noch keine Kinder</div>
-                <p class="text-muted mb-3">Am einfachsten installierst du PaCo auf dem PC des Kindes – die Kinder werden dabei automatisch angelegt. Du kannst ein Kind aber auch schon vorab unten anlegen.</p>
-                <a asp-page="/Devices/Index" class="btn btn-primary"><span class="ico ico-plus" aria-hidden="true"></span>PC hinzufügen</a>
+                <div class="fw-semibold mb-1 empty-title">@T("Noch keine Kinder")</div>
+                <p class="text-muted mb-3">@T("Am einfachsten installierst du PaCo auf dem PC des Kindes – die Kinder werden dabei automatisch angelegt. Du kannst ein Kind aber auch schon vorab unten anlegen.")</p>
+                <a asp-page="/Devices/Index" class="btn btn-primary"><span class="ico ico-plus" aria-hidden="true"></span>@T("PC hinzufügen")</a>
             </div>
         }
     </div>
 </div>
 
 <div class="card">
-    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-user-plus" aria-hidden="true"></span></span>Kind von Hand anlegen</div>
+    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-user-plus" aria-hidden="true"></span></span>@T("Kind von Hand anlegen")</div>
     <div class="card-body">
-        <p class="small text-muted">Meist nicht nötig. Danach unter <strong>Geräte</strong> das Windows-Konto des Kindes zuordnen.</p>
+        <p class="small text-muted">@Html.Raw(T("Meist nicht nötig. Danach unter <strong>Geräte</strong> das Windows-Konto des Kindes zuordnen."))</p>
         <form method="post" class="row g-2">
             <div class="col-sm-8">
-                <label asp-for="NewName" class="form-label visually-hidden">Vorname des Kindes</label>
-                <input asp-for="NewName" class="form-control" placeholder="Vorname des Kindes" autocomplete="off" autocapitalize="words" maxlength="60" />
+                <label asp-for="NewName" class="form-label visually-hidden">@T("Vorname des Kindes")</label>
+                <input asp-for="NewName" class="form-control" placeholder="@T("Vorname des Kindes")" autocomplete="off" autocapitalize="words" maxlength="60" />
                 <span asp-validation-for="NewName" class="text-danger small"></span>
             </div>
             <div class="col-sm-4">
-                <button class="btn btn-outline-primary w-100"><span class="ico ico-plus" aria-hidden="true"></span>Anlegen</button>
+                <button class="btn btn-outline-primary w-100"><span class="ico ico-plus" aria-hidden="true"></span>@T("Anlegen")</button>
             </div>
         </form>
     </div>

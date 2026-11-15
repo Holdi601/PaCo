@@ -51,7 +51,7 @@ public sealed class ScreenshotModel(PaCoDb db, ScreenshotStore store, ParentActi
         store.Delete(shot.FamilyId, shot.Id);
         db.Screenshots.Remove(shot);
         await db.SaveChangesAsync();
-        TempData["Message"] = "Bildschirmfoto gelöscht.";
+        TempData["Message"] = Ui.T("Bildschirmfoto gelöscht.");
         return RedirectToPage("/Dashboard");
     }
 }
