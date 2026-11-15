@@ -2,13 +2,13 @@
 (function () {
     "use strict";
 
-    // Short "done" feedback on a button, then restore its label.
+    // Short "done" feedback on a button, then restore its content (keeps the icon markup).
     function flash(el, text) {
         if (el.hasAttribute("data-flashing")) return;
-        var old = el.textContent;
+        var old = Array.prototype.slice.call(el.childNodes);
         el.setAttribute("data-flashing", "");
-        el.textContent = text;
-        setTimeout(function () { el.textContent = old; el.removeAttribute("data-flashing"); }, 2000);
+        el.replaceChildren(document.createTextNode(text));
+        setTimeout(function () { el.replaceChildren.apply(el, old); el.removeAttribute("data-flashing"); }, 2000);
     }
 
     // Confirmation for dangerous buttons: <button data-confirm="Wirklich?">

@@ -6,32 +6,35 @@
     var tz = Model.Tz;
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-        <div class="stat-label">Statistik</div>
-        <h1 class="h3 mb-0 page-title">@Model.Child.Name</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-chart" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <div class="stat-label">Statistik</div>
+            <h1 class="h3 mb-0 page-title">@Model.Child.Name</h1>
+        </div>
     </div>
     <div class="d-flex gap-2">
-        <a asp-page="./Edit" asp-route-id="@Model.Child.Id" class="btn btn-outline-secondary btn-sm">Regeln</a>
-        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">← Übersicht</a>
+        <a asp-page="./Edit" asp-route-id="@Model.Child.Id" class="btn btn-outline-secondary btn-sm"><span class="ico ico-sliders" aria-hidden="true"></span>Regeln</a>
+        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Übersicht</a>
     </div>
 </div>
 
 <div class="row g-3">
     <div class="col-lg-5 order-2 order-lg-1">
         <div class="card h-100">
-            <div class="card-header">Letzte 14 Tage <span class="visually-hidden">(Tag antippen für Details)</span><span class="text-muted fw-normal small">· Ø 7 Tage: @Format.Duration(Model.WeekAverage)</span></div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-calendar" aria-hidden="true"></span></span>Letzte 14 Tage <span class="visually-hidden">(Tag antippen für Details)</span><span class="text-muted fw-normal small">· Ø 7 Tage: @Format.Duration(Model.WeekAverage)</span></div>
             <div class="list-group list-group-flush">
                 @foreach (var d in Model.Last14)
                 {
                     var over = d.LimitSeconds is { } l && d.Seconds > l;
                     <a asp-route-id="@Model.Child.Id" asp-route-day="@d.Day.ToString("yyyy-MM-dd")"
                        class="list-group-item list-group-item-action @(d.Day == Model.Day ? "active" : "")" aria-current="@(d.Day == Model.Day ? "date" : null)">
-                        <div class="d-flex justify-content-between small">
-                            <span>@Format.WeekdayNames[(int)d.Day.DayOfWeek][..2], @d.Day.ToString("dd.MM.")</span>
-                            <span class="@(over && d.Day != Model.Day ? "status-warn" : "")">@Format.Duration(d.Seconds)</span>
+                        <div class="day-bar small">
+                            <span class="day-name">@Format.WeekdayNames[(int)d.Day.DayOfWeek][..2], @d.Day.ToString("dd.MM.")</span>
+                            <progress class="w-100 @(over ? "is-over" : "")" max="@max" value="@d.Seconds" aria-hidden="true"></progress>
+                            <span class="day-val @(over && d.Day != Model.Day ? "status-warn" : "")">@Format.Duration(d.Seconds)</span>
                         </div>
-                        <progress class="w-100" max="@max" value="@d.Seconds" aria-hidden="true"></progress>
                     </a>
                 }
             </div>
@@ -39,7 +42,7 @@
     </div>
     <div class="col-lg-7 order-1 order-lg-2">
         <div class="card mb-3">
-            <div class="card-header">@(Model.Day == Model.Today ? "Heute" : Model.Day.ToString("dddd, dd.MM.yyyy", new System.Globalization.CultureInfo("de-DE")))</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>@(Model.Day == Model.Today ? "Heute" : Model.Day.ToString("dddd, dd.MM.yyyy", new System.Globalization.CultureInfo("de-DE")))</div>
             <div class="card-body">
                 <div class="big-number">@Format.Duration(Model.DayTotal)</div>
                 @if (Model.DayBonus > 0)
@@ -59,7 +62,7 @@
                             @foreach (var a in Model.Apps)
                             {
                                 <tr>
-                                    <td>
+                                    <td class="app-row">
                                         <div>@a.Name <span class="text-muted small">(@a.Process)</span></div>
                                         <progress class="w-100" max="@appMax" value="@a.Seconds" aria-hidden="true"></progress>
                                     </td>
@@ -72,8 +75,8 @@
             </div>
         </div>
         <div class="card">
-            <div class="card-header">Ereignisse (14 Tage)</div>
-            <div class="list-group list-group-flush small">
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>Ereignisse (14 Tage)</div>
+            <div class="list-group list-group-flush small event-list">
                 @foreach (var e in Model.Events)
                 {
                     <div class="list-group-item">

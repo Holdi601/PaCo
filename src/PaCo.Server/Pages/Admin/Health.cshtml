@@ -2,12 +2,15 @@
 @model PaCo.Server.Pages.Admin.HealthModel
 @{ ViewData["Title"] = "Geräte-Zustand"; }
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-        <div class="stat-label">Verwaltung</div>
-        <h1 class="h3 mb-0 page-title">Geräte-Zustand (technisch)</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-activity" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <div class="stat-label">Verwaltung</div>
+            <h1 class="h3 mb-0 page-title">Geräte-Zustand (technisch)</h1>
+        </div>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">← Verwaltung</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Verwaltung</a>
 </div>
 <p class="small text-muted">Nur technische Daten: Version, letzter Kontakt und Fehlermeldungen der PCs (7 Tage). Kinder, Nutzung, Alarme, Bilder und Standorte sind hier bewusst nicht sichtbar – das vollständige Diagnose-Log können die Eltern unter Geräte → Protokoll abrufen.</p>
 

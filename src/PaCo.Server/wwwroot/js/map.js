@@ -38,14 +38,14 @@
     }
     var latlngs = points.map(function (p) { return [p.lat, p.lon]; });
     if (latlngs.length > 1) {
-        L.polyline(latlngs, { color: "#4f7cff", weight: 3, opacity: 0.6 }).addTo(map);
+        L.polyline(latlngs, { color: "#5b6cff", weight: 3, opacity: 0.6 }).addTo(map);
         points.slice(0, -1).forEach(function (p) {
-            L.circleMarker([p.lat, p.lon], { radius: 4, color: "#7c5cff", weight: 1, fillOpacity: 0.7 })
+            L.circleMarker([p.lat, p.lon], { radius: 4, color: "#8b5cf6", weight: 1, fillOpacity: 0.7 })
                 .bindPopup(p.time + (p.ssid ? "<br>WLAN: " + escapeHtml(p.ssid) : "")).addTo(map);
         });
     }
     var last = points[points.length - 1];
-    if (last.acc) L.circle([last.lat, last.lon], { radius: last.acc, color: "#22a565", weight: 1, fillOpacity: 0.12 }).addTo(map);
+    if (last.acc) L.circle([last.lat, last.lon], { radius: last.acc, color: "#22b35e", weight: 1, fillOpacity: 0.12 }).addTo(map);
     L.marker([last.lat, last.lon]).bindPopup("<b>Zuletzt: " + last.time + "</b><br>Genauigkeit ±" + Math.round(last.acc || 0) + " m" +
         (last.ssid ? "<br>WLAN: " + escapeHtml(last.ssid) : "")).addTo(map).openPopup();
     if (latlngs.length > 1) map.fitBounds(latlngs, { padding: [30, 30], maxZoom: 16 });

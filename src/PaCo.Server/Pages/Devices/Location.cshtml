@@ -7,12 +7,15 @@
 }
 <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-        <div class="stat-label">Standort</div>
-        <h1 class="h3 mb-0 page-title"><span aria-hidden="true">💻</span> @Model.Device.Name</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-pin" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <div class="stat-label">Standort</div>
+            <h1 class="h3 mb-0 page-title">@Model.Device.Name</h1>
+        </div>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">← Geräte</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Geräte</a>
 </div>
 
 <div class="card mb-3">
@@ -24,7 +27,7 @@
                 <option value="OnRequest" selected="@(Model.Device.LocationMode == LocationMode.OnRequest)">Nur auf Anforderung</option>
                 <option value="Continuous" selected="@(Model.Device.LocationMode == LocationMode.Continuous)">Dauerhaft (alle 15 Min)</option>
             </select>
-            <button class="btn btn-sm btn-outline-primary">Speichern</button>
+            <button class="btn btn-sm btn-outline-primary"><span class="ico ico-check" aria-hidden="true"></span>Speichern</button>
         </form>
         <div class="d-flex gap-2 align-items-center">
             @if (Model.Waiting)
@@ -33,7 +36,7 @@
                 <div data-autorefresh="4"></div>
             }
             <form method="post" asp-page-handler="Locate" asp-route-id="@Model.Device.Id">
-                <button class="btn btn-primary" disabled="@Model.Waiting">📍 Jetzt orten</button>
+                <button class="btn btn-primary" disabled="@Model.Waiting"><span class="ico ico-locate" aria-hidden="true"></span>Jetzt orten</button>
             </form>
         </div>
         @if (Model.Device.LocationMode == LocationMode.Off)
@@ -43,35 +46,37 @@
     </div>
 </div>
 
-<nav class="d-flex flex-wrap gap-3 mb-2 small" aria-label="Zeitraum">
+<nav class="seg-row mb-3 small" aria-label="Zeitraum">
     Zeitraum:
+    <div class="seg">
     @foreach (var d in new[] { 1, 7, 30 })
     {
         <a asp-route-id="@Model.Device.Id" asp-route-days="@d" class="@(Model.Days == d ? "fw-bold" : "")" aria-current="@(Model.Days == d ? "true" : null)">@(d == 1 ? "24 Stunden" : $"{d} Tage")</a>
     }
+    </div>
 </nav>
 
 @if (Model.Latest is { } last)
 {
-    <div class="card mb-3">
+    <div class="card mb-3 map-frame">
         <div class="card-header d-flex flex-wrap justify-content-between gap-2">
-            <span>Letzte Position · @TimeZoneInfo.ConvertTime(last.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm") · ±@((int)(last.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(last.Source)</span>
-            <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(last.Latitude!.Value, last.Longitude!.Value)" target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+            <span class="d-inline-flex align-items-center gap-2"><span class="head-ico" aria-hidden="true"><span class="ico ico-pin" aria-hidden="true"></span></span><span>Letzte Position · @TimeZoneInfo.ConvertTime(last.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm") · ±@((int)(last.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(last.Source)</span></span>
+            <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(last.Latitude!.Value, last.Longitude!.Value)" target="_blank" rel="noopener noreferrer" class="d-inline-flex align-items-center gap-1 fw-semibold">In Google Maps öffnen<span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
         </div>
         <iframe id="gmap" class="paco-map border-0" title="Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                 src="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(last.Latitude!.Value, last.Longitude!.Value)"></iframe>
     </div>
 }
 
-<details class="card mb-4">
-    <summary class="card-header">Verlauf auf der Karte (OpenStreetMap)</summary>
+<details class="card mb-4 map-frame">
+    <summary class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>Verlauf auf der Karte (OpenStreetMap)</summary>
     <div id="paco-map" class="paco-map" data-points="@Model.MapJson"></div>
 </details>
 
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header">Verlauf</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>Verlauf</div>
             <div class="list-group list-group-flush small">
                 @foreach (var p in Model.Points.AsEnumerable().Reverse().Take(60))
                 {
@@ -83,7 +88,7 @@
                                 <a href="#gmap" data-gmap="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(lat, lon)">
                                     @lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture), @lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
                                 </a>
-                                <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(lat, lon)" target="_blank" rel="noopener noreferrer" title="In Google Maps öffnen">↗</a>
+                                <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(lat, lon)" target="_blank" rel="noopener noreferrer" title="In Google Maps öffnen" aria-label="In Google Maps öffnen" class="ms-1"><span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
                             </span>
                             <span class="text-muted">±@((int)(p.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(p.Source)</span>
                         }
@@ -106,7 +111,7 @@
             {
                 <div class="card-body pt-2">
                     <form method="post" asp-page-handler="Clear" asp-route-id="@Model.Device.Id" class="text-end">
-                        <button class="btn btn-sm btn-link text-danger" data-confirm="Gesamten Standortverlauf dieses Geräts löschen?">Verlauf löschen</button>
+                        <button class="btn btn-sm btn-link text-danger" data-confirm="Gesamten Standortverlauf dieses Geräts löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Verlauf löschen</button>
                     </form>
                 </div>
             }
@@ -116,7 +121,7 @@
         @if (Model.LatestScan is { } scan)
         {
             <div class="card mb-4">
-                <div class="card-header">WLANs in der Nähe <span class="small text-muted fw-normal">(@TimeZoneInfo.ConvertTime(scan.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm"))</span></div>
+                <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-wifi" aria-hidden="true"></span></span>WLANs in der Nähe <span class="small text-muted fw-normal">(@TimeZoneInfo.ConvertTime(scan.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm"))</span></div>
                 <div class="list-group list-group-flush small">
                     @foreach (var n in scan.GetNearby())
                     {
@@ -130,7 +135,7 @@
             </div>
         }
         <div class="card mb-4">
-            <div class="card-header">Internet-Anschlüsse (IP-Adressen)</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>Internet-Anschlüsse (IP-Adressen)</div>
             <div class="list-group list-group-flush small">
                 @foreach (var i in Model.Ips)
                 {
@@ -146,7 +151,7 @@
             </div>
         </div>
         <div class="card">
-            <div class="card-header">Gut zu wissen</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-info" aria-hidden="true"></span></span>Gut zu wissen</div>
             <div class="card-body small">
                 <ul class="mb-0">
                     <li>Laptops ohne GPS orten über WLAN-Netze in der Nähe – meist auf 20–100 m genau. Ohne WLAN ist keine genaue Ortung möglich.</li>

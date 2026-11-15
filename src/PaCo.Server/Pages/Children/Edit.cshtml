@@ -2,14 +2,17 @@
 @model PaCo.Server.Pages.Children.EditModel
 @{ ViewData["Title"] = $"Regeln für {Model.Name}"; }
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-        <div class="stat-label">Regeln</div>
-        <h1 class="h3 mb-0 page-title">@Model.Name</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-sliders" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <div class="stat-label">Regeln</div>
+            <h1 class="h3 mb-0 page-title">@Model.Name</h1>
+        </div>
     </div>
     <div class="d-flex gap-2">
-        <a asp-page="./Stats" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">Statistik</a>
-        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">← Übersicht</a>
+        <a asp-page="./Stats" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm"><span class="ico ico-chart" aria-hidden="true"></span>Statistik</a>
+        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm"><span class="ico ico-back" aria-hidden="true"></span>Übersicht</a>
     </div>
 </div>
 
@@ -17,7 +20,7 @@
 
 <form method="post" asp-route-id="@Model.Id">
     <section class="card mb-3" aria-labelledby="sec-week">
-        <div class="card-header" id="sec-week">Bildschirmzeit pro Tag</div>
+        <div class="card-header" id="sec-week"><span class="head-ico" aria-hidden="true"><span class="ico ico-calendar" aria-hidden="true"></span></span>Bildschirmzeit pro Tag</div>
         <div class="card-body">
             <p class="small text-muted">Pro Tag: wie viele Minuten insgesamt (60 = 1 Stunde, 120 = 2 Stunden) und in welchem Zeitraum der PC benutzt werden darf. Zusatzzeit von der Übersicht oder per Freischaltcode gilt auch außerhalb des Zeitraums.</p>
             <div class="table-days">
@@ -62,15 +65,15 @@
                 }
             </div>
             <div class="d-flex flex-wrap gap-2 mt-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="2,3,4,5">Montag auf Di–Fr übertragen</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="6" data-targets="0">Samstag auf Sonntag übertragen</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="0,2,3,4,5,6">Montag auf alle Tage übertragen</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="2,3,4,5"><span class="ico ico-copy" aria-hidden="true"></span>Montag auf Di–Fr übertragen</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="6" data-targets="0"><span class="ico ico-copy" aria-hidden="true"></span>Samstag auf Sonntag übertragen</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="0,2,3,4,5,6"><span class="ico ico-copy" aria-hidden="true"></span>Montag auf alle Tage übertragen</button>
             </div>
         </div>
     </section>
 
     <section class="card mb-3" aria-labelledby="sec-expiry">
-        <div class="card-header" id="sec-expiry">Wenn die Zeit abgelaufen ist</div>
+        <div class="card-header" id="sec-expiry"><span class="head-ico" aria-hidden="true"><span class="ico ico-lock" aria-hidden="true"></span></span>Wenn die Zeit abgelaufen ist</div>
         <div class="card-body">
             <fieldset class="mb-3">
                 <legend class="visually-hidden">Was passiert, wenn die Zeit abgelaufen ist?</legend>
@@ -91,7 +94,7 @@
     </section>
 
     <section class="card mb-3" aria-labelledby="sec-web">
-        <div class="card-header" id="sec-web">Internet</div>
+        <div class="card-header" id="sec-web"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>Internet</div>
         <div class="card-body">
             <p class="small text-muted">Gilt für Microsoft Edge, Google Chrome und Firefox im Windows-Konto des Kindes.</p>
             <div class="form-check form-switch">
@@ -134,7 +137,7 @@
     </section>
 
     <section class="card mb-3" aria-labelledby="sec-apps">
-        <div class="card-header" id="sec-apps">Programme</div>
+        <div class="card-header" id="sec-apps"><span class="head-ico" aria-hidden="true"><span class="ico ico-app" aria-hidden="true"></span></span>Programme</div>
         <div class="card-body">
             <div class="form-check form-switch mb-3">
                 <input asp-for="BlockSystemTools" class="form-check-input" role="switch" />
@@ -147,7 +150,7 @@
     </section>
 
     <section class="card mb-3" aria-labelledby="sec-alerts">
-        <div class="card-header" id="sec-alerts">Alarme bei bedenklichen Stichwörtern</div>
+        <div class="card-header" id="sec-alerts"><span class="head-ico" aria-hidden="true"><span class="ico ico-bell" aria-hidden="true"></span></span>Alarme bei bedenklichen Stichwörtern</div>
         <div class="card-body">
             <p class="small text-muted">PaCo prüft auf dem PC <strong>lokal</strong>, ob bestimmte Wörter auftauchen, und meldet nur den Treffer mit kurzem Ausschnitt – sofort aufs Handy, wenn <a asp-page="/Notifications">Handy-Benachrichtigungen</a> eingerichtet sind.</p>
             <div class="form-check form-switch">
@@ -183,7 +186,7 @@
     </section>
 
     <section class="card mb-3" aria-labelledby="sec-general">
-        <div class="card-header" id="sec-general">Allgemein</div>
+        <div class="card-header" id="sec-general"><span class="head-ico" aria-hidden="true"><span class="ico ico-user" aria-hidden="true"></span></span>Allgemein</div>
         <div class="card-body">
             <div class="mb-3">
                 <label asp-for="Name" class="form-label">Name</label>
@@ -198,7 +201,7 @@
     </section>
 
     <div class="sticky-actions d-flex flex-wrap align-items-center gap-2">
-        <button type="submit" class="btn btn-primary btn-lg">Speichern</button>
+        <button type="submit" class="btn btn-primary btn-lg"><span class="ico ico-check" aria-hidden="true"></span>Speichern</button>
         <a asp-page="/Dashboard" class="btn btn-link">Abbrechen</a>
         <span class="small text-muted d-none d-sm-inline">Online-PCs übernehmen die Regeln innerhalb von 30 Sekunden.</span>
     </div>
@@ -206,5 +209,5 @@
 
 <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Id" class="mt-5 pt-3 border-top">
     <div class="small text-muted mb-2">Kind wird nicht mehr gebraucht? Dabei werden Statistik und Regeln gelöscht, und zugeordnete Windows-Konten werden nicht mehr überwacht.</div>
-    <button class="btn btn-sm btn-outline-danger" data-confirm="@Model.Name wirklich löschen? Statistik und Regeln gehen verloren.">Kind löschen</button>
+    <button class="btn btn-sm btn-outline-danger" data-confirm="@Model.Name wirklich löschen? Statistik und Regeln gehen verloren."><span class="ico ico-trash" aria-hidden="true"></span>Kind löschen</button>
 </form>

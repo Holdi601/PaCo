@@ -17,16 +17,23 @@
         });
     }
 
-    var labels = { auto: "◐ Auto", light: "☀ Hell", dark: "☾ Dunkel" };
+    // The icon comes from CSS ([data-mode]); the button only carries the text label.
+    var labels = { auto: "Auto", light: "Hell", dark: "Dunkel" };
     var order = ["auto", "light", "dark"];
+    function show(btn, mode) {
+        btn.setAttribute("data-mode", mode);
+        btn.setAttribute("title", "Farbschema: " + labels[mode]);
+        var label = btn.querySelector(".theme-label");
+        if (label) label.textContent = labels[mode]; else btn.textContent = labels[mode];
+    }
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
-            btn.textContent = labels[stored()];
+            show(btn, stored());
             btn.addEventListener("click", function () {
                 var next = order[(order.indexOf(stored()) + 1) % order.length];
                 try { localStorage.setItem(KEY, next); } catch (e) { /* private mode */ }
                 apply(next);
-                btn.textContent = labels[next];
+                show(btn, next);
             });
         });
     });

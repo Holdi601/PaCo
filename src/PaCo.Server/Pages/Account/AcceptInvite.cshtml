@@ -2,41 +2,43 @@
 @model PaCo.Server.Pages.Account.AcceptInviteModel
 @{ ViewData["Title"] = "Einladung"; }
 
-<div class="row justify-content-center">
-    <div class="col-md-7 col-lg-5">
-        <div class="card mt-4">
-            <div class="card-body p-4">
-                @if (Model.Invalid)
-                {
-                    <h1 class="h4">Link ungültig</h1>
-                    <p>Dieser Einladungslink ist abgelaufen oder wurde bereits benutzt. Bitte frag die Person, die dich eingeladen hat, nach einem neuen Link.</p>
-                    <p class="small text-muted">Hast du dein Passwort schon festgelegt? Dann melde dich einfach an.</p>
-                    <a asp-page="./Login" class="btn btn-outline-primary">Zur Anmeldung</a>
-                }
-                else
-                {
-                    <h1 class="h4">Willkommen bei PaCo, @Model.Name!</h1>
-                    <p class="text-muted">Lege ein Passwort für <strong>@Model.Email</strong> fest. Danach richtest du noch die Authenticator-App auf deinem Handy ein.</p>
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-                    <form method="post">
-                        <input type="hidden" asp-for="Uid" />
-                        <input type="hidden" asp-for="Token" />
-                        <input type="email" class="d-none" value="@Model.Email" autocomplete="username" readonly />
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label">Passwort</label>
-                            <input asp-for="Password" class="form-control" autocomplete="new-password" autofocus aria-describedby="pw-rules" />
-                            <div id="pw-rules" class="form-text">Mindestens 12 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer. Tipp: ein kurzer Satz wie „Sommer-Ferien-2026“.</div>
-                            <span asp-validation-for="Password" class="text-danger small"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="ConfirmPassword" class="form-label">Passwort wiederholen</label>
-                            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
-                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Weiter</button>
-                    </form>
-                }
-            </div>
+<div class="auth-shell">
+    <div class="auth-art" aria-hidden="true">
+        <div class="auth-brand"><partial name="_Logo" model="@("auth")" /><span class="wordmark">Pa<span class="wordmark-co">Co</span></span></div>
+        <partial name="_ArtHero" />
+    </div>
+    <div class="card auth-card">
+        <div class="card-body p-4">
+            @if (Model.Invalid)
+            {
+                <h1 class="h4">Link ungültig</h1>
+                <p>Dieser Einladungslink ist abgelaufen oder wurde bereits benutzt. Bitte frag die Person, die dich eingeladen hat, nach einem neuen Link.</p>
+                <p class="small text-muted">Hast du dein Passwort schon festgelegt? Dann melde dich einfach an.</p>
+                <a asp-page="./Login" class="btn btn-outline-primary">Zur Anmeldung</a>
+            }
+            else
+            {
+                <h1 class="h4">Willkommen bei PaCo, @Model.Name!</h1>
+                <p class="text-muted">Lege ein Passwort für <strong>@Model.Email</strong> fest. Danach richtest du noch die Authenticator-App auf deinem Handy ein.</p>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <form method="post">
+                    <input type="hidden" asp-for="Uid" />
+                    <input type="hidden" asp-for="Token" />
+                    <input type="email" class="d-none" value="@Model.Email" autocomplete="username" readonly />
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Passwort</label>
+                        <input asp-for="Password" class="form-control" autocomplete="new-password" autofocus aria-describedby="pw-rules" />
+                        <div id="pw-rules" class="form-text">Mindestens 12 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer. Tipp: ein kurzer Satz wie „Sommer-Ferien-2026“.</div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label">Passwort wiederholen</label>
+                        <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Weiter</button>
+                </form>
+            }
         </div>
     </div>
 </div>
