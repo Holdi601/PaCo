@@ -314,6 +314,9 @@ public static class DeviceApi
         {
             Policy = await policies.BuildSignedAsync(device, ct),
             ServerUtcNow = now,
+            SignedTime = req.TimeNonce is { Length: >= 16 and <= 64 } nonce
+                ? keys.Sign(new ServerTime { DeviceId = device.Id, Nonce = nonce, ServerUtc = now })
+                : null,
             LatestClientVersion = client.Version,
             Update = update,
             Screenshots = screenshots,

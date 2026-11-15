@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Zapora systemu Windows jest wyłączona dla: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Zapora systemu Windows jest włączona.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Konto Windows „{0}” ({1}) ma uprawnienia administratora.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Zegar Windows cofnięto o {0} min – zostanie to zignorowane."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Zegar Windows cofnięto o {0} min – zostanie to zignorowane.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Odrzucono czas serwera bez ważnego podpisu – możliwy fałszywy serwer. PaCo liczy dalej według własnego zegara."
 }

@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Windows Firewall staat uit voor: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Windows Firewall staat aan.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-account ‘{0}’ van {1} heeft administratorrechten.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-klok is {0} minuten teruggezet – wordt genegeerd."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-klok is {0} minuten teruggezet – wordt genegeerd.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertijd zonder geldige handtekening geweigerd – mogelijk een nepserver. PaCo telt verder met de eigen klok."
 }

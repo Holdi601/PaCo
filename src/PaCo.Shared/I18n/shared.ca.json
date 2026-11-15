@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "El Tallafoc del Windows està desactivat per a: {0}.",
  "Windows-Firewall ist eingeschaltet.": "El Tallafoc del Windows està activat.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "El compte del Windows «{0}» de {1} té drets d'administrador.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "S'ha endarrerit el rellotge del Windows {0} minuts – s'ignora."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "S'ha endarrerit el rellotge del Windows {0} minuts – s'ignora.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "S'ha rebutjat l'hora del servidor sense signatura vàlida: potser un servidor fals. PaCo continua comptant amb el seu propi rellotge."
 }

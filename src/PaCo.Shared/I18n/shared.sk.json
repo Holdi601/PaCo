@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Brána Windows Firewall je vypnutá pre: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Brána Windows Firewall je zapnutá.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Konto Windows „{0}“ ({1}) má oprávnenia správcu.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Hodiny Windows boli vrátené o {0} min – ignoruje sa."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Hodiny Windows boli vrátené o {0} min – ignoruje sa.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas servera bez platného podpisu bol odmietnutý – možno falošný server. PaCo počíta ďalej podľa vlastných hodín."
 }

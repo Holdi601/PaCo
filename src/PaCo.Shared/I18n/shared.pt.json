@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "A Firewall do Windows está desativada para: {0}.",
  "Windows-Firewall ist eingeschaltet.": "A Firewall do Windows está ativada.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "A conta do Windows «{0}» de {1} tem direitos de administrador.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "O relógio do Windows foi atrasado {0} minutos – ignorado."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "O relógio do Windows foi atrasado {0} minutos – ignorado.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Hora do servidor sem assinatura válida rejeitada – possivelmente um servidor falso. O PaCo continua a contar com o seu próprio relógio."
 }

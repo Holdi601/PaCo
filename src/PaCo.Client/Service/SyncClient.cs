@@ -309,6 +309,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
 
             req = new SyncRequest
             {
+                TimeNonce = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)),
                 ClientVersion = ServerApi.Version,
                 OsVersion = ServerApi.OsVersion,
                 ClientUtcNow = DateTimeOffset.UtcNow,
@@ -324,7 +325,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             };
         }
 
-        var sentAt = DateTimeOffset.UtcNow;
+        var sentAt = Mono.Now; // monotonic: immune to clock changes during the request
         SyncResponse resp;
         try
         {
@@ -335,7 +336,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             Log.Error("Server lehnt das Gerät ab (401) – wurde es auf der Website gelöscht? Letzte Regeln bleiben aktiv.");
             throw;
         }
-        var receivedAt = DateTimeOffset.UtcNow;
+        var receivedAt = Mono.Now;
 
         try
         {
@@ -379,12 +380,42 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                 rt.State.LocationMode = resp.LocationMode;
             }
             if (resp.LocateNow) rt.RequestLocate();
-            // Server time now ≈ server timestamp + half the round trip.
-            rt.ConfirmServerTime(resp.ServerUtcNow + (receivedAt - sentAt) / 2);
+            // Server time now ≈ signed server timestamp + half the round trip. Unsigned or foreign time is ignored.
+            if (VerifiedServerTime(resp, req.TimeNonce!) is { } serverUtc)
+                rt.ConfirmServerTime(serverUtc + (receivedAt - sentAt) / 2);
             var tz = FamilyClock.Resolve(rt.Policies.Current?.TimeZoneId ?? "Europe/Berlin");
             rt.State.Prune(FamilyClock.Day(rt.Now(), tz));
             rt.MarkDirty();
             rt.SaveIfNeeded();
+        }
+    }
+
+    private DateTimeOffset _lastTimeWarning = DateTimeOffset.MinValue;
+
+    /// <summary>
+    /// Server time only counts if it is signed with the pinned server key, for this device and for the nonce of this
+    /// very request. Otherwise the internal clock keeps running unchanged (no extra time from a fake server).
+    /// </summary>
+    private DateTimeOffset? VerifiedServerTime(SyncResponse resp, string nonce)
+    {
+        try
+        {
+            if (resp.SignedTime is null) throw new PolicySignatureException("Serverzeit ohne Signatur.");
+            var t = PolicySigning.Verify<ServerTime>(resp.SignedTime, rt.Device.PolicyPublicKeyPem);
+            if (t.DeviceId != rt.Device.DeviceId || t.Nonce != nonce)
+                throw new PolicySignatureException("Serverzeit gehört nicht zu dieser Anfrage.");
+            return t.ServerUtc;
+        }
+        catch (PolicySignatureException ex)
+        {
+            // Log every time, report to the parents at most hourly.
+            Log.Warn($"Serverzeit verworfen: {ex.Message}");
+            if (DateTimeOffset.UtcNow - _lastTimeWarning > TimeSpan.FromHours(1))
+            {
+                _lastTimeWarning = DateTimeOffset.UtcNow;
+                rt.State.AddEvent(DeviceEventKind.ClockTampering, LocText.Of("Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter."));
+            }
+            return null;
         }
     }
 }

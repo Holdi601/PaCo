@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Muri mbrojtës i Windows është i çaktivizuar për: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Muri mbrojtës i Windows është i aktivizuar.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Llogaria Windows „{0}“ e fëmijës {1} ka të drejta administratori.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Ora e Windows u kthye prapa me {0} minuta – nuk merret parasysh."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Ora e Windows u kthye prapa me {0} minuta – nuk merret parasysh.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Ora e serverit pa nënshkrim të vlefshëm u refuzua – ndoshta server i rremë. PaCo vazhdon me orën e vet."
 }

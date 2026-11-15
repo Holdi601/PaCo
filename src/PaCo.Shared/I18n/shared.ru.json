@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Брандмауэр Windows отключён для: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Брандмауэр Windows включён.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Учётная запись Windows «{0}» (ребёнок: {1}) имеет права администратора.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Часы Windows были переведены назад на {0} мин – это проигнорировано."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Часы Windows были переведены назад на {0} мин – это проигнорировано.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Время сервера без действительной подписи отклонено – возможно, поддельный сервер. PaCo продолжает считать по собственным часам."
 }

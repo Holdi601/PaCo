@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Tá Balla Dóiteáin Windows casta as do: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Tá Balla Dóiteáin Windows casta air.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Tá cearta riarthóra ag cuntas Windows “{0}” le {1}.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Cuireadh clog Windows siar {0} nóiméad – déantar neamhaird de."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Cuireadh clog Windows siar {0} nóiméad – déantar neamhaird de.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Diúltaíodh d'am an fhreastalaí gan síniú bailí – b'fhéidir freastalaí bréige. Leanann PaCo ar aghaidh lena chlog féin."
 }

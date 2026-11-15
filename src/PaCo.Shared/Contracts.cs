@@ -197,6 +197,9 @@ public sealed record DeviceEvent
 
 public sealed record SyncRequest
 {
+    /// <summary>Random value per sync; the server signs it together with its time (<see cref="SignedServerTime"/>).</summary>
+    public string? TimeNonce { get; init; }
+
     public string ClientVersion { get; init; } = "";
 
     public string OsVersion { get; init; } = "";
@@ -252,11 +255,27 @@ public sealed record ChildLiveStatus
     public string? CurrentApp { get; init; }
 }
 
+/// <summary>Signed server time for one sync: bound to the device and the client's random nonce (no replay).</summary>
+public sealed record ServerTime
+{
+    public Guid DeviceId { get; init; }
+
+    public string Nonce { get; init; } = "";
+
+    public DateTimeOffset ServerUtc { get; init; }
+}
+
 public sealed record SyncResponse
 {
     public SignedEnvelope Policy { get; init; } = new();
 
     public DateTimeOffset ServerUtcNow { get; init; }
+
+    /// <summary>
+    /// <see cref="ServerTime"/> signed with the policy key. The client only trusts the server time from this envelope,
+    /// so a fake server (DNS/hosts redirect, own proxy) cannot move the clock to "tomorrow" for a fresh time budget.
+    /// </summary>
+    public SignedEnvelope? SignedTime { get; init; }
 
     /// <summary>Newest client version the server offers (informational).</summary>
     public string? LatestClientVersion { get; init; }

@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Windows-Firewall ass aus fir: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Windows-Firewall ass ageschalt.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-Kont „{0}“ vun {1} huet Administrateursrechter.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-Auer gouf ëm {0} Minutten zréckgesat – gëtt ignoréiert."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-Auer gouf ëm {0} Minutten zréckgesat – gëtt ignoréiert.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Serverzäit ouni gülteg Ënnerschrëft verworf – méiglecherweis e gefälschte Server. PaCo rechent mat senger eegener Auer weider."
 }

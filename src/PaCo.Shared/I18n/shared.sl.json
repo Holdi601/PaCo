@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "Požarni zid Windows je izklopljen za: {0}.",
  "Windows-Firewall ist eingeschaltet.": "Požarni zid Windows je vklopljen.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Račun Windows „{0}“ ({1}) ima skrbniške pravice.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Ura Windows je bila prestavljena nazaj za {0} min – to se prezre."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Ura Windows je bila prestavljena nazaj za {0} min – to se prezre.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas strežnika brez veljavnega podpisa je bil zavrnjen – morda lažni strežnik. PaCo šteje naprej po lastni uri."
 }

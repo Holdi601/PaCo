@@ -1,5 +1,7 @@
 # PaCo – Kinderschutz für Windows, selbst gehostet
 
+**➡ Projekt-Website mit Bildern und Einrichtungs-Anleitung: https://holdi601.github.io/PaCo/** ([English](https://holdi601.github.io/PaCo/) · [Deutsch](https://holdi601.github.io/PaCo/de/))
+
 PaCo begrenzt die **Bildschirmzeit** von Kindern an Windows-PCs, filtert **Webseiten und Programme** und zeigt Eltern
 **live**, wer gerade wie lange am PC ist. Der Server läuft auf dem eigenen Heimserver (Docker). Es gibt keine Cloud und
 kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.

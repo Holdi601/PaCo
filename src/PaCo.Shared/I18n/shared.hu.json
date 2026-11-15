@@ -53,5 +53,6 @@
  "Windows-Firewall ist aus für: {0}.": "A Windows tűzfal ki van kapcsolva ennél: {0}.",
  "Windows-Firewall ist eingeschaltet.": "A Windows tűzfal be van kapcsolva.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "A(z) „{0}” Windows-fiók ({1}) rendszergazdai jogokkal rendelkezik.",
- "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "A Windows óráját {0} perccel visszaállították – figyelmen kívül hagyva."
+ "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "A Windows óráját {0} perccel visszaállították – figyelmen kívül hagyva.",
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Érvényes aláírás nélküli szerveridő elutasítva – lehet, hogy hamis szerver. A PaCo a saját órájával számol tovább."
 }

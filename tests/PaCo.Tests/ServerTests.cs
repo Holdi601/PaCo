@@ -147,8 +147,10 @@ public class DeviceApiTests : IClassFixture<PaCoFactory>
         var children = (await assign.Content.ReadFromJsonAsync<List<ChildRef>>(PaCoJson.Options))!;
         var lena = Assert.Single(children);
 
+        var nonce = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24));
         var sync = await http.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest
         {
+            TimeNonce = nonce,
             ClientUtcNow = DateTimeOffset.UtcNow,
             ActiveChildren = [lena.Id],
             Events = [new DeviceEvent { TimeUtc = DateTimeOffset.UtcNow, Kind = DeviceEventKind.ForcedLogoff, ChildId = lena.Id, Message = "Test" }],
@@ -164,6 +166,18 @@ public class DeviceApiTests : IClassFixture<PaCoFactory>
 
         var policy = PolicySigning.Verify<PolicyDocument>(resp.Policy, paired.PolicyPublicKeyPem);
         Assert.Equal(paired.DeviceId, policy.DeviceId);
+
+        // Server time is only trustworthy signed, bound to this device and this request's nonce.
+        var time = PolicySigning.Verify<ServerTime>(resp.SignedTime!, paired.PolicyPublicKeyPem);
+        Assert.Equal(paired.DeviceId, time.DeviceId);
+        Assert.Equal(nonce, time.Nonce);
+        Assert.True(Math.Abs((time.ServerUtc - DateTimeOffset.UtcNow).TotalMinutes) < 1);
+        // A fake server moving the clock to "tomorrow" (fresh daily budget) cannot produce a valid signature.
+        var tomorrow = Convert.ToBase64String(PaCoJson.SerializeToUtf8(time with { ServerUtc = time.ServerUtc.AddDays(1) }));
+        var forged = resp.SignedTime! with { Payload = tomorrow };
+        Assert.Throws<PolicySignatureException>(() => PolicySigning.Verify<ServerTime>(forged, paired.PolicyPublicKeyPem));
+        var foreignKey = PolicySigning.ExportPublicPem(PolicySigning.CreateKey());
+        Assert.Throws<PolicySignatureException>(() => PolicySigning.Verify<ServerTime>(resp.SignedTime!, foreignKey));
         Assert.Equal(lena.Id, policy.ChildForSid(sid)!.ChildId);
         Assert.Null(policy.ChildForSid("S-1-5-21-1-2-3-500"));
         Assert.Equal(7, policy.Children[0].Days.Count);
