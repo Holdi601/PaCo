@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PaCo.Server.Data;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Server.Services;
 
@@ -34,16 +35,16 @@ public sealed class Notifier(IHttpClientFactory http, IOptions<ServerOptions> op
     /// <summary>Sends immediately and reports success (used by the "Test senden" button).</summary>
     public async Task<(bool Ok, string Message)> SendNowAsync(PushMessage m, CancellationToken ct)
     {
-        if (!Configured) return (false, "Benachrichtigungen sind auf dem Server nicht eingerichtet (PaCo__NtfyUrl fehlt).");
+        if (!Configured) return (false, Ui.T("Benachrichtigungen sind auf dem Server nicht eingerichtet (PaCo__NtfyUrl fehlt)."));
         try
         {
             await SendAsync(m, ct);
-            return (true, "Test-Benachrichtigung gesendet.");
+            return (true, Ui.T("Test-Benachrichtigung gesendet."));
         }
         catch (Exception ex)
         {
             log.LogError(ex, "ntfy-Test fehlgeschlagen");
-            return (false, $"Senden fehlgeschlagen: {ex.Message}");
+            return (false, Ui.F("Senden fehlgeschlagen: {0}", ex.Message));
         }
     }
 
@@ -161,10 +162,17 @@ public static class AlertTexts
 {
     public static int Priority(AlertCategory c) => c is AlertCategory.SelfHarm or AlertCategory.Grooming ? 5 : 4;
 
-    public static PushMessage ForAlert(string topic, string childName, AlertEntity a, string? baseUrl) => new(
+    /// <summary>Push language of a family: the language most of its parents chose (one shared ntfy topic per family).</summary>
+    public static async Task<string> PushLanguageAsync(PaCoDb db, Guid familyId, CancellationToken ct)
+    {
+        var langs = await db.Users.Where(u => u.FamilyId == familyId && u.Language != null).Select(u => u.Language!).ToListAsync(ct);
+        return langs.GroupBy(l => l).OrderByDescending(g => g.Count()).Select(g => g.Key).FirstOrDefault() ?? Languages.Source;
+    }
+
+    public static PushMessage ForAlert(string topic, string childName, AlertEntity a, string? baseUrl, string lang) => new(
         topic,
-        $"PaCo-Alarm: {childName}",
-        $"{AlertKeywords.Label(a.Category)}: „{a.Keyword}“ in {a.App}\n{a.Snippet}",
+        Ui.In(lang, "PaCo-Alarm: {0}", childName),
+        Ui.In(lang, "{0}: „{1}“ in {2}", SharedText.T(lang, AlertKeywords.Label(a.Category)), a.Keyword, a.App) + "\n" + a.Snippet,
         Priority(a.Category),
         baseUrl is null ? null : $"{baseUrl}/Alerts",
         a.Category == AlertCategory.SelfHarm ? "rotating_light,warning" : "warning");

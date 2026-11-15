@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Website translations server.{lang}.json (WithCulture=false: ".de" is not a satellite culture here). -->
+    <EmbeddedResource Include="I18n\*.json" WithCulture="false" LogicalName="PaCo.Server.I18n.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="PaCo.Tests" />
   </ItemGroup>
 

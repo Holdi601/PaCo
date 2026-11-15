@@ -42,8 +42,8 @@ public sealed class NotificationsModel(PaCoDb db, ParentActions actions, Notifie
     {
         var fam = await actions.GetFamilyAsync(ct);
         if (fam.NtfyTopic is null) return RedirectToPage();
-        var (ok, msg) = await notifier.SendNowAsync(new PushMessage(fam.NtfyTopic, "PaCo-Test ✅",
-            "Wenn du das liest, kommen PaCo-Alarme auf diesem Handy an.", 3, null, "white_check_mark"), ct);
+        var (ok, msg) = await notifier.SendNowAsync(new PushMessage(fam.NtfyTopic, Ui.T("PaCo-Test ✅"),
+            Ui.T("Wenn du das liest, kommen PaCo-Alarme auf diesem Handy an."), 3, null, "white_check_mark"), ct);
         TempData[ok ? "Message" : "Error"] = msg;
         return RedirectToPage();
     }

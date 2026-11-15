@@ -230,6 +230,11 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("LockedByParent")
                         .HasColumnType("INTEGER");
 
@@ -395,6 +400,10 @@ namespace PaCo.Server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ArgsJson")
+                        .HasMaxLength(1500)
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid?>("ChildId")
                         .HasColumnType("TEXT");
 
@@ -409,6 +418,10 @@ namespace PaCo.Server.Data.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Template")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
@@ -625,6 +638,10 @@ namespace PaCo.Server.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
                     b.Property<long?>("LastLoginUtc")

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PaCo.Server.Data;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Server.Services;
 
@@ -44,7 +45,8 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                 Days = c.GetDays(),
                 BlockedApps = c.BlockSystemTools ? c.GetBlockedApps().Concat(Child.SystemTools).Distinct().ToList() : c.GetBlockedApps(),
                 Web = c.GetWeb(),
-                Alerts = c.GetAlerts(),
+                Language = Languages.IsSupported(c.Language) ? c.Language : Languages.Source,
+                Alerts = WithLanguages(c.GetAlerts(), c.Language),
                 NotifyChildOnScreenshot = c.NotifyChildOnScreenshot,
                 Grants = grants.Where(g => g.ChildId == c.Id).Select(g => new TimeGrant
                 {
@@ -101,4 +103,8 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
         Days = c.GetDays(),
         Grants = grants.Where(g => g.ChildId == c.Id).Select(g => new TimeGrant { Id = g.Id, Day = g.Day, Minutes = g.Minutes }).ToList(),
     };
+
+    /// <summary>Alarm keyword lists: the child's language and English are always checked, plus any the parents added.</summary>
+    private static AlertSettings WithLanguages(AlertSettings a, string childLang) =>
+        a with { Languages = a.Languages.Append(Languages.IsSupported(childLang) ? childLang : Languages.Source).Append("en").Where(Languages.IsSupported).Distinct().ToList() };
 }

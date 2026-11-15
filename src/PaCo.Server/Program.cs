@@ -114,22 +114,24 @@ builder.Services.AddRazorPages(o =>
     foreach (var p in new[] { "/Account/Login", "/Account/LoginWith2fa", "/Account/LoginWithRecoveryCode", "/Account/AcceptInvite", "/Account/AccessDenied", "/Account/Logout" })
         o.Conventions.AllowAnonymousToPage(p);
     o.Conventions.AllowAnonymousToPage("/Error");
+    o.Conventions.AllowAnonymousToPage("/Language");
     o.Conventions.AllowAnonymousToPage("/Index"); // Only redirects (login / dashboard / admin).
-}).AddMvcOptions(o =>
+}).AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider = (_, _) => new CatalogStringLocalizer())
+.AddMvcOptions(o =>
 {
     // Form errors the parents may see (e.g. a time typed wrongly) – in German instead of the English defaults.
     var m = o.ModelBindingMessageProvider;
-    m.SetValueIsInvalidAccessor(v => $"Der Wert „{v}“ ist ungültig.");
-    m.SetAttemptedValueIsInvalidAccessor((v, f) => $"Der Wert „{v}“ ist ungültig.");
-    m.SetNonPropertyAttemptedValueIsInvalidAccessor(v => $"Der Wert „{v}“ ist ungültig.");
-    m.SetUnknownValueIsInvalidAccessor(f => "Ungültige Eingabe.");
-    m.SetNonPropertyUnknownValueIsInvalidAccessor(() => "Ungültige Eingabe.");
-    m.SetValueMustNotBeNullAccessor(v => "Bitte ausfüllen.");
-    m.SetMissingBindRequiredValueAccessor(f => "Bitte ausfüllen.");
-    m.SetMissingKeyOrValueAccessor(() => "Bitte ausfüllen.");
-    m.SetMissingRequestBodyRequiredValueAccessor(() => "Bitte ausfüllen.");
-    m.SetValueMustBeANumberAccessor(f => "Bitte eine Zahl eingeben.");
-    m.SetNonPropertyValueMustBeANumberAccessor(() => "Bitte eine Zahl eingeben.");
+    m.SetValueIsInvalidAccessor(v => Ui.F("Der Wert „{0}“ ist ungültig.", v));
+    m.SetAttemptedValueIsInvalidAccessor((v, f) => Ui.F("Der Wert „{0}“ ist ungültig.", v));
+    m.SetNonPropertyAttemptedValueIsInvalidAccessor(v => Ui.F("Der Wert „{0}“ ist ungültig.", v));
+    m.SetUnknownValueIsInvalidAccessor(f => Ui.T("Ungültige Eingabe."));
+    m.SetNonPropertyUnknownValueIsInvalidAccessor(() => Ui.T("Ungültige Eingabe."));
+    m.SetValueMustNotBeNullAccessor(v => Ui.T("Bitte ausfüllen."));
+    m.SetMissingBindRequiredValueAccessor(f => Ui.T("Bitte ausfüllen."));
+    m.SetMissingKeyOrValueAccessor(() => Ui.T("Bitte ausfüllen."));
+    m.SetMissingRequestBodyRequiredValueAccessor(() => Ui.T("Bitte ausfüllen."));
+    m.SetValueMustBeANumberAccessor(f => Ui.T("Bitte eine Zahl eingeben."));
+    m.SetNonPropertyValueMustBeANumberAccessor(() => Ui.T("Bitte eine Zahl eingeben."));
 });
 builder.Services.AddAntiforgery(o =>
 {
@@ -197,6 +199,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
+app.UseRequestLocalization(Ui.LocalizationOptions());
 app.UseOnboardingRedirect();
 app.UseAuthorization();
 

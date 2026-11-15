@@ -40,6 +40,10 @@ public sealed class ParentUser : IdentityUser<Guid>
     [MaxLength(100)]
     public string DisplayName { get; set; } = "";
 
+    /// <summary>Website language chosen by the parent (null = browser language).</summary>
+    [MaxLength(10)]
+    public string? Language { get; set; }
+
     public bool MustChangePassword { get; set; }
 
     public DateTimeOffset CreatedUtc { get; set; } = DateTimeOffset.UtcNow;
@@ -58,6 +62,10 @@ public sealed class Child : IFamilyScoped
 
     [MaxLength(60)]
     public string Name { get; set; } = "";
+
+    /// <summary>Language of the lock screen and notices on the child's PC; also selects the alarm keyword lists.</summary>
+    [MaxLength(10)]
+    public string Language { get; set; } = "de";
 
     public ExpiryAction ExpiryAction { get; set; } = ExpiryAction.LockScreen;
 
@@ -456,4 +464,14 @@ public sealed class DeviceEventEntity : IFamilyScoped
 
     [MaxLength(500)]
     public string Message { get; set; } = "";
+
+    /// <summary>German template of <see cref="Message"/> for translation on the website (null for old events).</summary>
+    [MaxLength(500)]
+    public string? Template { get; set; }
+
+    /// <summary>JSON string array of template arguments.</summary>
+    [MaxLength(1500)]
+    public string? ArgsJson { get; set; }
+
+    public string Text() => Ui.Render(Template, Template is null || string.IsNullOrEmpty(ArgsJson) ? [] : PaCoJson.Deserialize<string[]>(ArgsJson), Message);
 }

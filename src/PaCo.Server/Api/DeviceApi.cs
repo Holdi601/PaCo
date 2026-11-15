@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PaCo.Server.Data;
 using PaCo.Server.Services;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Server.Api;
 
@@ -91,6 +92,7 @@ public static class DeviceApi
         var ids = alerts.Take(100).Select(a => a.Id).ToList();
         var known = await db.Alerts.IgnoreQueryFilters().Where(a => ids.Contains(a.Id)).Select(a => a.Id).ToListAsync(ct);
         var family = await db.Families.SingleAsync(f => f.Id == device.FamilyId, ct);
+        var pushLang = family.NtfyTopic is null ? Languages.Source : await AlertTexts.PushLanguageAsync(db, device.FamilyId, ct);
         foreach (var r in alerts.Take(100).Where(a => !known.Contains(a.Id) && children.ContainsKey(a.ChildId)))
         {
             var e = new AlertEntity
@@ -100,7 +102,7 @@ public static class DeviceApi
                 WindowTitle = r.WindowTitle is null ? null : Trim(r.WindowTitle, 200), Snippet = Trim(r.Snippet, 300), Source = Trim(r.Source, 40),
             };
             db.Alerts.Add(e);
-            if (family.NtfyTopic is { } topic) notifier.Enqueue(AlertTexts.ForAlert(topic, children[r.ChildId], e, baseUrl));
+            if (family.NtfyTopic is { } topic) notifier.Enqueue(AlertTexts.ForAlert(topic, children[r.ChildId], e, baseUrl, pushLang));
         }
     }
 
@@ -180,7 +182,7 @@ public static class DeviceApi
                 var child = children.FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
                 if (child is null)
                 {
-                    child = new Child { FamilyId = device.FamilyId, Name = name, DayRulesJson = PaCoJson.Serialize(Child.DefaultDays()) };
+                    child = new Child { FamilyId = device.FamilyId, Name = name, Language = await AlertTexts.PushLanguageAsync(db, device.FamilyId, ct), DayRulesJson = PaCoJson.Serialize(Child.DefaultDays()) };
                     child.SetWeb(new WebFilterPolicy());
                     db.Children.Add(child);
                     children.Add(child);
@@ -397,7 +399,10 @@ public static class DeviceApi
         {
             var fam = await db.Families.SingleAsync(f => f.Id == device.FamilyId, ct);
             if (fam.NtfyTopic is { } topic)
-                notifier.Enqueue(new PushMessage(topic, "PaCo wurde deinstalliert", $"Auf {device.Name} wurde PaCo entfernt.", 4, null));
+            {
+                var lang = await AlertTexts.PushLanguageAsync(db, device.FamilyId, ct);
+                notifier.Enqueue(new PushMessage(topic, Ui.In(lang, "PaCo wurde deinstalliert"), Ui.In(lang, "Auf {0} wurde PaCo entfernt.", device.Name), 4, null));
+            }
         }
         if (events.Count == 0) return;
         var ids = events.Take(MaxEventsPerSync).Select(e => e.Id).ToList();
@@ -414,6 +419,8 @@ public static class DeviceApi
                 TimeUtc = e.TimeUtc.ToUniversalTime(),
                 Kind = e.Kind,
                 Message = Trim(e.Message, 500),
+                Template = e.Template is { Length: <= 500 } && e.Args.Count <= 10 && e.Args.All(a => a.Length <= 120) ? e.Template : null,
+                ArgsJson = e.Template is { Length: <= 500 } && e.Args.Count <= 10 && e.Args.All(a => a.Length <= 120) ? PaCoJson.Serialize(e.Args) : null,
             });
         }
     }

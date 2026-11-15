@@ -30,7 +30,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family) : PageModel
             await OnGetAsync();
             return Page();
         }
-        var child = new Child { FamilyId = family.FamilyId!.Value, Name = NewName.Trim() };
+        var child = new Child { FamilyId = family.FamilyId!.Value, Name = NewName.Trim(), Language = Ui.Lang };
         child.SetDays(Child.DefaultDays());
         child.SetWeb(new WebFilterPolicy());
         db.Children.Add(child);

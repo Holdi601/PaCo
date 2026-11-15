@@ -13,6 +13,8 @@ public static class PaCoClaims
     public const string MustChangePassword = "paco:mcp";
     public const string TwoFactor = "paco:2fa";
     public const string DisplayName = "paco:name";
+
+    public const string Language = "paco:lang";
 }
 
 public static class PaCoRoles
@@ -64,6 +66,7 @@ public sealed class PaCoClaimsFactory(
         id.AddClaim(new Claim(PaCoClaims.MustChangePassword, user.MustChangePassword ? "1" : "0"));
         id.AddClaim(new Claim(PaCoClaims.TwoFactor, user.TwoFactorEnabled ? "1" : "0"));
         id.AddClaim(new Claim(PaCoClaims.DisplayName, string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email ?? "" : user.DisplayName));
+        if (user.Language is { } lang) id.AddClaim(new Claim(PaCoClaims.Language, lang));
         return id;
     }
 }
