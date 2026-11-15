@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["suicid*", "me quiero morir", "quiero morirme", "quiero morir", "matarme", "me voy a matar", "quitarme la vida", "no quiero vivir", "no quiero seguir viviendo", "acabar con todo", "cortarme las venas", "cortarme los brazos", "autolesi*", "hacerme daño", "sobredosis", "morir sin dolor", "cómo matarme", "ganas de morir", "nadie me echaría de menos"],
+ "Drugs": ["comprar maria", "comprar porros", "comprar hierba", "comprar hachís", "pillar costo", "cocaína", "farlopa", "una raya de coca", "crystal meth", "éxtasis", "mdma", "lsd", "ketamina", "xanax", "beber lean", "busco camello", "tusi", "cocaina rosa", "setas alucinógenas"],
+ "Violence": ["tiroteo en el instituto", "tiroteo en el colegio", "comprar una pistola", "comprar un arma", "fabricar una bomba", "hacer una bomba", "te voy a matar", "te mato", "voy a apuñalar", "apuñalarle", "llevar una navaja", "matar a todos", "masacre en clase"],
+ "Sexual": ["porno*", "pornhub", "nudes", "fotos desnuda", "fotos desnudo", "foto desnuda", "sexcam", "xxx", "onlyfans", "hentai", "nsfw", "videos de sexo"],
+ "Bullying": ["nadie te quiere", "todos te odian", "todo el mundo te odia", "mátate", "suicídate", "vete a morir", "ojalá te mueras", "gorda asquerosa", "gordo asqueroso", "eres feo", "eres fea", "das asco", "no vales nada", "hijo de puta", "subnormal"],
+ "Grooming": ["no se lo digas a nadie", "no le digas a nadie", "no se lo digas a tus padres", "nuestro secreto", "nuestro pequeño secreto", "mándame una foto", "envíame una foto", "pásame una foto tuya", "estás solo en casa", "estás sola en casa", "están tus padres", "cuantos años tienes", "dónde vives", "quedamos en persona", "podemos quedar", "borra el chat", "borra los mensajes", "pon la cámara", "enciende la cámara"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "guerra racial", "matar a los infieles", "unirse al isis", "unirme al estado islámico", "muerte a los judíos", "muerte a los moros", "raza superior"]
+}
