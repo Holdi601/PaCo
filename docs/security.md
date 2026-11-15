@@ -42,7 +42,9 @@ PaCo geht von zwei Gegnern aus: **Angreifern aus dem Internet** (der Server ist 
 | Freischaltcode raten | 100.000 Möglichkeiten, nach 5 Fehlversuchen exponentielle Sperre bis 60 min. Codes gelten nur für ein Kind, einen Tag und einmal. |
 | Sperrbildschirm umgehen (Alt+Tab, Win-Taste, Task-Manager) | Der Sperrbildschirm läuft auf einem **eigenen Windows-Desktop**. Die Programme des Kindes sind dort nicht erreichbar, und ein Wächter schaltet sofort zurück. |
 | Sitzungs-Agent sabotieren | Lässt sich der Sperrbildschirm nicht anzeigen, wird das Kind **abgemeldet** (fail closed). |
-| Abgesicherter Modus | Der Dienst ist für den abgesicherten Modus registriert. |
+| Abgesicherter Modus (z. B. Umschalt + Neustart → Problembehandlung → Starteinstellungen, geht ohne Admin-Passwort) | Der Dienst ist für den abgesicherten Modus (mit und ohne Netzwerk) registriert und sperrt dort genauso – in der Test-VM geprüft. Den Eltern wird gemeldet, dass der PC im abgesicherten Modus gestartet wurde. |
+| Systemwerkzeuge (Registry-Editor, Eingabeaufforderung, PowerShell, Skript-Hosts, winget) | Windows-Benutzerrichtlinien im Konto des Kindes (wie im Gruppenrichtlinien-Editor): `DisableRegistryTools`, `DisableCMD` (Batchdateien laufen weiter), PowerShell-Skripte aus, Windows Script Host aus, dazu `DisallowRun` mit allen gesperrten Programmen – Windows verweigert den Start mit einer Meldung. Was trotzdem startet, beendet PaCo. Die Schlüssel sind für das Kind nur lesbar; PaCo entfernt genau seine Werte wieder, wenn das Konto kein Kinderkonto mehr ist oder PaCo deinstalliert wird. |
+| Apps selbst installieren (Microsoft Store, winget) | Der Store und winget sind standardmäßig gesperrt (auf der Website pro Kind abschaltbar). Die Windows-Richtlinie „Store deaktivieren“ wirkt nur in Enterprise/Education, deshalb sperrt PaCo die Store-App selbst. |
 | Gesperrtes Programm umbenennen | Zusätzlich wird der Original-Dateiname aus den Versionsinformationen der Exe geprüft. |
 | Anderer Browser / Inkognito | Browser-Richtlinien für Edge, Chrome und Firefox (Sperrlisten, SafeSearch, kein InPrivate). Andere Browser können gesperrt werden. Die Registry-Schlüssel sind für das Kind nur lesbar. |
 | Mehrere Konten / Benutzerwechsel | Jede Sitzung wird einzeln überwacht. Neue Windows-Konten erscheinen auf der Website. |
@@ -54,6 +56,7 @@ PaCo geht von zwei Gegnern aus: **Angreifern aus dem Internet** (der Server ist 
 - **Mehrere PCs offline gleichzeitig**: Jeder PC kennt die Nutzung der anderen nur bis zum letzten Kontakt.
 - **Webfilter** wirken in Edge, Chrome und Firefox. Für einen netzwerkweiten Filter (alle Geräte, auch Handys) kann man
   zusätzlich einen DNS-Filter wie AdGuard Home betreiben.
+- **Bewusst nicht gesperrt**, damit der PC nutzbar bleibt: Task-Manager, Einstellungen/Systemsteuerung, Ausführen-Dialog und Programme im Benutzerordner (AppLocker/Softwareeinschränkung würde Spiele wie Roblox, Minecraft oder Discord blockieren). Ein Kind kann mit dem Task-Manager nur eigene Programme beenden, nicht PaCo.
 - Das Installationsprogramm ist nicht code-signiert, deshalb zeigt Windows SmartScreen eine Warnung.
 
 ## Sicherheitslücke melden
