@@ -2,93 +2,96 @@
 @model PaCo.Server.Pages.Children.EditModel
 @{ ViewData["Title"] = $"Regeln für {Model.Name}"; }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Regeln für @Model.Name</h1>
-    <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">Zurück</a>
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="stat-label">Regeln</div>
+        <h1 class="h3 mb-0 page-title">@Model.Name</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="./Stats" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">Statistik</a>
+        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">← Übersicht</a>
+    </div>
 </div>
 
-<div asp-validation-summary="All" class="alert alert-danger"></div>
+<div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
 <form method="post" asp-route-id="@Model.Id">
-    <div class="card mb-3">
-        <div class="card-header">Allgemein</div>
+    <section class="card mb-3" aria-labelledby="sec-week">
+        <div class="card-header" id="sec-week">Bildschirmzeit pro Tag</div>
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="Name" class="form-label">Name</label>
-                    <input asp-for="Name" class="form-control" />
+            <p class="small text-muted">Pro Tag: wie viele Minuten insgesamt (60 = 1 Stunde, 120 = 2 Stunden) und in welchem Zeitraum der PC benutzt werden darf. Zusatzzeit von der Übersicht oder per Freischaltcode gilt auch außerhalb des Zeitraums.</p>
+            <div class="table-days">
+                <div class="row g-2 d-none d-md-flex small text-muted fw-semibold pb-1" aria-hidden="true">
+                    <div class="col-md-2">Tag</div>
+                    <div class="col-md-4">Minuten pro Tag</div>
+                    <div class="col-md-6">Erlaubt von – bis</div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-label">Wenn die Zeit abgelaufen ist</div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" asp-for="ExpiryAction" value="@ExpiryAction.LockScreen" id="ea-lock" />
-                        <label class="form-check-label" for="ea-lock"><strong>Sperrbildschirm</strong> – Ton aus, schwarzer Bildschirm. Weiter nur mit Freischaltcode oder Zeit von der Website.</label>
+                @foreach (var dow in Format.WeekOrder)
+                {
+                    var i = (int)dow;
+                    var day = Format.WeekdayNames[i];
+                    <div class="day-row row g-2 align-items-center py-2" data-day-row="@i" role="group" aria-label="@day">
+                        <div class="col-12 col-md-2 fw-semibold">@day</div>
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <label asp-for="Days[i].LimitMinutes" class="visually-hidden">Minuten am @day</label>
+                                <div class="input-group input-group-sm w-auto">
+                                    <input asp-for="Days[i].LimitMinutes" type="number" min="0" max="1440" step="15" inputmode="numeric" class="form-control" data-field="limit" />
+                                    <span class="input-group-text">Min</span>
+                                </div>
+                                <div class="form-check text-nowrap mb-0">
+                                    <input asp-for="Days[i].Unlimited" class="form-check-input" data-field="unlimited" />
+                                    <label asp-for="Days[i].Unlimited" class="form-check-label small">unbegrenzt</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-6">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <label asp-for="Days[i].From" class="visually-hidden">@day erlaubt ab</label>
+                                <input asp-for="Days[i].From" type="time" class="form-control form-control-sm w-auto" data-field="from" />
+                                <span aria-hidden="true">–</span>
+                                <label asp-for="Days[i].To" class="visually-hidden">@day erlaubt bis</label>
+                                <input asp-for="Days[i].To" type="time" class="form-control form-control-sm w-auto" data-field="to" />
+                                <div class="form-check text-nowrap mb-0">
+                                    <input asp-for="Days[i].AllDay" class="form-check-input" data-field="allday" />
+                                    <label asp-for="Days[i].AllDay" class="form-check-label small">ganztags</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" asp-for="ExpiryAction" value="@ExpiryAction.Logoff" id="ea-logoff" />
-                        <label class="form-check-label" for="ea-logoff"><strong>Abmelden</strong> – Ton aus, Kind wird sofort abgemeldet.</label>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <div class="form-check form-switch">
-                        <input asp-for="Paused" class="form-check-input" role="switch" />
-                        <label asp-for="Paused" class="form-check-label">Überwachung pausieren (z. B. Ferien) – nichts wird gesperrt, Nutzung wird weiter erfasst</label>
-                    </div>
-                </div>
+                }
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="2,3,4,5">Montag auf Di–Fr übertragen</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="6" data-targets="0">Samstag auf Sonntag übertragen</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="0,2,3,4,5,6">Montag auf alle Tage übertragen</button>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card mb-3">
-        <div class="card-header">Wochenplan</div>
+    <section class="card mb-3" aria-labelledby="sec-expiry">
+        <div class="card-header" id="sec-expiry">Wenn die Zeit abgelaufen ist</div>
         <div class="card-body">
-            <p class="small text-muted">Pro Tag: wie viele Minuten insgesamt, und in welchem Zeitraum der PC benutzt werden darf. Zusatzzeit von der Website oder per Freischaltcode gilt auch außerhalb des Zeitraums.</p>
-            <div class="table-responsive">
-                <table class="table align-middle table-days">
-                    <thead>
-                        <tr><th>Tag</th><th>Minuten pro Tag</th><th>Erlaubt von – bis</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var dow in Format.WeekOrder)
-                        {
-                            var i = (int)dow;
-                            <tr data-day-row="@i">
-                                <td class="fw-semibold">@Format.WeekdayNames[i]</td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <input asp-for="Days[i].LimitMinutes" type="number" min="0" max="1440" step="15" class="form-control form-control-sm" data-field="limit" />
-                                        <div class="form-check text-nowrap mb-0">
-                                            <input asp-for="Days[i].Unlimited" class="form-check-input" data-field="unlimited" />
-                                            <label asp-for="Days[i].Unlimited" class="form-check-label small">unbegrenzt</label>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                                        <input asp-for="Days[i].From" type="time" class="form-control form-control-sm w-auto" data-field="from" />
-                                        <span>–</span>
-                                        <input asp-for="Days[i].To" type="time" class="form-control form-control-sm w-auto" data-field="to" />
-                                        <div class="form-check text-nowrap mb-0">
-                                            <input asp-for="Days[i].AllDay" class="form-check-input" data-field="allday" />
-                                            <label asp-for="Days[i].AllDay" class="form-check-label small">ganztags</label>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="2,3,4,5">Montag auf Di–Fr übertragen</button>
-                <button class="btn btn-sm btn-outline-secondary" data-copy-day="6" data-targets="0">Samstag auf Sonntag übertragen</button>
-                <button class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="0,2,3,4,5,6">Montag auf alle Tage übertragen</button>
+            <fieldset class="mb-3">
+                <legend class="visually-hidden">Was passiert, wenn die Zeit abgelaufen ist?</legend>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="ExpiryAction" value="@ExpiryAction.LockScreen" id="ea-lock" />
+                    <label class="form-check-label" for="ea-lock"><strong>Sperrbildschirm</strong> (empfohlen) – Ton aus, schwarzer Bildschirm. Weiter nur mit Freischaltcode oder Zeit von der Übersicht.</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="ExpiryAction" value="@ExpiryAction.Logoff" id="ea-logoff" />
+                    <label class="form-check-label" for="ea-logoff"><strong>Abmelden</strong> – Ton aus, das Kind wird sofort abgemeldet. Nicht gespeicherte Arbeit kann verloren gehen.</label>
+                </div>
+            </fieldset>
+            <div class="form-check form-switch">
+                <input asp-for="Paused" class="form-check-input" role="switch" />
+                <label asp-for="Paused" class="form-check-label">Überwachung pausieren (z. B. in den Ferien) – nichts wird gesperrt, die Nutzung wird weiter erfasst</label>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card mb-3">
-        <div class="card-header">Internet</div>
+    <section class="card mb-3" aria-labelledby="sec-web">
+        <div class="card-header" id="sec-web">Internet</div>
         <div class="card-body">
             <p class="small text-muted">Gilt für Microsoft Edge, Google Chrome und Firefox im Windows-Konto des Kindes.</p>
             <div class="form-check form-switch">
@@ -108,23 +111,43 @@
                 <label asp-for="BlockOtherBrowsers" class="form-check-label">Andere Browser sperren (Opera, Brave, Tor, …) – sonst könnten die Regeln umgangen werden</label>
             </div>
 
-            <label asp-for="BlockedSites" class="form-label">Gesperrte Webseiten (eine pro Zeile)</label>
-            <textarea asp-for="BlockedSites" class="form-control font-monospace" rows="5" placeholder="tiktok.com"></textarea>
-            <div class="mt-2 small">Schnell hinzufügen:</div>
-            <div class="d-flex flex-wrap gap-3 mt-1">
-                @foreach (var p in PaCo.Server.Pages.Children.EditModel.SitePresets.Keys)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="AddPresets" value="@p" id="preset-@p.GetHashCode()" />
-                        <label class="form-check-label small" for="preset-@p.GetHashCode()">@p</label>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
+            <fieldset class="mb-3">
+                <legend class="form-label fs-6 mb-1">Ganze Gruppen sperren</legend>
+                <div class="small text-muted mb-1">Ankreuzen und speichern – die Webseiten erscheinen danach in der Liste darunter.</div>
+                <div class="d-flex flex-wrap column-gap-3">
+                    @{ var presetNo = 0; }
+                    @foreach (var p in PaCo.Server.Pages.Children.EditModel.SitePresets.Keys)
+                    {
+                        presetNo++;
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="AddPresets" value="@p" id="preset-@presetNo" />
+                            <label class="form-check-label" for="preset-@presetNo">@p</label>
+                        </div>
+                    }
+                </div>
+            </fieldset>
 
-    <div class="card mb-3">
-        <div class="card-header">Alarme (Stichwörter)</div>
+            <label asp-for="BlockedSites" class="form-label">Gesperrte Webseiten</label>
+            <textarea asp-for="BlockedSites" class="form-control font-monospace" rows="5" placeholder="tiktok.com" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="sites-help"></textarea>
+            <div id="sites-help" class="form-text">Eine Adresse pro Zeile, z. B. <code>tiktok.com</code>.</div>
+        </div>
+    </section>
+
+    <section class="card mb-3" aria-labelledby="sec-apps">
+        <div class="card-header" id="sec-apps">Programme</div>
+        <div class="card-body">
+            <div class="form-check form-switch mb-3">
+                <input asp-for="BlockSystemTools" class="form-check-input" role="switch" />
+                <label asp-for="BlockSystemTools" class="form-check-label">Systemwerkzeuge sperren (PowerShell, Eingabeaufforderung, Registry-Editor, Skript-Hosts) – schützt vor Umgehungsversuchen und typischer Schadsoftware (empfohlen)</label>
+            </div>
+            <label asp-for="BlockedApps" class="form-label">Gesperrte Programme</label>
+            <textarea asp-for="BlockedApps" class="form-control font-monospace" rows="4" placeholder="discord" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="apps-help"></textarea>
+            <div id="apps-help" class="form-text">Ein Programmname pro Zeile – das Programm wird sofort wieder geschlossen, wenn es gestartet wird. Den Namen findest du unter <a asp-page="./Stats" asp-route-id="@Model.Id">Statistik</a> in Klammern (z. B. <code>robloxplayerbeta</code>, <code>steam</code>, <code>discord</code>).</div>
+        </div>
+    </section>
+
+    <section class="card mb-3" aria-labelledby="sec-alerts">
+        <div class="card-header" id="sec-alerts">Alarme bei bedenklichen Stichwörtern</div>
         <div class="card-body">
             <p class="small text-muted">PaCo prüft auf dem PC <strong>lokal</strong>, ob bestimmte Wörter auftauchen, und meldet nur den Treffer mit kurzem Ausschnitt – sofort aufs Handy, wenn <a asp-page="/Notifications">Handy-Benachrichtigungen</a> eingerichtet sind.</p>
             <div class="form-check form-switch">
@@ -139,45 +162,49 @@
                 <input asp-for="ShowHelpToChild" class="form-check-input" role="switch" />
                 <label asp-for="ShowHelpToChild" class="form-check-label">Bei Suizid-Stichwörtern dem Kind Hilfsangebote anzeigen (Nummer gegen Kummer, TelefonSeelsorge)</label>
             </div>
-            <div class="form-label">Kategorien</div>
-            <div class="row row-cols-1 row-cols-md-2 g-1 mb-3">
-                @foreach (var cat in Enum.GetValues<AlertCategory>().Where(c => c != AlertCategory.Custom))
-                {
-                    <div class="col">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="AlertCategories" value="@cat" id="cat-@cat" checked="@Model.AlertCategories.Contains(cat)" />
-                            <label class="form-check-label" for="cat-@cat">@AlertKeywords.Label(cat)</label>
+            <fieldset class="mb-3">
+                <legend class="form-label fs-6 mb-1">Worauf soll PaCo achten?</legend>
+                <div class="row row-cols-1 row-cols-md-2 g-1">
+                    @foreach (var cat in Enum.GetValues<AlertCategory>().Where(c => c != AlertCategory.Custom))
+                    {
+                        <div class="col">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="AlertCategories" value="@cat" id="cat-@cat" checked="@Model.AlertCategories.Contains(cat)" />
+                                <label class="form-check-label" for="cat-@cat">@AlertKeywords.Label(cat)</label>
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
+            </fieldset>
+            <label asp-for="CustomKeywords" class="form-label">Eigene Stichwörter</label>
+            <textarea asp-for="CustomKeywords" class="form-control font-monospace" rows="3" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="kw-help"></textarea>
+            <div id="kw-help" class="form-text">Eins pro Zeile. Ein <code>*</code> am Ende findet auch Wortanfänge, z. B. <code>wette*</code>.</div>
+        </div>
+    </section>
+
+    <section class="card mb-3" aria-labelledby="sec-general">
+        <div class="card-header" id="sec-general">Allgemein</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Name</label>
+                <input asp-for="Name" class="form-control" autocomplete="off" autocapitalize="words" maxlength="60" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
             </div>
-            <label asp-for="CustomKeywords" class="form-label">Eigene Stichwörter (eins pro Zeile, * am Ende = auch Wortanfänge, z. B. <code>wette*</code>)</label>
-            <textarea asp-for="CustomKeywords" class="form-control font-monospace" rows="3"></textarea>
-            <div class="form-check form-switch mt-3">
+            <div class="form-check form-switch">
                 <input asp-for="NotifyChildOnScreenshot" class="form-check-input" role="switch" />
                 <label asp-for="NotifyChildOnScreenshot" class="form-check-label">Kind kurz informieren, wenn ein Bildschirmfoto gemacht wird (empfohlen – Vertrauen)</label>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card mb-3">
-        <div class="card-header">Gesperrte Programme</div>
-        <div class="card-body">
-            <div class="form-check form-switch mb-3">
-                <input asp-for="BlockSystemTools" class="form-check-input" role="switch" />
-                <label asp-for="BlockSystemTools" class="form-check-label">Systemwerkzeuge sperren (PowerShell, Eingabeaufforderung, Registry-Editor, Skript-Hosts) – schützt vor Umgehungsversuchen und typischer Schadsoftware (empfohlen)</label>
-            </div>
-            <label asp-for="BlockedApps" class="form-label">Programmname (eine pro Zeile) – das Programm wird sofort geschlossen, wenn es gestartet wird</label>
-            <textarea asp-for="BlockedApps" class="form-control font-monospace" rows="4" placeholder="discord"></textarea>
-            <div class="form-text">Den Programmnamen findest du unter <a asp-page="./Stats" asp-route-id="@Model.Id">Statistik</a> (z. B. <code>robloxplayerbeta</code>, <code>steam</code>, <code>discord</code>).</div>
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-between">
+    <div class="sticky-actions d-flex flex-wrap align-items-center gap-2">
         <button type="submit" class="btn btn-primary btn-lg">Speichern</button>
+        <a asp-page="/Dashboard" class="btn btn-link">Abbrechen</a>
+        <span class="small text-muted d-none d-sm-inline">Online-PCs übernehmen die Regeln innerhalb von 30 Sekunden.</span>
     </div>
 </form>
 
-<form method="post" asp-page-handler="Delete" asp-route-id="@Model.Id" class="mt-4 text-end">
+<form method="post" asp-page-handler="Delete" asp-route-id="@Model.Id" class="mt-5 pt-3 border-top">
+    <div class="small text-muted mb-2">Kind wird nicht mehr gebraucht? Dabei werden Statistik und Regeln gelöscht, und zugeordnete Windows-Konten werden nicht mehr überwacht.</div>
     <button class="btn btn-sm btn-outline-danger" data-confirm="@Model.Name wirklich löschen? Statistik und Regeln gehen verloren.">Kind löschen</button>
 </form>

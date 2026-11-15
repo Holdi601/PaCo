@@ -6,16 +6,18 @@
     <div class="stat-label">Familie</div>
     <h1 class="h3 page-title">Eltern & Erziehungsberechtigte</h1>
     <p class="text-muted mb-0">Alle hier haben die gleichen Rechte: Regeln ändern, Zeit geben, sperren, Alarme sehen.</p>
+    <p class="small mt-2 mb-0">Alarme aufs Handy richtet jedes Elternteil selbst ein: <a asp-page="/Notifications">Handy-Benachrichtigungen</a>.</p>
 </div>
 
 @if (Model.InviteLink is not null)
 {
-    <div class="alert alert-info">
+    <div class="alert alert-info" role="status">
         <div class="fw-semibold mb-1">Einladungslink für @Model.InviteFor</div>
-        <div class="small mb-2">7 Tage gültig, nur einmal benutzbar. Schick ihn z. B. per Messenger. Damit legt die Person ihr Passwort fest und richtet die Authenticator-App ein.</div>
+        <div class="small mb-2">Jetzt kopieren und z. B. per Messenger schicken – der Link wird nur dieses eine Mal angezeigt. 7 Tage gültig, nur einmal benutzbar. Damit legt die Person ihr Passwort fest und richtet die Authenticator-App ein.</div>
         <div class="input-group">
-            <input id="invite-link" class="form-control font-monospace small" value="@Model.InviteLink" readonly />
+            <input id="invite-link" class="form-control font-monospace small" value="@Model.InviteLink" readonly aria-label="Einladungslink" />
             <button class="btn btn-primary" data-copy="#invite-link" type="button">Kopieren</button>
+            <button class="btn btn-outline-primary" data-share="#invite-link" data-share-title="Einladung zu PaCo" type="button" hidden>Teilen</button>
         </div>
     </div>
 }
@@ -30,7 +32,7 @@
                     <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
                         <div>
                             <div class="fw-semibold">@p.DisplayName @if (p.Id == Model.MyId) { <span class="text-muted small">(du)</span> }</div>
-                            <div class="small text-muted">@p.Email · @(p.InvitePending ? "Einladung offen" : $"zuletzt angemeldet {Format.Ago(p.LastLoginUtc, Model.Now)}")</div>
+                            <div class="small text-muted">@p.Email · @(p.InvitePending ? "Einladung noch nicht angenommen" : $"zuletzt angemeldet {Format.Ago(p.LastLoginUtc, Model.Now)}")</div>
                         </div>
                         @if (p.Id != Model.MyId)
                         {
@@ -39,12 +41,12 @@
                                 {
                                     <form method="post" asp-page-handler="NewLink">
                                         <input type="hidden" name="userId" value="@p.Id" />
-                                        <button class="btn btn-sm btn-outline-secondary">Neuer Link</button>
+                                        <button class="btn btn-sm btn-outline-secondary" data-confirm="Neuen Einladungslink für @p.DisplayName erstellen? Der alte Link funktioniert dann nicht mehr.">Neuer Link</button>
                                     </form>
                                 }
                                 <form method="post" asp-page-handler="Remove">
                                     <input type="hidden" name="userId" value="@p.Id" />
-                                    <button class="btn btn-sm btn-outline-danger" data-confirm="@p.DisplayName wirklich aus der Familie entfernen?">Entfernen</button>
+                                    <button class="btn btn-sm btn-outline-danger" data-confirm="@p.DisplayName wirklich aus der Familie entfernen? Das Konto wird gelöscht.">Entfernen</button>
                                 </form>
                             </div>
                         }
@@ -57,15 +59,18 @@
         <div class="card">
             <div class="card-header">Weiteres Elternteil einladen</div>
             <div class="card-body">
-                <div asp-validation-summary="All" class="alert alert-danger"></div>
+                <p class="small text-muted">Z. B. Papa, Oma oder eine andere Bezugsperson. Es wird keine E-Mail verschickt – du bekommst einen Link, den du selbst weiterschickst.</p>
                 <form method="post" asp-page-handler="Invite">
                     <div class="mb-3">
                         <label asp-for="InviteName" class="form-label">Name</label>
-                        <input asp-for="InviteName" class="form-control" placeholder="z. B. Papa" />
+                        <input asp-for="InviteName" class="form-control" placeholder="z. B. Papa" autocomplete="off" autocapitalize="words" />
+                        <span asp-validation-for="InviteName" class="text-danger small"></span>
                     </div>
                     <div class="mb-3">
-                        <label asp-for="InviteEmail" class="form-label">E-Mail (Benutzername)</label>
-                        <input asp-for="InviteEmail" class="form-control" />
+                        <label asp-for="InviteEmail" class="form-label">E-Mail-Adresse</label>
+                        <input asp-for="InviteEmail" class="form-control" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="invite-email-help" />
+                        <div id="invite-email-help" class="form-text">Damit meldet sich die Person später an.</div>
+                        <span asp-validation-for="InviteEmail" class="text-danger small"></span>
                     </div>
                     <button class="btn btn-primary w-100">Einladungslink erstellen</button>
                 </form>

@@ -10,9 +10,9 @@
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
     <div>
         <div class="stat-label">Standort</div>
-        <h1 class="h3 mb-0 page-title">💻 @Model.Device.Name</h1>
+        <h1 class="h3 mb-0 page-title"><span aria-hidden="true">💻</span> @Model.Device.Name</h1>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">Zurück</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">← Geräte</a>
 </div>
 
 <div class="card mb-3">
@@ -29,23 +29,27 @@
         <div class="d-flex gap-2 align-items-center">
             @if (Model.Waiting)
             {
-                <span class="spinner-border spinner-border-sm text-primary"></span><span class="small">Orte … (PC muss online sein)</span>
+                <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">Orte … (PC muss online sein)</span>
                 <div data-autorefresh="4"></div>
             }
             <form method="post" asp-page-handler="Locate" asp-route-id="@Model.Device.Id">
-                <button class="btn btn-primary" @(Model.Waiting ? "disabled" : "")>📍 Jetzt orten</button>
+                <button class="btn btn-primary" disabled="@Model.Waiting">📍 Jetzt orten</button>
             </form>
         </div>
+        @if (Model.Device.LocationMode == LocationMode.Off)
+        {
+            <div class="small text-muted w-100">Die Aufzeichnung ist aus. „Jetzt orten“ schaltet sie auf „Nur auf Anforderung“ – es wird nur geortet, wenn du darauf tippst.</div>
+        }
     </div>
 </div>
 
-<div class="d-flex gap-2 mb-2 small">
+<nav class="d-flex flex-wrap gap-3 mb-2 small" aria-label="Zeitraum">
     Zeitraum:
     @foreach (var d in new[] { 1, 7, 30 })
     {
-        <a asp-route-id="@Model.Device.Id" asp-route-days="@d" class="@(Model.Days == d ? "fw-bold" : "")">@(d == 1 ? "24 Stunden" : $"{d} Tage")</a>
+        <a asp-route-id="@Model.Device.Id" asp-route-days="@d" class="@(Model.Days == d ? "fw-bold" : "")" aria-current="@(Model.Days == d ? "true" : null)">@(d == 1 ? "24 Stunden" : $"{d} Tage")</a>
     }
-</div>
+</nav>
 
 @if (Model.Latest is { } last)
 {
@@ -95,7 +99,7 @@
                 }
                 @if (Model.Points.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Keine Standorte in diesem Zeitraum. @(Model.Device.LocationMode == LocationMode.Off ? "Die Aufzeichnung ist ausgeschaltet." : "")</div>
+                    <div class="list-group-item text-muted">Keine Standorte in diesem Zeitraum. @(Model.Device.LocationMode == LocationMode.Off ? "Die Aufzeichnung ist ausgeschaltet – tippe oben auf „Jetzt orten“." : "")</div>
                 }
             </div>
             @if (Model.Points.Count > 0)

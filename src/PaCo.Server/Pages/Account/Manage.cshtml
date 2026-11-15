@@ -2,7 +2,7 @@
 @model PaCo.Server.Pages.Account.ManageModel
 @{ ViewData["Title"] = "Mein Konto"; }
 
-<h1 class="h3 mb-3">Mein Konto</h1>
+<h1 class="h3 page-title mb-3">Mein Konto</h1>
 <div class="row g-3">
     <div class="col-lg-6">
         <div class="card h-100">
@@ -10,16 +10,19 @@
             <div class="card-body">
                 <form method="post">
                     <div class="mb-3">
-                        <label class="form-label">E-Mail</label>
-                        <input class="form-control" value="@Model.Email" disabled />
+                        <label for="account-email" class="form-label">E-Mail (zum Anmelden)</label>
+                        <input id="account-email" class="form-control" value="@Model.Email" disabled />
                     </div>
                     <div class="mb-3">
                         <label asp-for="DisplayName" class="form-label">Anzeigename</label>
-                        <input asp-for="DisplayName" class="form-control" />
+                        <input asp-for="DisplayName" class="form-control" autocomplete="name" autocapitalize="words" aria-describedby="name-help" />
+                        <div id="name-help" class="form-text">So sehen dich die anderen Eltern.</div>
                         <span asp-validation-for="DisplayName" class="text-danger small"></span>
                     </div>
-                    <button type="submit" class="btn btn-primary">Speichern</button>
-                    <a asp-page="./ChangePassword" class="btn btn-outline-secondary">Passwort ändern</a>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                        <a asp-page="./ChangePassword" class="btn btn-outline-secondary">Passwort ändern</a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -29,17 +32,39 @@
             <div class="card-header">Sicherheit</div>
             <div class="card-body">
                 <p>Zwei-Faktor-Anmeldung: <strong class="status-ok">aktiv</strong><br />
-                   Übrige Notfall-Codes: <strong>@Model.RecoveryCodesLeft</strong></p>
+                   Übrige Notfall-Codes: <strong class="@(Model.RecoveryCodesLeft <= 2 ? "status-warn" : "")">@Model.RecoveryCodesLeft</strong></p>
+                @if (Model.RecoveryCodesLeft <= 2)
+                {
+                    <p class="small status-warn">Nur noch wenige Notfall-Codes übrig – erstelle am besten neue und schreib sie auf.</p>
+                }
                 <div class="d-flex flex-wrap gap-2">
                     <a asp-page="./SetupAuthenticator" class="btn btn-outline-secondary">Neues Handy einrichten</a>
                     <form method="post" asp-page-handler="RecoveryCodes">
-                        <button type="submit" class="btn btn-outline-secondary">Neue Notfall-Codes</button>
+                        <button type="submit" class="btn btn-outline-secondary" data-confirm="Neue Notfall-Codes erstellen? Die alten Codes funktionieren danach nicht mehr.">Neue Notfall-Codes</button>
                     </form>
                     <form method="post" asp-page-handler="LogoutEverywhere">
-                        <button type="submit" class="btn btn-outline-danger">Überall abmelden</button>
+                        <button type="submit" class="btn btn-outline-danger" data-confirm="Auf allen Geräten abmelden – auch hier? Danach musst du dich überall neu anmelden.">Überall abmelden</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+    @if (User.HasClaim(c => c.Type == PaCoClaims.Family))
+    {
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">Weitere Einstellungen</div>
+                <div class="list-group list-group-flush">
+                    <a asp-page="/Notifications" class="list-group-item list-group-item-action py-3">
+                        <div class="fw-semibold">📱 Handy-Benachrichtigungen</div>
+                        <div class="small text-muted">Alarme sofort aufs Handy bekommen (App ntfy einrichten)</div>
+                    </a>
+                    <a asp-page="/Family" class="list-group-item list-group-item-action py-3">
+                        <div class="fw-semibold">👪 Familie &amp; Eltern einladen</div>
+                        <div class="small text-muted">Wer außer dir noch Zugriff hat – und weitere Eltern einladen</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
 </div>

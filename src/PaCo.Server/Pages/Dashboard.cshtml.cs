@@ -21,6 +21,9 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
 
     public IReadOnlyDictionary<Guid, int> UnreadAlerts { get; private set; } = new Dictionary<Guid, int>();
 
+    /// <summary>At least one PC is connected (drives the first-run guide).</summary>
+    public bool HasDevices { get; private set; }
+
     /// <summary>Unlock code just generated (shown once).</summary>
     [TempData]
     public string? NewCode { get; set; }
@@ -34,6 +37,7 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         FamilyName = (await actions.GetFamilyAsync()).Name;
         Children = await actions.StatusAsync();
         Warnings = await WarningsAsync();
+        HasDevices = await db.Devices.AnyAsync(d => !d.Revoked);
         UnreadAlerts = (await db.Alerts.Where(a => a.ReadUtc == null).Select(a => a.ChildId).ToListAsync())
             .GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
     }
@@ -42,14 +46,17 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
     {
         await actions.GrantAsync(child, minutes, User);
         var name = (await actions.FindChildAsync(child))?.Name;
-        TempData["Message"] = minutes == 0 ? $"{name} darf heute unbegrenzt." : $"{name} hat {minutes} Minuten mehr bekommen. Ist der PC online, gilt das in wenigen Sekunden.";
+        TempData["Message"] = minutes == 0
+            ? $"{name} darf heute unbegrenzt an den PC. Ist der PC online, gilt das in wenigen Sekunden."
+            : $"{name} hat {minutes} Minuten mehr bekommen. Ist der PC online, gilt das in wenigen Sekunden.";
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostRevokeGrantsAsync(Guid child)
     {
         await actions.RevokeTodayGrantsAsync(child);
-        TempData["Message"] = "Zusatzzeit für heute zurückgenommen.";
+        var name = (await actions.FindChildAsync(child))?.Name;
+        TempData["Message"] = $"Zusatzzeit für {name} heute zurückgenommen.";
         return RedirectToPage();
     }
 
@@ -57,7 +64,9 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
     {
         await actions.SetLockedAsync(child, locked);
         var name = (await actions.FindChildAsync(child))?.Name;
-        TempData["Message"] = locked ? $"{name} ist jetzt gesperrt." : $"Sperre für {name} aufgehoben.";
+        TempData["Message"] = locked
+            ? $"{name} ist jetzt gesperrt. Ist der PC online, erscheint der Sperrbildschirm in wenigen Sekunden."
+            : $"Sperre für {name} aufgehoben.";
         return RedirectToPage();
     }
 
@@ -88,7 +97,7 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         var c = await actions.FindChildAsync(child);
         if (c is null) return NotFound();
         NewCode = await actions.CreateUnlockCodeAsync(child, minutes, User);
-        NewCodeInfo = $"Freischaltcode für {c.Name}: {Format.Grant(minutes)}. Gilt nur heute und nur einmal – funktioniert auch ohne Internet.";
+        NewCodeInfo = $"Freischaltcode für {c.Name}: {Format.Grant(minutes)}";
         return RedirectToPage();
     }
 

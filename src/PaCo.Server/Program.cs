@@ -115,6 +115,21 @@ builder.Services.AddRazorPages(o =>
         o.Conventions.AllowAnonymousToPage(p);
     o.Conventions.AllowAnonymousToPage("/Error");
     o.Conventions.AllowAnonymousToPage("/Index"); // Only redirects (login / dashboard / admin).
+}).AddMvcOptions(o =>
+{
+    // Form errors the parents may see (e.g. a time typed wrongly) – in German instead of the English defaults.
+    var m = o.ModelBindingMessageProvider;
+    m.SetValueIsInvalidAccessor(v => $"Der Wert „{v}“ ist ungültig.");
+    m.SetAttemptedValueIsInvalidAccessor((v, f) => $"Der Wert „{v}“ ist ungültig.");
+    m.SetNonPropertyAttemptedValueIsInvalidAccessor(v => $"Der Wert „{v}“ ist ungültig.");
+    m.SetUnknownValueIsInvalidAccessor(f => "Ungültige Eingabe.");
+    m.SetNonPropertyUnknownValueIsInvalidAccessor(() => "Ungültige Eingabe.");
+    m.SetValueMustNotBeNullAccessor(v => "Bitte ausfüllen.");
+    m.SetMissingBindRequiredValueAccessor(f => "Bitte ausfüllen.");
+    m.SetMissingKeyOrValueAccessor(() => "Bitte ausfüllen.");
+    m.SetMissingRequestBodyRequiredValueAccessor(() => "Bitte ausfüllen.");
+    m.SetValueMustBeANumberAccessor(f => "Bitte eine Zahl eingeben.");
+    m.SetNonPropertyValueMustBeANumberAccessor(() => "Bitte eine Zahl eingeben.");
 });
 builder.Services.AddAntiforgery(o =>
 {

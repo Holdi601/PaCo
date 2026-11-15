@@ -32,12 +32,13 @@ public sealed class ManageModel(UserManager<ParentUser> users, SignInManager<Par
         if (!ModelState.IsValid)
         {
             Email = user.Email ?? "";
+            RecoveryCodesLeft = await users.CountRecoveryCodesAsync(user);
             return Page();
         }
         user.DisplayName = DisplayName.Trim();
         await users.UpdateAsync(user);
         await signIn.RefreshSignInAsync(user);
-        TempData["Message"] = "Gespeichert.";
+        TempData["Message"] = "Dein Name wurde gespeichert.";
         return RedirectToPage();
     }
 

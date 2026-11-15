@@ -9,12 +9,12 @@
                 <h1 class="h4 mb-3">Anmelden</h1>
                 @if (Model.Error is not null)
                 {
-                    <div class="alert alert-danger">@Model.Error</div>
+                    <div class="alert alert-danger" role="alert">@Model.Error</div>
                 }
                 <form method="post">
                     <div class="mb-3">
                         <label asp-for="Email" class="form-label">E-Mail</label>
-                        <input asp-for="Email" class="form-control" autocomplete="username" autofocus />
+                        <input asp-for="Email" class="form-control" autocomplete="username" autocapitalize="off" spellcheck="false" autofocus />
                         <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
                     <div class="mb-3">
@@ -28,6 +28,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Weiter</button>
                 </form>
+                <p class="small text-muted mt-3 mb-0">Passwort vergessen oder Handy verloren? Frag die Person, die PaCo für euch betreibt – sie kann deinen Zugang zurücksetzen und dir einen neuen Link schicken.</p>
             </div>
         </div>
     </div>

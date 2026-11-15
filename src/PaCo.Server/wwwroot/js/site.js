@@ -2,6 +2,15 @@
 (function () {
     "use strict";
 
+    // Short "done" feedback on a button, then restore its label.
+    function flash(el, text) {
+        if (el.hasAttribute("data-flashing")) return;
+        var old = el.textContent;
+        el.setAttribute("data-flashing", "");
+        el.textContent = text;
+        setTimeout(function () { el.textContent = old; el.removeAttribute("data-flashing"); }, 2000);
+    }
+
     // Confirmation for dangerous buttons: <button data-confirm="Wirklich?">
     document.addEventListener("click", function (e) {
         var el = e.target.closest("[data-confirm]");
@@ -17,27 +26,64 @@
         if (!el) return;
         var src = document.querySelector(el.getAttribute("data-copy"));
         if (!src) return;
-        var text = src.value !== undefined ? src.value : src.textContent;
-        navigator.clipboard.writeText(text.trim()).then(function () {
-            var old = el.textContent;
-            el.textContent = "Kopiert ✓";
-            setTimeout(function () { el.textContent = old; }, 2000);
+        var text = (src.value !== undefined ? src.value : src.textContent).trim();
+        var done = function () { flash(el, "Kopiert ✓"); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { if (src.select) src.select(); });
+        } else if (src.select) {
+            src.select(); // older browsers: at least select it so the user can copy by hand
+        }
+    });
+
+    // Share buttons (phone share sheet: WhatsApp, Signal, Mail …): <button data-share="#elementId" hidden>
+    // Only shown where the browser supports it.
+    document.querySelectorAll("[data-share]").forEach(function (el) {
+        if (!navigator.share) return;
+        el.hidden = false;
+        el.addEventListener("click", function () {
+            var src = document.querySelector(el.getAttribute("data-share"));
+            if (!src) return;
+            var text = (src.value !== undefined ? src.value : src.textContent).trim();
+            var data = { title: el.getAttribute("data-share-title") || "PaCo" };
+            if (/^https?:\/\//.test(text)) data.url = text; else data.text = text;
+            navigator.share(data).catch(function () { /* cancelled */ });
         });
     });
 
-    // Auto refresh (dashboard) unless the user is typing in a form.
+    // Submit a form as soon as a select changes: <select data-autosubmit>
+    document.addEventListener("change", function (e) {
+        var el = e.target.closest("[data-autosubmit]");
+        if (el && el.form) el.form.requestSubmit ? el.form.requestSubmit() : el.form.submit();
+    });
+
+    // Auto refresh (dashboard, live pages) unless the user is busy on the page.
     var auto = document.querySelector("[data-autorefresh]");
     if (auto) {
         var seconds = parseInt(auto.getAttribute("data-autorefresh"), 10) || 60;
         setInterval(function () {
+            if (document.hidden) return;
             var a = document.activeElement;
             if (a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA")) return;
             if (document.querySelector(".alert-info .code-box")) return; // keep a fresh unlock code visible
+            if (document.querySelector(".dropdown-menu.show, .navbar-collapse.show, .navbar-collapse.collapsing")) return; // menu open
             window.location.reload();
         }, seconds * 1000);
     }
 
-    // Day-rule helpers on the rules page.
+    // Weekly plan on the rules page: "unbegrenzt" / "ganztags" grey out the fields they make irrelevant.
+    function syncDay(row) {
+        var get = function (k) { return row.querySelector("[data-field='" + k + "']"); };
+        var unlimited = get("unlimited"), allday = get("allday");
+        if (unlimited && get("limit")) get("limit").disabled = unlimited.checked;
+        if (allday) ["from", "to"].forEach(function (k) { if (get(k)) get(k).disabled = allday.checked; });
+    }
+    document.querySelectorAll("[data-day-row]").forEach(syncDay);
+    document.addEventListener("change", function (e) {
+        var row = e.target.closest("[data-day-row]");
+        if (row && e.target.matches("[data-field='unlimited'], [data-field='allday']")) syncDay(row);
+    });
+
+    // Day-rule helpers on the rules page: copy one day to others.
     document.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-copy-day]");
         if (!btn) return;
@@ -54,6 +100,8 @@
                 if (!s || !d) return;
                 if (s.type === "checkbox") d.checked = s.checked; else d.value = s.value;
             });
+            syncDay(dst);
         });
+        flash(btn, "Übertragen ✓ – Speichern nicht vergessen");
     });
 })();

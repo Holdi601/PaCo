@@ -5,17 +5,17 @@
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
     <div>
         <div class="stat-label">Protokoll</div>
-        <h1 class="h3 mb-0 page-title">💻 @Model.Device.Name</h1>
+        <h1 class="h3 mb-0 page-title"><span aria-hidden="true">💻</span> @Model.Device.Name</h1>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">Zurück</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">← Geräte</a>
 </div>
 
-<div class="d-flex flex-wrap gap-3 mb-3 small">
+<nav class="d-flex flex-wrap gap-3 mb-3 small" aria-label="Filter">
     Anzeigen:
-    <a asp-route-id="@Model.Device.Id" asp-route-filter="all" class="@(Model.Filter == "all" ? "fw-bold" : "")">alles</a>
-    <a asp-route-id="@Model.Device.Id" asp-route-filter="suspicious" class="@(Model.Filter == "suspicious" ? "fw-bold" : "")">mögliche Umgehungsversuche</a>
-    <a asp-route-id="@Model.Device.Id" asp-route-filter="errors" class="@(Model.Filter == "errors" ? "fw-bold" : "")">technische Fehler</a>
-</div>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="all" class="@(Model.Filter == "all" ? "fw-bold" : "")" aria-current="@(Model.Filter == "all" ? "true" : null)">alles</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="suspicious" class="@(Model.Filter == "suspicious" ? "fw-bold" : "")" aria-current="@(Model.Filter == "suspicious" ? "true" : null)">mögliche Umgehungsversuche</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="errors" class="@(Model.Filter == "errors" ? "fw-bold" : "")" aria-current="@(Model.Filter == "errors" ? "true" : null)">technische Fehler</a>
+</nav>
 
 <div class="row g-4">
     <div class="col-lg-7">
@@ -34,7 +34,7 @@
                 }
                 @if (Model.Events.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Keine Ereignisse.</div>
+                    <div class="list-group-item text-muted">Keine Ereignisse für diese Auswahl.</div>
                 }
             </div>
         </div>
@@ -45,10 +45,10 @@
             <div class="card-body">
                 <p class="small text-muted">Für die Fehlersuche: Der PC lädt die letzten Einträge seines Protokolls hoch (verschlüsselt gespeichert, die letzten 3 bleiben erhalten).</p>
                 <form method="post" asp-page-handler="Request" asp-route-id="@Model.Device.Id" asp-route-filter="@Model.Filter" class="d-flex align-items-center gap-2 mb-3">
-                    <button class="btn btn-outline-primary btn-sm" @(Model.Waiting ? "disabled" : "")>Diagnose-Log abrufen</button>
+                    <button class="btn btn-outline-primary btn-sm" disabled="@Model.Waiting">Diagnose-Log abrufen</button>
                     @if (Model.Waiting)
                     {
-                        <span class="spinner-border spinner-border-sm text-primary"></span><span class="small">warte auf den PC …</span>
+                        <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">warte auf den PC …</span>
                         <div data-autorefresh="5"></div>
                     }
                 </form>
