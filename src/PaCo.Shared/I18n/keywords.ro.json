@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["sinucid*", "sinucig*", "suicid*", "să mă omor", "vreau să mor", "nu mai vreau să trăiesc", "să-mi iau viața", "să mă tai", "mă tai pe mâini", "autovătămare", "automutilare", "supradoză", "moarte fără durere", "cum să mor", "să mă spânzur", "să mă arunc de pe bloc"],
+  "Drugs": ["să cumpăr iarbă", "cumpăr iarbă", "de unde iau iarbă", "cocain*", "metamfetamin*", "amfetamin*", "ecstasy", "mdma", "lsd", "heroin*", "ketamin*", "xanax", "etnobotanice", "dealer de iarbă", "iarbă de fumat"],
+  "Violence": ["atac armat la școală", "împușcături la școală", "să cumpăr o armă", "cumpăr pistol", "să fac o bombă", "cum fac o bombă", "o să te omor", "te omor", "să-l înjunghii", "să-l împușc", "iau cuțitul la școală"],
+  "Sexual": ["porno*", "poze nud", "poze goale", "nuduri", "nudes", "sexcam", "onlyfans", "hentai", "nsfw", "xxx", "chat sex"],
+  "Bullying": ["nimeni nu te place", "toată lumea te urăște", "toți te urăsc", "omoară-te", "sinucide-te", "du-te și mori", "ești un nimic", "nu valorezi nimic", "grasă și urâtă", "gras și urât", "curvă", "târfă", "retardat*"],
+  "Grooming": ["nu spune nimănui", "să nu spui nimănui", "nu le spune părinților", "micul nostru secret", "secretul nostru", "trimite-mi o poză cu tine", "trimite o poză cu tine", "ești singură acasă", "ești singur acasă", "sunt părinții acasă", "câți ani ai", "unde locuiești", "ne vedem doar noi doi", "șterge conversația", "șterge mesajele", "șterge chatul"],
+  "Extremism": ["heil hitler", "sieg heil", "white power", "război rasial", "omorâți necredincioșii", "puterea albă", "stormfront", "trăiască legiunea", "gazați evreii", "moarte evreilor"]
+}

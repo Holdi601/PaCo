@@ -45,6 +45,9 @@ public class AlertTests
     [InlineData("samobojstwo", "samobójstwo")]      // Polish without accents
     [InlineData("αυτοκτονία", "αυτοκτονια")] // Greek with/without tonos
     [InlineData("SUICIDIO", "suicidio")]
+    [InlineData("ongyilkos akarok lenni", "\u00f6ngyilkos")]  // Hungarian typed without accents
+    [InlineData("lebensmuede", "lebensm\u00fcde")]               // German typed with digraph
+    [InlineData("lebensmude", "lebensm\u00fcde")]                // German typed without umlaut
     public void AccentsAreIgnored(string text, string keyword)
     {
         var m = new AlertKeywords.Matcher(new AlertSettings { Categories = [], CustomKeywords = [keyword], Languages = [] });

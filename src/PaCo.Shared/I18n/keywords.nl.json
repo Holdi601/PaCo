@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["zelfmoord*", "suïcid*", "zelfdoding", "mezelf doodmaken", "mezelf van kant maken", "ik wil dood", "wil niet meer leven", "niet meer willen leven", "er een eind aan maken", "een einde aan mijn leven", "snijden in mezelf", "mezelf snijden", "zelfbeschadiging", "automutilatie", "overdosis", "pijnloos doodgaan", "hoe pleeg ik", "niemand zal me missen"],
+ "Drugs": ["wiet kopen", "hasj kopen", "drugs kopen", "cocaïne", "coke snuiven", "lijntje coke", "crystal meth", "xtc", "ecstasy", "mdma", "lsd", "heroïne", "ketamine", "xanax", "lachgas", "lean drinken", "dealer", "paddo's", "nummer van een dealer"],
+ "Violence": ["schietpartij op school", "wapen kopen", "pistool kopen", "bom maken", "ik maak je dood", "ik vermoord je", "neersteken", "steek je neer", "mes meenemen", "iedereen neerschieten", "aanslag plegen"],
+ "Sexual": ["porno*", "pornhub", "nudes", "naaktfoto*", "sexcam", "seks cam", "xxx", "onlyfans", "hentai", "nsfw"],
+ "Bullying": ["niemand vindt je leuk", "niemand mag je", "iedereen haat je", "maak jezelf dood", "ga dood", "kankerlijer", "vieze dikzak", "lelijke dikzak", "je bent waardeloos", "mongool", "hoerenkind", "tyfuslijer", "pleeg zelfmoord"],
+ "Grooming": ["zeg het tegen niemand", "vertel het niemand", "niet aan je ouders vertellen", "ons geheimpje", "ons geheim", "stuur me een foto", "stuur een foto van jezelf", "stuur eens een foto", "ben je alleen thuis", "zijn je ouders thuis", "hoe oud ben je", "waar woon je", "zullen we afspreken", "laten we afspreken", "verwijder deze chat", "wis de chat", "verwijder het bericht", "zet je camera aan", "laat jezelf eens zien"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "rassenoorlog", "joden vergassen", "ongelovigen doden", "aansluiten bij is", "jihad voeren", "dood aan de joden", "omvolking"]
+}

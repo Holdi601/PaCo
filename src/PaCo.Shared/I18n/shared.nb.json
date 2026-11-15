@@ -52,6 +52,6 @@
   "Wenn es dir gerade nicht gut geht: Du bist nicht allein. Nummer gegen Kummer 116 111 (kostenlos, anonym) oder TelefonSeelsorge 0800 111 0 111 – rund um die Uhr. Im Notfall: 112.": "Hvis du ikke har det bra akkurat nå: Du er ikke alene. Ring Kors på halsen 800 33 321 eller Hjelpetelefonen 116 123 (gratis, anonymt, døgnåpen). Ved nødsituasjon: 112.",
   "Windows-Firewall ist aus für: {0}.": "Windows-brannmuren er slått av for: {0}.",
   "Windows-Firewall ist eingeschaltet.": "Windows-brannmuren er slått på.",
-  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-kontoen «{0}» på {1} har administratorrettigheter.",
+  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-kontoen «{0}», som tilhører {1}, har administratorrettigheter.",
   "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-klokken ble stilt {0} minutter tilbake – ignoreres."
 }

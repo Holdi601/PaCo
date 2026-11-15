@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["féinmharú*", "féinmharfach", "lámh a chur i mo bhás féin", "ba mhaith liom bás a fháil", "ba mhaith liom bás", "níl mé ag iarraidh maireachtáil", "ní theastaíonn uaim maireachtáil", "mé féin a mharú", "maróidh mé mé féin", "deireadh a chur le mo shaol", "féindochar", "mé féin a ghearradh", "ródháileog", "bás gan phian", "conas mé féin a mharú"],
+ "Drugs": ["drugaí a cheannach", "cannabas a cheannach", "fiaile a cheannach", "cócaon", "meth criostail", "eacstais", "mdma", "lsd", "hearóin", "ceitimín", "xanax", "díoltóir drugaí"],
+ "Violence": ["lámhach scoile", "gunna a cheannach", "piostal a cheannach", "buama a dhéanamh", "maróidh mé thú", "sceanfaidh mé thú", "scian a thabhairt ar scoil", "gach duine a lámhach", "ionsaí ar an scoil", "marófar thú"],
+ "Sexual": ["porn*", "grianghraif nocht", "grianghraf nocht", "pictiúir nocht", "nudes", "sexcam", "xxx", "onlyfans", "hentai", "nsfw"],
+ "Bullying": ["níl aon duine ag iarraidh thú", "is fuath le gach duine thú", "ní maith le duine ar bith thú", "maraigh thú féin", "téigh agus faigh bás", "tá tú gránna", "ramhar agus gránna", "níl maith ar bith ionat", "bitseach", "níl aon mhaith leat"],
+ "Grooming": ["ná habair le duine ar bith", "ná hinis do dhuine ar bith", "ná hinis do do thuismitheoirí", "ár rún", "ár rún beag", "seol pictiúr chugam", "seol grianghraf chugam", "an bhfuil tú i d'aonar", "an bhfuil do thuismitheoirí sa bhaile", "cén aois thú", "cén aois atá agat", "cá bhfuil tú i do chónaí", "buailimis le chéile", "scrios an comhrá", "scrios an teachtaireacht", "cas air do cheamara"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "cogadh cine", "cine uachtarach", "bás do na giúdaigh", "maraigh na hinimircigh", "maraigh na hainchreidmhigh", "dul isteach in isis", "jihad a dhéanamh"]
+}

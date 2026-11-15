@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["suizid*", "selbstmord*", "ech wëll stierwen", "wëll stierwen", "ech wëll net méi liewen", "net méi liewen", "mech ëmbréngen", "ech bréngen mech ëm", "mengem liewen en enn maachen", "ritzen", "mech ritzen", "selbstverletz*", "iwwerdosis", "overdose", "ouni péng stierwen", "wéi bréngen ech mech ëm"],
+ "Drugs": ["drogen kafen", "gras kafen", "weed kafen", "kokain", "koks", "crystal meth", "ecstasy", "mdma", "lsd", "heroin", "ketamin", "xanax", "dealer", "lean drénken"],
+ "Violence": ["amoklaf", "amok lafen", "waff kafen", "pistoul kafen", "bomm bauen", "ech bréngen dech ëm", "ofstiechen", "erschéissen", "messer matbréngen", "alleguer erschéissen"],
+ "Sexual": ["porno*", "plakeg fotoen", "plakeg biller", "nacktbilder", "nudes", "sexcam", "xxx", "onlyfans", "hentai", "nsfw"],
+ "Bullying": ["keen huet dech gär", "keen mag dech", "jidderee haasst dech", "all haassen dech", "bréng dech ëm", "du bass ellen", "fett an ellen", "du bass näischt wäert", "hurensohn", "spast", "du affer", "missgeburt"],
+ "Grooming": ["sot et kengem", "so et kengem", "so denge elteren näischt", "sot et denge elteren net", "eist geheimnis", "eist klengt geheimnis", "schéck mer e bild", "schéck mer e foto", "bass du eleng", "sinn deng elteren doheem", "wéi al bass du", "wou wunns du", "loss eis treffen", "solle mer eis treffen", "läsch de chat", "läsch d'noriicht", "maach deng kamera un"],
+ "Extremism": ["heil hitler", "sieg heil", "88 heil", "white power", "rassekrich", "ongleeweger ëmbréngen", "dout de judden", "isis bäitrieden", "jihad maachen", "wäiss rass"]
+}

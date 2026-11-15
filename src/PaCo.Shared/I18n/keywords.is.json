@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["sjálfsvíg*", "sjálfsmorð*", "fremja sjálfsmorð", "svipta mig lífi", "taka eigið líf", "drepa sjálfa mig", "drepa sjálfan mig", "langar að deyja", "vil deyja", "vil ekki lifa lengur", "nenni ekki að lifa", "sjálfsskað*", "skera mig", "skaða mig", "of stór skammtur", "sársaukalaus dauði", "hengja mig"],
+  "Drugs": ["kaupa gras", "kaupa weed", "kaupa dóp", "kókaín", "crystal meth", "ecstasy", "mdma", "lsd", "heróín", "ketamín", "amfetamín", "xanax", "contalgen", "oxycontin", "dópsali", "dílari"],
+  "Violence": ["skotárás í skóla", "kaupa byssu", "kaupa vopn", "búa til sprengju", "ég drep þig", "ég ætla að drepa þig", "stinga hann", "skjóta hann", "taka með hníf", "hnífaárás"],
+  "Sexual": ["klám*", "porn*", "nektarmyndir", "nektarmynd", "nudes", "sexcam", "onlyfans", "hentai", "nsfw", "xxx", "typpamynd"],
+  "Bullying": ["enginn líkar við þig", "enginn fílar þig", "allir hata þig", "drepðu þig", "farðu og drepðu þig", "þú ert einskis virði", "feit og ljót", "feitur og ljótur", "hóra", "mella", "enginn vill vera vinur þinn"],
+  "Grooming": ["ekki segja neinum", "ekki segja foreldrum þínum", "leyndarmálið okkar", "litla leyndarmálið okkar", "sendu mér mynd", "sendu mynd af þér", "ertu ein heima", "ertu einn heima", "eru foreldrar þínir heima", "hvað ertu gömul", "hvað ertu gamall", "hvar áttu heima", "eigum við að hittast", "hittumst", "eyddu spjallinu", "eyddu skilaboðunum"],
+  "Extremism": ["heil hitler", "sieg heil", "white power", "kynþáttastríð", "drepa trúleysingjana", "hvítt vald", "stormfront", "gasa gyðingana", "deyja sem píslarvottur", "norðurvígi"]
+}

@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["itsemurh*", "tappaa itseni", "tapan itseni", "haluan kuolla", "haluun kuolla", "en jaksa elää", "en halua elää", "lopettaa elämäni", "viiltel*", "viillän itseäni", "satutan itseäni", "satuttaa itseäni", "itsetuho*", "yliannostus*", "kivuton kuolema", "hirttää itseni", "miten tappaa itsensä"],
+  "Drugs": ["ostaa kannabista", "ostaa ruohoa", "ostaa huumeita", "huumekauppia*", "kokaiini*", "amfetamiini*", "metamfetamiini*", "ekstaasi*", "mdma", "lsd", "heroiini*", "ketamiini*", "subutex", "xanax", "tramadol*", "diileri*", "piriä"],
+  "Violence": ["kouluampuminen", "kouluammuskelu", "ostaa ase", "ostaa aseen", "tehdä pommi", "rakentaa pommi", "tapan sut", "tapan sinut", "puukotan", "ampua hänet", "ottaa puukko mukaan", "joukkoampuminen"],
+  "Sexual": ["porno*", "alastonkuva*", "nudet", "nudeja", "nudes", "seksikamera*", "onlyfans", "hentai", "nsfw", "xxx", "munakuva*", "seksichat*"],
+  "Bullying": ["kukaan ei tykkää susta", "kukaan ei tykkää sinusta", "kaikki vihaa sua", "kaikki vihaavat sinua", "tapa ittes", "tapa itsesi", "oot arvoton", "olet arvoton", "läski ja ruma", "huora", "huoranpenikka", "vammanen", "kuole pois", "mee hirteen"],
+  "Grooming": ["älä kerro kenellekään", "älä kerro vanhemmille", "älä kerro sun vanhemmille", "meidän pieni salaisuus", "meidän salaisuus", "lähetä kuva itsestäsi", "lähetä kuva susta", "laita kuva susta", "ootko yksin kotona", "oletko yksin kotona", "onko vanhemmat kotona", "onko sun vanhemmat kotona", "kuinka vanha oot", "kuinka vanha olet", "missä asut", "nähdäänkö", "tavataanko", "poista chatti", "poista viestit"],
+  "Extremism": ["heil hitler", "sieg heil", "white power", "rotusota", "tappakaa vääräuskoiset", "valkoinen ylivalta", "stormfront", "kaasuttaa juutalaiset", "kuolla marttyyrina", "valkoinen voima"]
+}

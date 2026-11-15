@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["suwiċid*", "suicide*", "irrid immut", "nixtieq immut", "noqtol lili nnifsi", "se noqtol ruħi", "noqtol ruħi", "ma rridx ngħix", "ma rridx ngħix aktar", "intemm ħajti", "naqta' lili nnifsi", "inweġġa' lili nnifsi", "self harm", "selfharm", "overdose", "kif noqtol lili nnifsi", "immut mingħajr uġigħ"],
+ "Drugs": ["nixtri l-weed", "nixtri d-droga", "fejn insib id-droga", "kokaina", "crystal meth", "ecstasy", "mdma", "lsd", "ketamine", "xanax", "pusher tad-droga", "nixtri l-kokaina"],
+ "Violence": ["sparatura fl-iskola", "nixtri pistola", "nixtri arma", "nagħmel bomba", "nibni bomba", "noqtlok", "se noqtlok", "nagħtik daqqa ta' sikkina", "nieħu sikkina l-iskola", "nispara lil kulħadd"],
+ "Sexual": ["porn*", "pornhub", "nudes", "ritratti għarwien", "ritratt għarwien", "sexcam", "xxx", "onlyfans", "hentai", "nsfw"],
+ "Bullying": ["ħadd ma jħobbok", "ħadd ma jridek", "kulħadd jobgħodok", "oqtol lilek innifsek", "oqtol ruħek", "mur mut", "int ikrah", "int ikraha", "int oħxon", "int oħxna", "ma tiswa xejn", "iben il-qaħba"],
+ "Grooming": ["la tgħid lil ħadd", "tgħidx lil ħadd", "tgħidx lill-ġenituri tiegħek", "is-sigriet tagħna", "is-sigriet żgħir tagħna", "ibgħatli ritratt", "ibgħatli ritratt tiegħek", "waħdek id-dar", "il-ġenituri tiegħek id-dar", "kemm għandek żmien", "fejn toqgħod", "ejja niltaqgħu", "ħassar il-chat", "ħassar il-messaġġi", "ixgħel il-kamera"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "gwerra razzjali", "razza superjuri", "suprematija bajda", "mewt lil-lhud", "oqtol lill-immigranti", "ingħaqad mal-isis", "nagħmel il-ġiħad"]
+}

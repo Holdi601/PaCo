@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["suicid*", "quero morrer", "quero matar-me", "quero me matar", "vou-me matar", "vou me matar", "tirar a minha vida", "acabar com tudo", "nao quero viver mais", "ja nao quero viver", "cortar os pulsos", "corto-me", "automutila*", "autolesao", "fazer-me mal", "overdose", "morrer sem dor", "como me matar", "vontade de morrer", "ninguem vai sentir a minha falta"],
+ "Drugs": ["comprar erva", "comprar ganza", "comprar maconha", "comprar haxixe", "cocaina", "uma linha de coca", "crystal meth", "ecstasy", "mdma", "lsd", "ketamina", "xanax", "beber lean", "dealer", "traficante", "cogumelos alucinogenios", "fumar um charro", "fumar um baseado"],
+ "Violence": ["tiroteio na escola", "comprar uma arma", "comprar uma pistola", "fazer uma bomba", "fabricar uma bomba", "vou-te matar", "vou te matar", "esfaquear", "levar uma faca", "matar toda a gente", "massacre na escola"],
+ "Sexual": ["porno*", "pornhub", "nudes", "fotos nua", "fotos nu", "foto nua", "sexcam", "xxx", "onlyfans", "hentai", "nsfw", "videos de sexo"],
+ "Bullying": ["ninguem gosta de ti", "ninguem gosta de voce", "toda a gente te odeia", "todo mundo te odeia", "mata-te", "vai-te matar", "vai se matar", "oxala morras", "gorda nojenta", "gordo nojento", "es feio", "es feia", "nao vales nada", "filho da puta", "atrasado mental"],
+ "Grooming": ["nao contes a ninguem", "nao conta pra ninguem", "nao digas aos teus pais", "o nosso segredo", "nosso segredinho", "manda-me uma foto", "me manda uma foto", "envia-me uma foto tua", "estas sozinho em casa", "estas sozinha em casa", "ta sozinha em casa", "os teus pais estao em casa", "quantos anos tens", "quantos anos voce tem", "onde moras", "vamos encontrar-nos", "apaga a conversa", "apaga as mensagens", "liga a camara", "liga a webcam"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "guerra racial", "raca superior", "morte aos judeus", "matar os infieis", "juntar-me ao isis", "fazer a jihad", "morte aos pretos"]
+}

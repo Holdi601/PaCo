@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["savižudyb*", "nusižud*", "noriu mirti", "nenoriu gyventi", "nebenoriu gyventi", "nusipjauti venas", "pjaustau save", "pjaustytis", "save žaloti", "savęs žalojim*", "perdozavim*", "neskausminga mirtis", "kaip nusižudyti", "pasikarti", "atimti sau gyvybę"],
+  "Drugs": ["pirkti žolės", "nusipirkti žolės", "pirkti narkotikų", "nusipirkti narkotikų", "kokain*", "amfetamin*", "metamfetamin*", "ekstazi", "mdma", "lsd", "heroin*", "ketamin*", "fentanil*", "xanax", "dyler*", "kanapių pirkti"],
+  "Violence": ["šaudymas mokykloje", "nusipirkti ginklą", "pirkti ginklą", "pagaminti bombą", "pasidaryti bombą", "aš tave užmušiu", "užmušiu tave", "nužudysiu tave", "subadyti jį", "nušauti jį", "pasiimti peilį į mokyklą"],
+  "Sexual": ["porno*", "pornografij*", "nuogos nuotraukos", "nuogų nuotraukų", "nudes", "sekso kamera", "onlyfans", "hentai", "nsfw", "xxx", "sekso čatas"],
+  "Bullying": ["niekas tavęs nemėgsta", "visi tavęs nekenčia", "nusižudyk", "eik pasikark", "tu niekam tikęs", "tu niekam tikusi", "stora ir bjauri", "storas ir bjaurus", "kekšė", "kalė", "debilas", "dvėsk"],
+  "Grooming": ["niekam nesakyk", "nesakyk tėvams", "niekam nepasakok", "mūsų mažoji paslaptis", "mūsų paslaptis", "atsiųsk savo nuotrauką", "atsiųsk man savo nuotrauką", "ar tu vienas namie", "ar tu viena namie", "esi viena namie", "esi vienas namie", "ar tėvai namie", "kiek tau metų", "kur tu gyveni", "susitikim dviese", "ištrink pokalbį", "ištrink žinutes"],
+  "Extremism": ["heil hitler", "sieg heil", "white power", "rasių karas", "žudyti netikinčiuosius", "baltųjų galia", "stormfront", "nuodyti žydus dujomis", "mirti kaip kankiniui", "baltoji rasė viršiausia"]
+}

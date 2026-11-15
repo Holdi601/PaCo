@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["suicid*", "voglio morire", "voglio ammazzarmi", "voglio uccidermi", "mi ammazzo", "mi uccido", "togliermi la vita", "farla finita", "non voglio più vivere", "non ce la faccio più a vivere", "mi taglio le braccia", "mi taglio i polsi", "autolesion*", "farmi del male", "overdose", "morire senza dolore", "come uccidersi", "voglia di morire", "nessuno sentirà la mia mancanza"],
+ "Drugs": ["comprare erba", "comprare fumo", "comprare maria", "dove trovo erba", "cocaina", "una riga di coca", "crystal meth", "ecstasy", "mdma", "lsd", "ketamina", "xanax", "bere lean", "spacciatore", "pusher", "funghetti allucinogeni", "farsi una canna"],
+ "Violence": ["sparatoria a scuola", "comprare una pistola", "comprare un'arma", "costruire una bomba", "fare una bomba", "ti ammazzo", "ti uccido", "accoltellare", "portare un coltello", "sparare a tutti", "strage a scuola"],
+ "Sexual": ["porno*", "pornhub", "nudes", "foto nuda", "foto nudo", "foto nude", "sexcam", "xxx", "onlyfans", "hentai", "nsfw", "video hard"],
+ "Bullying": ["nessuno ti vuole", "nessuno ti sopporta", "tutti ti odiano", "ammazzati", "ucciditi", "vai a morire", "spero che muori", "fai schifo", "cicciona", "ciccione", "sei brutto", "sei brutta", "non vali niente", "figlio di puttana", "mongoloide"],
+ "Grooming": ["non dirlo a nessuno", "non dire niente ai tuoi", "non dirlo ai tuoi genitori", "il nostro segreto", "il nostro piccolo segreto", "mandami una foto", "mandami una tua foto", "inviami una foto", "sei solo a casa", "sei sola a casa", "ci sono i tuoi genitori", "quanti anni hai", "dove abiti", "vediamoci di persona", "ci vediamo dal vivo", "cancella la chat", "cancella i messaggi", "accendi la webcam", "accendi la cam"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "guerra razziale", "razza superiore", "morte agli ebrei", "uccidere gli infedeli", "unirsi all'isis", "fare la jihad", "boia chi molla"]
+}

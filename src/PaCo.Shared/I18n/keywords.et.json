@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["enesetap*", "suitsiid*", "tapan end ära", "tappa ennast", "tahan surra", "ei taha enam elada", "ei jaksa enam elada", "enesevigastami*", "lõikun ennast", "lõikun end", "üledoos*", "valutu surm", "kuidas end tappa", "end üles puua", "teen endale haiget"],
+  "Drugs": ["osta kanepit", "kanepit osta", "osta narkootikume", "kokaiin*", "amfetamiin*", "metamfetamiin*", "ecstasy", "mdma", "lsd", "heroiin*", "ketamiin*", "fentanüül*", "xanax", "diiler*", "tramadool*", "kraami müük"],
+  "Violence": ["koolitulistami*", "osta relv", "osta püstol", "teha pommi", "ehitada pommi", "ma tapan su ära", "ma tapan sind", "pussitan", "tulistan ta maha", "nuga kooli kaasa"],
+  "Sexual": ["porno*", "alastipilt*", "alasti pildid", "nudes", "nuudid", "seksikaamera*", "onlyfans", "hentai", "nsfw", "xxx", "seksivestlus*"],
+  "Bullying": ["keegi ei salli sind", "keegi ei taha sinuga olla", "kõik vihkavad sind", "tapa ennast", "tapa end ära", "sa oled väärtusetu", "paks ja kole", "hoor", "lits", "debiilik", "mine sure", "sure ära"],
+  "Grooming": ["ära räägi kellelegi", "ära ütle kellelegi", "ära ütle vanematele", "meie väike saladus", "meie saladus", "saada endast pilt", "saada mulle endast pilt", "oled sa üksi kodus", "kas oled üksi kodus", "kas su vanemad on kodus", "kui vana sa oled", "kus sa elad", "saame kahekesi kokku", "kustuta vestlus", "kustuta sõnumid"],
+  "Extremism": ["heil hitler", "sieg heil", "white power", "rassisõda", "tapke uskmatud", "valge võim", "stormfront", "gaasi juudid", "sure märtrina", "valge rassi ülemvõim"]
+}

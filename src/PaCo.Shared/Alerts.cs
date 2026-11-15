@@ -107,7 +107,7 @@ public static class AlertKeywords
 
     public sealed class Matcher
     {
-        private readonly List<(AlertCategory Cat, string Display, string[] Words, bool Prefix)> _rules = [];
+        private readonly List<(AlertCategory Cat, string Display, string[] Words, string[] Plain, bool Prefix)> _rules = [];
         private readonly List<(AlertCategory Cat, string Display, string Compact)> _cjkRules = [];
 
         public Matcher(AlertSettings settings)
@@ -143,7 +143,9 @@ public static class AlertKeywords
             }
             var words = norm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (words.Length == 0) return;
-            _rules.Add((cat, k.TrimEnd('*'), words, prefix));
+            var plain = Normalize(k.TrimEnd('*'), out _, germanDigraphs: false).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (plain.Length != words.Length) plain = words;
+            _rules.Add((cat, k.TrimEnd('*'), words, plain, prefix));
         }
 
         /// <summary>Returns at most one match per keyword.</summary>
@@ -177,16 +179,26 @@ public static class AlertKeywords
             }
             if (_rules.Count == 0) return result;
             var tokens = Tokenize(norm);
+            // Second view with ä/ö/ü → a/o/u: "lebensmuede" (German typing) and "ongyilkos" (Hungarian without accents)
+            // must both match. Word boundaries are identical in both views, so token indices line up.
+            var plainNorm = Normalize(text, out var plainMap, germanDigraphs: false);
+            var plainTokens = Tokenize(plainNorm);
+            var aligned = plainTokens.Count == tokens.Count;
             // Longest phrases first, so "will nicht mehr leben" wins over the overlapping "nicht mehr leben".
             var covered = new List<(AlertCategory Cat, int From, int To)>();
             foreach (var rule in _rules.OrderByDescending(r => r.Words.Length))
             {
                 var at = IndexOf(tokens, rule.Words, rule.Prefix);
+                var start = at >= 0 ? map[tokens[at].Start] : 0;
+                if (at < 0 && aligned)
+                {
+                    at = IndexOf(plainTokens, rule.Plain, rule.Prefix);
+                    if (at >= 0) start = plainMap[plainTokens[at].Start];
+                }
                 if (at < 0) continue;
                 var to = at + rule.Words.Length - 1;
                 if (covered.Any(c => c.Cat == rule.Cat && at <= c.To && to >= c.From)) continue;
                 covered.Add((rule.Cat, at, to));
-                var start = map[tokens[at].Start];
                 result.Add(new AlertMatch(rule.Cat, rule.Display, Snippet(text, start, snippetRadius)));
             }
             return result;
@@ -250,7 +262,7 @@ public static class AlertKeywords
 
     /// <summary>Lower-case, umlauts/ß folded, leetspeak mapped, everything else non-alphanumeric → space.
     /// <paramref name="map"/>[i] = index in the original text for normalized position i.</summary>
-    public static string Normalize(string text, out int[] map)
+    public static string Normalize(string text, out int[] map, bool germanDigraphs = true)
     {
         var sb = new StringBuilder(text.Length + 16);
         var m = new List<int>(text.Length + 16);
@@ -268,9 +280,9 @@ public static class AlertKeywords
             var c = char.ToLowerInvariant(text[i]);
             switch (c)
             {
-                case 'ä': Put("ae", i); break;
-                case 'ö': Put("oe", i); break;
-                case 'ü': Put("ue", i); break;
+                case 'ä' when germanDigraphs: Put("ae", i); break;
+                case 'ö' when germanDigraphs: Put("oe", i); break;
+                case 'ü' when germanDigraphs: Put("ue", i); break;
                 case 'ß': Put("ss", i); break;
                 case '0': Put("o", i); break;
                 case '1': Put("i", i); break;

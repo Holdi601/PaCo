@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["pašnāvīb*", "nogalināt sevi", "nogalināšu sevi", "gribu nomirt", "negribu dzīvot", "negribu vairs dzīvot", "nav vērts dzīvot", "griezt sevi", "griežu sevi", "paškaitējum*", "pārdozēšan*", "pārdozēt", "nesāpīga nāve", "kā nogalināt sevi", "pakārties", "atņemt sev dzīvību"],
+  "Drugs": ["pirkt zālīti", "nopirkt zālīti", "pirkt narkotikas", "nopirkt narkotikas", "kokaīn*", "amfetamīn*", "metamfetamīn*", "ekstazī", "mdma", "lsd", "heroīn*", "ketamīn*", "spaiss", "xanax", "dīler*", "fentanil*"],
+  "Violence": ["šaušana skolā", "apšaude skolā", "nopirkt ieroci", "nopirkt pistoli", "uztaisīt bumbu", "pagatavot bumbu", "es tevi nogalināšu", "es tevi nositīšu", "nositīšu tevi", "sadurt viņu", "nošaut viņu", "paņemt nazi uz skolu"],
+  "Sexual": ["porno*", "pornogrāfij*", "kailbildes", "kailfoto", "nudes", "seksa kamera", "onlyfans", "hentai", "nsfw", "xxx", "seksa čats"],
+  "Bullying": ["neviens tevi nemīl", "neviens tevi negrib", "visi tevi ienīst", "nogalini sevi", "ej pakāries", "tu esi nevērtīgs", "tu esi nevērtīga", "resna un neglīta", "resns un neglīts", "mauka", "maucīte", "debils", "kroplis", "nomirsti"],
+  "Grooming": ["nesaki nevienam", "nestāsti nevienam", "nesaki vecākiem", "mūsu mazais noslēpums", "mūsu noslēpums", "atsūti savu bildi", "atsūti man savu bildi", "vai tu esi viens mājās", "vai tu esi viena mājās", "esi viena mājās", "esi viens mājās", "vai vecāki ir mājās", "cik tev gadu", "kur tu dzīvo", "satiksimies divatā", "izdzēs saraksti", "izdzēs čatu", "izdzēs ziņas"],
+  "Extremism": ["heil hitler", "sieg heil", "white power", "rasu karš", "nogalināt neticīgos", "baltā vara", "stormfront", "gāzēt ebrejus", "mirt kā moceklim", "baltā rase pāri visam"]
+}

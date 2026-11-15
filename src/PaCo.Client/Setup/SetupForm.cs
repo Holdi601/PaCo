@@ -42,7 +42,7 @@ internal sealed class SetupForm : Form
                          L.T("Wichtig: Diese Einrichtung muss mit einem Administrator-Konto gemacht werden (nicht mit dem Konto des Kindes)."), 90);
         var urlLabel = Para(L.T("Serveradresse"), 24);
         var url = new TextBox { Dock = DockStyle.Top, Text = _payload?.ServerUrl ?? "https://", Height = 30 };
-        var codeLabel = Para(L.T("Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)"), 30);
+        var codeLabel = Para(L.T("Kopplungscode (steht auf der Website unter „Geräte“)"), 30);
         var code = new TextBox { Dock = DockStyle.Top, Text = _payload?.PairingCode ?? "", Font = new Font("Consolas", 14), CharacterCasing = CharacterCasing.Upper };
         var status = Para("", 50, Color.Firebrick);
         var next = Button(L.T("Verbinden"));

@@ -1,0 +1,9 @@
+{
+ "SelfHarm": ["suïcid*", "em vull morir", "vull morir", "vull matar-me", "em vull matar", "em mataré", "treure'm la vida", "acabar amb tot", "no vull viure", "no vull continuar vivint", "tallar-me les venes", "em tallo els braços", "autolesi*", "fer-me mal", "sobredosi", "morir sense dolor", "com matar-me", "ganes de morir", "ningú em trobarà a faltar", "me quiero morir", "quiero morir"],
+ "Drugs": ["comprar maria", "comprar porros", "comprar herba", "comprar haixix", "pillar costo", "cocaïna", "farlopa", "una ratlla de coca", "crystal meth", "èxtasi", "mdma", "lsd", "ketamina", "xanax", "beure lean", "busco camell", "tusi", "bolets al·lucinògens", "fumar un porro"],
+ "Violence": ["tiroteig a l'institut", "tiroteig a l'escola", "comprar una pistola", "comprar una arma", "fabricar una bomba", "fer una bomba", "et mataré", "et mato", "apunyalar", "portar una navalla", "matar a tothom", "massacre a classe"],
+ "Sexual": ["porno*", "pornhub", "nudes", "fotos nua", "fotos nu", "foto despullada", "foto despullat", "sexcam", "xxx", "onlyfans", "hentai", "nsfw", "vídeos de sexe"],
+ "Bullying": ["ningú t'estima", "ningú et vol", "tothom t'odia", "mata't", "suïcida't", "vés-te'n a morir", "tant de bo et moris", "grassa fastigosa", "gras fastigós", "ets lleig", "ets lletja", "fas fàstic", "no vals res", "fill de puta", "subnormal"],
+ "Grooming": ["no ho diguis a ningú", "no ho expliquis a ningú", "no ho diguis als teus pares", "el nostre secret", "el nostre petit secret", "envia'm una foto", "passa'm una foto teva", "estàs sol a casa", "estàs sola a casa", "hi són els teus pares", "quants anys tens", "on vius", "quedem en persona", "podem quedar", "esborra el xat", "esborra els missatges", "posa la càmera", "encén la càmera"],
+ "Extremism": ["heil hitler", "sieg heil", "white power", "guerra racial", "raça superior", "matar els infidels", "unir-se a l'isis", "mort als jueus", "mort als moros", "fer la gihad"]
+}
