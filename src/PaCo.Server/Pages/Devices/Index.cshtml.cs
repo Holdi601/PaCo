@@ -61,7 +61,10 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         if (childId is { } cid && !await db.Children.AnyAsync(c => c.Id == cid)) return NotFound();
         acc.ChildId = childId;
         await db.SaveChangesAsync();
-        TempData["Message"] = childId is null ? $"Konto „{acc.UserName}“ wird nicht mehr überwacht." : $"Konto „{acc.UserName}“ zugeordnet.";
+        var childName = childId is { } id ? (await db.Children.FirstAsync(c => c.Id == id)).Name : null;
+        TempData["Message"] = childName is null
+            ? $"Konto „{acc.UserName}“ wird nicht mehr überwacht."
+            : $"Konto „{acc.UserName}“ gehört jetzt zu {childName}. Online-PCs übernehmen das innerhalb von 30 Sekunden.";
         return RedirectToPage();
     }
 
@@ -69,8 +72,14 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
     {
         var d = await db.Devices.FirstOrDefaultAsync(x => x.Id == deviceId);
         if (d is null) return NotFound();
-        if (!string.IsNullOrWhiteSpace(name)) d.Name = name.Trim()[..Math.Min(100, name.Trim().Length)];
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            TempData["Error"] = "Bitte einen Namen für den PC eingeben.";
+            return RedirectToPage();
+        }
+        d.Name = name.Trim()[..Math.Min(100, name.Trim().Length)];
         await db.SaveChangesAsync();
+        TempData["Message"] = $"PC heißt jetzt „{d.Name}“.";
         return RedirectToPage();
     }
 
@@ -103,6 +112,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         if (d is null) return NotFound();
         db.Devices.Remove(d);
         await db.SaveChangesAsync();
+        TempData["Message"] = $"{d.Name} und seine Statistik wurden gelöscht.";
         return RedirectToPage();
     }
 

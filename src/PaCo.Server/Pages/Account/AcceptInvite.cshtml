@@ -9,7 +9,8 @@
                 @if (Model.Invalid)
                 {
                     <h1 class="h4">Link ungültig</h1>
-                    <p>Dieser Einladungslink ist abgelaufen oder wurde bereits benutzt. Bitte frag nach einem neuen Link.</p>
+                    <p>Dieser Einladungslink ist abgelaufen oder wurde bereits benutzt. Bitte frag die Person, die dich eingeladen hat, nach einem neuen Link.</p>
+                    <p class="small text-muted">Hast du dein Passwort schon festgelegt? Dann melde dich einfach an.</p>
                     <a asp-page="./Login" class="btn btn-outline-primary">Zur Anmeldung</a>
                 }
                 else
@@ -23,8 +24,8 @@
                         <input type="email" class="d-none" value="@Model.Email" autocomplete="username" readonly />
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label">Passwort</label>
-                            <input asp-for="Password" class="form-control" autocomplete="new-password" autofocus />
-                            <div class="form-text">Mindestens 12 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer.</div>
+                            <input asp-for="Password" class="form-control" autocomplete="new-password" autofocus aria-describedby="pw-rules" />
+                            <div id="pw-rules" class="form-text">Mindestens 12 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer. Tipp: ein kurzer Satz wie „Sommer-Ferien-2026“.</div>
                             <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
                         <div class="mb-3">

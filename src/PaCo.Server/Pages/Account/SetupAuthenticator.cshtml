@@ -16,15 +16,18 @@
                             <div>@c</div>
                         }
                     </div>
-                    <a asp-page="/Index" class="btn btn-primary">Ich habe die Codes notiert – weiter</a>
+                    <a asp-page="/Index" class="btn btn-primary" data-confirm="Hast du die Notfall-Codes aufgeschrieben? Sie werden nicht noch einmal angezeigt.">Ich habe die Codes notiert – weiter</a>
                 }
                 else if (Model.AlreadyEnabled)
                 {
                     <h1 class="h4">Zwei-Faktor-Anmeldung ist aktiv</h1>
                     <p>Neues Handy? Dann hier neu einrichten. Der alte Eintrag in der App funktioniert danach nicht mehr.</p>
-                    <form method="post" asp-page-handler="Reset">
-                        <button type="submit" class="btn btn-outline-danger">Authenticator neu einrichten</button>
-                    </form>
+                    <div class="d-flex flex-wrap gap-2">
+                        <form method="post" asp-page-handler="Reset">
+                            <button type="submit" class="btn btn-outline-danger" data-confirm="Authenticator neu einrichten? Der bisherige Eintrag in der App funktioniert danach nicht mehr.">Authenticator neu einrichten</button>
+                        </form>
+                        <a asp-page="./Manage" class="btn btn-link">← Zurück zu Mein Konto</a>
+                    </div>
                 }
                 else
                 {
@@ -32,15 +35,22 @@
                     <p class="text-muted">Zum Schutz deines Kontos ist eine zweite Bestätigung per Handy Pflicht.</p>
                     <ol>
                         <li class="mb-2">Installiere <strong>Google Authenticator</strong> (oder Microsoft Authenticator) auf deinem Handy.</li>
-                        <li class="mb-2">Tippe in der App auf <strong>+</strong> → <strong>QR-Code scannen</strong> und scanne diesen Code:
+                        <li class="mb-2">
+                            <span class="d-md-none"><strong>Du bist gerade am Handy?</strong> Dann tippe hier – die App öffnet sich und übernimmt PaCo:
+                                <a href="@Model.AuthenticatorUri" class="btn btn-primary d-block my-2">In Authenticator-App übernehmen</a>
+                                Am PC kannst du stattdessen den QR-Code scannen:</span>
+                            <span class="d-none d-md-inline">Tippe in der App auf <strong>+</strong> → <strong>QR-Code scannen</strong> und scanne diesen Code:</span>
                             <div class="qr my-3"><img src="@Model.QrDataUri" alt="QR-Code für die Authenticator-App" /></div>
-                            <div class="small text-muted">Scannen klappt nicht? Schlüssel manuell eingeben: <code>@Model.SharedKey</code></div>
+                            <div class="small text-muted">Scannen klappt nicht? Schlüssel manuell eingeben: <code>@Model.SharedKey</code>
+                                <input type="hidden" id="totp-key" value="@Model.SharedKey.Replace(" ", "")" />
+                                <button type="button" class="btn btn-sm btn-link p-0 ms-1 align-baseline" data-copy="#totp-key">Kopieren</button>
+                            </div>
                         </li>
-                        <li>Gib den 6-stelligen Code ein, den die App jetzt anzeigt:</li>
+                        <li><label for="Code">Gib den 6-stelligen Code ein, den die App jetzt anzeigt:</label></li>
                     </ol>
                     <form method="post" class="row g-2">
                         <div class="col-sm-6">
-                            <input asp-for="Code" class="form-control form-control-lg text-center" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" />
+                            <input asp-for="Code" class="form-control form-control-lg text-center" inputmode="numeric" maxlength="7" autocomplete="one-time-code" placeholder="123456" />
                             <span asp-validation-for="Code" class="text-danger small"></span>
                         </div>
                         <div class="col-sm-6">

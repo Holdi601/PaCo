@@ -17,6 +17,9 @@ public sealed class SetupAuthenticatorModel(UserManager<ParentUser> users, SignI
 
     public string QrDataUri { get; set; } = "";
 
+    /// <summary>otpauth:// link – opens the authenticator app directly when the page is viewed on the phone itself.</summary>
+    public string AuthenticatorUri { get; set; } = "";
+
     public bool AlreadyEnabled { get; set; }
 
     [TempData]
@@ -86,6 +89,7 @@ public sealed class SetupAuthenticatorModel(UserManager<ParentUser> users, SignI
 
         var label = Uri.EscapeDataString($"PaCo:{user.Email}");
         var uri = $"otpauth://totp/{label}?secret={key}&issuer=PaCo&digits=6&period=30";
+        AuthenticatorUri = uri;
         using var gen = new QRCodeGenerator();
         using var data = gen.CreateQrCode(uri, QRCodeGenerator.ECCLevel.M);
         var png = new PngByteQRCode(data).GetGraphic(8);

@@ -10,15 +10,18 @@
                 <p class="text-muted">Gib einen der Notfall-Codes ein, die du bei der Einrichtung notiert hast. Jeder Code funktioniert nur einmal.</p>
                 @if (Model.Error is not null)
                 {
-                    <div class="alert alert-danger">@Model.Error</div>
+                    <div class="alert alert-danger" role="alert">@Model.Error</div>
                 }
                 <form method="post">
                     <div class="mb-3">
-                        <input asp-for="Code" class="form-control" autocomplete="off" autofocus />
+                        <label asp-for="Code" class="form-label">Notfall-Code</label>
+                        <input asp-for="Code" class="form-control font-monospace" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" autofocus />
                         <span asp-validation-for="Code" class="text-danger small"></span>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Anmelden</button>
                 </form>
+                <p class="small text-muted mt-3 mb-0">Keine Notfall-Codes mehr? Dann kann die Person, die PaCo für euch betreibt, deinen Zugang zurücksetzen.</p>
+                <p class="small mt-2 mb-0"><a asp-page="./LoginWith2fa">← Doch mit der Authenticator-App anmelden</a></p>
             </div>
         </div>
     </div>

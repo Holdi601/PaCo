@@ -6,32 +6,38 @@
     var tz = Model.Tz;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Statistik: @Model.Child.Name</h1>
-    <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">Zurück</a>
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="stat-label">Statistik</div>
+        <h1 class="h3 mb-0 page-title">@Model.Child.Name</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="./Edit" asp-route-id="@Model.Child.Id" class="btn btn-outline-secondary btn-sm">Regeln</a>
+        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm">← Übersicht</a>
+    </div>
 </div>
 
 <div class="row g-3">
-    <div class="col-lg-5">
+    <div class="col-lg-5 order-2 order-lg-1">
         <div class="card h-100">
-            <div class="card-header">Letzte 14 Tage <span class="text-muted fw-normal small">· Ø 7 Tage: @Format.Duration(Model.WeekAverage)</span></div>
+            <div class="card-header">Letzte 14 Tage <span class="visually-hidden">(Tag antippen für Details)</span><span class="text-muted fw-normal small">· Ø 7 Tage: @Format.Duration(Model.WeekAverage)</span></div>
             <div class="list-group list-group-flush">
                 @foreach (var d in Model.Last14)
                 {
                     var over = d.LimitSeconds is { } l && d.Seconds > l;
                     <a asp-route-id="@Model.Child.Id" asp-route-day="@d.Day.ToString("yyyy-MM-dd")"
-                       class="list-group-item list-group-item-action @(d.Day == Model.Day ? "active" : "")">
+                       class="list-group-item list-group-item-action @(d.Day == Model.Day ? "active" : "")" aria-current="@(d.Day == Model.Day ? "date" : null)">
                         <div class="d-flex justify-content-between small">
                             <span>@Format.WeekdayNames[(int)d.Day.DayOfWeek][..2], @d.Day.ToString("dd.MM.")</span>
                             <span class="@(over && d.Day != Model.Day ? "status-warn" : "")">@Format.Duration(d.Seconds)</span>
                         </div>
-                        <progress class="w-100" max="@max" value="@d.Seconds"></progress>
+                        <progress class="w-100" max="@max" value="@d.Seconds" aria-hidden="true"></progress>
                     </a>
                 }
             </div>
         </div>
     </div>
-    <div class="col-lg-7">
+    <div class="col-lg-7 order-1 order-lg-2">
         <div class="card mb-3">
             <div class="card-header">@(Model.Day == Model.Today ? "Heute" : Model.Day.ToString("dddd, dd.MM.yyyy", new System.Globalization.CultureInfo("de-DE")))</div>
             <div class="card-body">
@@ -42,20 +48,20 @@
                 }
                 @if (Model.Apps.Count == 0)
                 {
-                    <p class="text-muted mt-3 mb-0">Keine Nutzung an diesem Tag.</p>
+                    <p class="text-muted mt-3 mb-0">An diesem Tag wurde der PC nicht benutzt.</p>
                 }
                 else
                 {
                     var appMax = Math.Max(1, Model.Apps[0].Seconds);
                     <table class="table table-sm mt-3 mb-0">
-                        <thead><tr><th>Programm</th><th class="text-end">Zeit</th></tr></thead>
+                        <thead><tr><th>Programm <span class="fw-normal text-muted small">(Programmname zum Sperren)</span></th><th class="text-end">Zeit</th></tr></thead>
                         <tbody>
                             @foreach (var a in Model.Apps)
                             {
                                 <tr>
                                     <td>
                                         <div>@a.Name <span class="text-muted small">(@a.Process)</span></div>
-                                        <progress class="w-100" max="@appMax" value="@a.Seconds"></progress>
+                                        <progress class="w-100" max="@appMax" value="@a.Seconds" aria-hidden="true"></progress>
                                     </td>
                                     <td class="text-end text-nowrap">@Format.Duration(a.Seconds)</td>
                                 </tr>
@@ -79,7 +85,7 @@
                 }
                 @if (Model.Events.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Keine Ereignisse.</div>
+                    <div class="list-group-item text-muted">Keine besonderen Ereignisse in den letzten 14 Tagen.</div>
                 }
             </div>
         </div>

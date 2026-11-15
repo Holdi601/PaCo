@@ -152,3 +152,21 @@ details > summary { cursor: pointer; user-select: none; }
 details > summary:hover { color: var(--bs-body-color) !important; }
 .min-w-0 { min-width: 0; }
 .page-title { font-weight: 700; letter-spacing: -.02em; }
+
+/* ---------- Usability helpers (layout only, no colours of their own) ---------- */
+/* Server-side validation summaries render even without errors; hide the empty box. */
+.validation-summary-valid { display: none !important; }
+.skip-link:focus { position: fixed; top: .5rem; left: .5rem; z-index: 1100; padding: .5rem 1rem; border-radius: 10px; background: var(--paco-surface); box-shadow: var(--paco-shadow); }
+main:focus { outline: none; }
+/* Finger-friendly tap targets on touch screens (~44px). */
+@media (pointer: coarse) {
+  .btn-chip, .btn-sm, .paco-nav .nav-link, .dropdown-item { min-height: 2.75rem; }
+  .btn-chip, .btn-sm { display: inline-flex; align-items: center; justify-content: center; }
+  .form-check { margin-bottom: .35rem; }
+  .paco-nav .nav-link, .dropdown-item { display: flex; align-items: center; }
+}
+/* Save bar that stays reachable at the bottom of long forms. */
+.sticky-actions { position: sticky; bottom: 0; z-index: 10; padding: .75rem 0; background: var(--paco-bg); border-top: 1px solid var(--paco-border); }
+.step-num { flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 50%; display: inline-grid; place-items: center; font-weight: 700; background: var(--paco-surface-2); }
+.step-done .step-num { background: color-mix(in srgb, var(--paco-ok) 18%, transparent); color: var(--paco-ok); }
+.day-row + .day-row { border-top: 1px solid var(--paco-border); }

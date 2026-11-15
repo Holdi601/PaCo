@@ -19,6 +19,9 @@ public sealed class AlertsModel(PaCoDb db, ParentActions actions, TimeProvider c
     [BindProperty(SupportsGet = true)]
     public Guid? Child { get; set; }
 
+    /// <summary>Unread alerts of the whole family (the "mark all as read" button acts on all of them).</summary>
+    public int UnreadTotal { get; private set; }
+
     public async Task OnGetAsync()
     {
         (Tz, _, _) = await actions.FamilyNowAsync();
@@ -27,6 +30,7 @@ public sealed class AlertsModel(PaCoDb db, ParentActions actions, TimeProvider c
         var q = db.Alerts.AsQueryable();
         if (Child is { } c) q = q.Where(a => a.ChildId == c);
         Alerts = await q.OrderByDescending(a => a.TimeUtc).Take(300).ToListAsync();
+        UnreadTotal = await db.Alerts.CountAsync(a => a.ReadUtc == null);
     }
 
     public async Task<IActionResult> OnPostReadAllAsync()
@@ -34,6 +38,7 @@ public sealed class AlertsModel(PaCoDb db, ParentActions actions, TimeProvider c
         var now = clock.GetUtcNow();
         foreach (var a in await db.Alerts.Where(a => a.ReadUtc == null).ToListAsync()) a.ReadUtc = now;
         await db.SaveChangesAsync();
+        TempData["Message"] = "Alle Alarme sind als gelesen markiert.";
         return RedirectToPage(new { Child });
     }
 
@@ -43,6 +48,7 @@ public sealed class AlertsModel(PaCoDb db, ParentActions actions, TimeProvider c
         if (a is null) return NotFound();
         db.Alerts.Remove(a);
         await db.SaveChangesAsync();
+        TempData["Message"] = "Alarm gelöscht.";
         return RedirectToPage(new { Child });
     }
 }
