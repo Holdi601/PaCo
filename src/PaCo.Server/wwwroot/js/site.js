@@ -2,6 +2,12 @@
 (function () {
     "use strict";
 
+    // UI texts come from data-txt-* attributes (element first, then <body>), rendered in the user's language.
+    function txt(el, name, fallback) {
+        var a = "data-txt-" + name;
+        return (el && el.getAttribute(a)) || document.body.getAttribute(a) || fallback;
+    }
+
     // Short "done" feedback on a button, then restore its content (keeps the icon markup).
     function flash(el, text) {
         if (el.hasAttribute("data-flashing")) return;
@@ -11,7 +17,7 @@
         setTimeout(function () { el.replaceChildren.apply(el, old); el.removeAttribute("data-flashing"); }, 2000);
     }
 
-    // Confirmation for dangerous buttons: <button data-confirm="Wirklich?">
+    // Confirmation for dangerous buttons: <button data-confirm="…">
     document.addEventListener("click", function (e) {
         var el = e.target.closest("[data-confirm]");
         if (el && !window.confirm(el.getAttribute("data-confirm"))) {
@@ -27,7 +33,7 @@
         var src = document.querySelector(el.getAttribute("data-copy"));
         if (!src) return;
         var text = (src.value !== undefined ? src.value : src.textContent).trim();
-        var done = function () { flash(el, "Kopiert ✓"); };
+        var done = function () { flash(el, txt(el, "copied", "✓")); };
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(done, function () { if (src.select) src.select(); });
         } else if (src.select) {
@@ -56,6 +62,13 @@
         if (el && el.form) el.form.requestSubmit ? el.form.requestSubmit() : el.form.submit();
     });
 
+    // Arrow keys on a select inside a dropdown menu (language) belong to the select, not to Bootstrap's menu navigation.
+    document.querySelectorAll(".dropdown-menu select").forEach(function (s) {
+        s.addEventListener("keydown", function (e) {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") e.stopPropagation();
+        });
+    });
+
     // Auto refresh (dashboard, live pages) unless the user is busy on the page.
     var auto = document.querySelector("[data-autorefresh]");
     if (auto) {
@@ -70,7 +83,7 @@
         }, seconds * 1000);
     }
 
-    // Weekly plan on the rules page: "unbegrenzt" / "ganztags" grey out the fields they make irrelevant.
+    // Weekly plan on the rules page: "unlimited" / "all day" grey out the fields they make irrelevant.
     function syncDay(row) {
         var get = function (k) { return row.querySelector("[data-field='" + k + "']"); };
         var unlimited = get("unlimited"), allday = get("allday");
@@ -102,6 +115,6 @@
             });
             syncDay(dst);
         });
-        flash(btn, "Übertragen ✓ – Speichern nicht vergessen");
+        flash(btn, txt(btn, "day-copied", "✓"));
     });
 })();

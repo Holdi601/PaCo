@@ -1,6 +1,6 @@
 @page
 @model PaCo.Server.Pages.Account.LoginWith2faModel
-@{ ViewData["Title"] = "Bestätigungscode"; }
+@{ ViewData["Title"] = T("Bestätigungscode"); }
 
 <div class="auth-shell">
     <div class="auth-art" aria-hidden="true">
@@ -9,8 +9,8 @@
     </div>
     <div class="card auth-card">
         <div class="card-body p-4">
-            <h1 class="h4 mb-2">Bestätigungscode</h1>
-            <p class="text-muted">Öffne die Authenticator-App (z. B. Google Authenticator) und gib den 6-stelligen Code für <strong>PaCo</strong> ein.</p>
+            <h1 class="h4 mb-2">@T("Bestätigungscode")</h1>
+            <p class="text-muted">@Html.Raw(F("Öffne die Authenticator-App (z. B. Google Authenticator) und gib den 6-stelligen Code für {0} ein.", "<strong>PaCo</strong>"))</p>
             @if (Model.Error is not null)
             {
                 <div class="alert alert-danger" role="alert">@Model.Error</div>
@@ -18,19 +18,19 @@
             <form method="post">
                 <input type="hidden" asp-for="RememberMe" />
                 <div class="mb-3">
-                    <label asp-for="Code" class="form-label visually-hidden">6-stelliger Code</label>
+                    <label asp-for="Code" class="form-label visually-hidden">@T("6-stelliger Code")</label>
                     <input asp-for="Code" class="form-control form-control-lg text-center code-input" inputmode="numeric" maxlength="7" autocomplete="one-time-code" autofocus placeholder="123456" />
                     <span asp-validation-for="Code" class="text-danger small"></span>
                 </div>
                 <div class="form-check mb-3">
                     <input asp-for="RememberDevice" class="form-check-input" />
-                    <label asp-for="RememberDevice" class="form-check-label">Diesem Browser 30 Tage vertrauen</label>
+                    <label asp-for="RememberDevice" class="form-check-label">@T("Diesem Browser 30 Tage vertrauen")</label>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+                <button type="submit" class="btn btn-primary w-100">@T("Anmelden")</button>
             </form>
             <div class="d-flex flex-wrap justify-content-between gap-2 mt-3 small">
-                <a asp-page="./LoginWithRecoveryCode">Handy verloren? Mit Notfall-Code anmelden</a>
-                <a asp-page="./Login" class="auth-foot"><span class="ico ico-back ico-sm" aria-hidden="true"></span>Zurück zur Anmeldung</a>
+                <a asp-page="./LoginWithRecoveryCode">@T("Handy verloren? Mit Notfall-Code anmelden")</a>
+                <a asp-page="./Login" class="auth-foot"><span class="ico ico-back ico-sm" aria-hidden="true"></span>@T("Zurück zur Anmeldung")</a>
             </div>
         </div>
     </div>

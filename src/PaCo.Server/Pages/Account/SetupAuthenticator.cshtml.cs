@@ -64,7 +64,7 @@ public sealed class SetupAuthenticatorModel(UserManager<ParentUser> users, SignI
         var valid = await users.VerifyTwoFactorTokenAsync(user, users.Options.Tokens.AuthenticatorTokenProvider, code);
         if (!valid)
         {
-            ModelState.AddModelError(nameof(Code), "Der Code stimmt nicht. Bitte prüfe, ob die Uhrzeit am Handy automatisch gestellt wird.");
+            ModelState.AddModelError(nameof(Code), Ui.T("Der Code stimmt nicht. Bitte prüfe, ob die Uhrzeit am Handy automatisch gestellt wird."));
             await LoadAsync(user);
             return Page();
         }

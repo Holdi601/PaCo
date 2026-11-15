@@ -1,11 +1,11 @@
 @page
-@{ ViewData["Title"] = "Kein Zugriff"; }
+@{ ViewData["Title"] = T("Kein Zugriff"); }
 
 <div class="card mt-4 mx-auto narrow-card">
     <div class="card-body p-4 text-center">
         <span class="page-icon is-bad mx-auto mb-3" aria-hidden="true"><span class="ico ico-lock"></span></span>
-        <h1 class="h4">Kein Zugriff</h1>
-        <p>Diese Seite ist für dein Konto nicht freigegeben. Falls du hier sein solltest, frag die Person, die PaCo für euch betreibt.</p>
-        <a asp-page="/Index" class="btn btn-primary">Zur Startseite</a>
+        <h1 class="h4">@T("Kein Zugriff")</h1>
+        <p>@T("Diese Seite ist für dein Konto nicht freigegeben. Falls du hier sein solltest, frag die Person, die PaCo für euch betreibt.")</p>
+        <a asp-page="/Index" class="btn btn-primary">@T("Zur Startseite")</a>
     </div>
 </div>

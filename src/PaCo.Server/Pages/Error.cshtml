@@ -1,19 +1,19 @@
 @page
 @model ErrorModel
 @{
-    ViewData["Title"] = "Fehler";
+    ViewData["Title"] = T("Fehler");
 }
 
 <div class="card mt-4">
     <div class="card-body p-4">
-        <h1 class="h4">Da ist leider etwas schiefgelaufen</h1>
-        <p>Bitte versuch es gleich noch einmal. Wenn der Fehler bleibt, sag der Person Bescheid, die PaCo für euch betreibt.</p>
+        <h1 class="h4">@T("Da ist leider etwas schiefgelaufen")</h1>
+        <p>@T("Bitte versuch es gleich noch einmal. Wenn der Fehler bleibt, sag der Person Bescheid, die PaCo für euch betreibt.")</p>
         <div class="d-flex flex-wrap gap-2">
-            <a asp-page="/Index" class="btn btn-primary">Zur Startseite</a>
+            <a asp-page="/Index" class="btn btn-primary">@T("Zur Startseite")</a>
         </div>
         @if (Model.ShowRequestId)
         {
-            <p class="small text-muted mt-3 mb-0">Fehlernummer für den Betreiber: <code>@Model.RequestId</code></p>
+            <p class="small text-muted mt-3 mb-0">@T("Fehlernummer für den Betreiber:") <code>@Model.RequestId</code></p>
         }
     </div>
 </div>

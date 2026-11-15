@@ -59,14 +59,15 @@ public static class Middleware
     });
 }
 
+/// <summary>Identity error texts (German keys) in the request language.</summary>
 public sealed class GermanIdentityErrors : IdentityErrorDescriber
 {
-    public override IdentityError PasswordTooShort(int length) => new() { Code = nameof(PasswordTooShort), Description = $"Das Passwort muss mindestens {length} Zeichen lang sein." };
-    public override IdentityError PasswordRequiresDigit() => new() { Code = nameof(PasswordRequiresDigit), Description = "Das Passwort braucht mindestens eine Ziffer." };
-    public override IdentityError PasswordRequiresLower() => new() { Code = nameof(PasswordRequiresLower), Description = "Das Passwort braucht mindestens einen Kleinbuchstaben." };
-    public override IdentityError PasswordRequiresUpper() => new() { Code = nameof(PasswordRequiresUpper), Description = "Das Passwort braucht mindestens einen Großbuchstaben." };
-    public override IdentityError PasswordMismatch() => new() { Code = nameof(PasswordMismatch), Description = "Das aktuelle Passwort ist falsch." };
-    public override IdentityError DuplicateEmail(string email) => new() { Code = nameof(DuplicateEmail), Description = $"Die E-Mail-Adresse {email} wird bereits verwendet." };
-    public override IdentityError DuplicateUserName(string userName) => new() { Code = nameof(DuplicateUserName), Description = $"Der Benutzername {userName} wird bereits verwendet." };
-    public override IdentityError InvalidEmail(string? email) => new() { Code = nameof(InvalidEmail), Description = $"Die E-Mail-Adresse {email} ist ungültig." };
+    public override IdentityError PasswordTooShort(int length) => new() { Code = nameof(PasswordTooShort), Description = Ui.F("Das Passwort muss mindestens {0} Zeichen lang sein.", length) };
+    public override IdentityError PasswordRequiresDigit() => new() { Code = nameof(PasswordRequiresDigit), Description = Ui.T("Das Passwort braucht mindestens eine Ziffer.") };
+    public override IdentityError PasswordRequiresLower() => new() { Code = nameof(PasswordRequiresLower), Description = Ui.T("Das Passwort braucht mindestens einen Kleinbuchstaben.") };
+    public override IdentityError PasswordRequiresUpper() => new() { Code = nameof(PasswordRequiresUpper), Description = Ui.T("Das Passwort braucht mindestens einen Großbuchstaben.") };
+    public override IdentityError PasswordMismatch() => new() { Code = nameof(PasswordMismatch), Description = Ui.T("Das aktuelle Passwort ist falsch.") };
+    public override IdentityError DuplicateEmail(string email) => new() { Code = nameof(DuplicateEmail), Description = Ui.F("Die E-Mail-Adresse {0} wird bereits verwendet.", email) };
+    public override IdentityError DuplicateUserName(string userName) => new() { Code = nameof(DuplicateUserName), Description = Ui.F("Der Benutzername {0} wird bereits verwendet.", userName) };
+    public override IdentityError InvalidEmail(string? email) => new() { Code = nameof(InvalidEmail), Description = Ui.F("Die E-Mail-Adresse {0} ist ungültig.", email) };
 }

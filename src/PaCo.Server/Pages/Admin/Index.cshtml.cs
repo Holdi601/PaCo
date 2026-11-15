@@ -43,7 +43,12 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         }
         await db.SaveChangesAsync();
         log.LogInformation("Update auf {Version} für {Count} Geräte angefordert", client.Version, n);
-        TempData["Message"] = n == 0 ? "Alle Geräte sind aktuell." : $"{n} Gerät(e) installieren Version {client.Version} beim nächsten Kontakt.";
+        TempData["Message"] = n switch
+        {
+            0 => Ui.T("Alle Geräte sind aktuell."),
+            1 => Ui.F("1 Gerät installiert Version {0} beim nächsten Kontakt.", client.Version),
+            _ => Ui.F("{0} Geräte installieren Version {1} beim nächsten Kontakt.", n, client.Version),
+        };
         return RedirectToPage();
     }
 
@@ -95,9 +100,9 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
     public async Task<IActionResult> OnPostInviteAsync()
     {
         if (InviteFamilyId is null && string.IsNullOrWhiteSpace(NewFamilyName))
-            ModelState.AddModelError(nameof(NewFamilyName), "Bitte eine Familie wählen oder einen Namen für die neue Familie eingeben.");
+            ModelState.AddModelError(nameof(NewFamilyName), Ui.T("Bitte eine Familie wählen oder einen Namen für die neue Familie eingeben."));
         if (await users.FindByEmailAsync(InviteEmail.Trim()) is not null)
-            ModelState.AddModelError(nameof(InviteEmail), "Diese E-Mail-Adresse hat bereits ein Konto.");
+            ModelState.AddModelError(nameof(InviteEmail), Ui.T("Diese E-Mail-Adresse hat bereits ein Konto."));
         if (!ModelState.IsValid)
         {
             await OnGetAsync();
@@ -127,7 +132,7 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         var user = await ParentAsync(userId);
         if (user is null) return NotFound();
         await admin.SetBlockedAsync(user, blocked);
-        TempData["Message"] = blocked ? $"{user.Email} ist gesperrt." : $"{user.Email} ist entsperrt.";
+        TempData["Message"] = blocked ? Ui.F("{0} ist gesperrt.", user.Email) : Ui.F("{0} ist entsperrt.", user.Email);
         return RedirectToPage();
     }
 
@@ -136,7 +141,7 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         var user = await ParentAsync(userId);
         if (user is null) return NotFound();
         await users.DeleteAsync(user);
-        TempData["Message"] = $"Konto {user.Email} gelöscht. Die Familie und ihre Daten bleiben erhalten.";
+        TempData["Message"] = Ui.F("Konto {0} gelöscht. Die Familie und ihre Daten bleiben erhalten.", user.Email);
         return RedirectToPage();
     }
 
@@ -147,7 +152,7 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         user.FamilyId = familyId;
         await users.UpdateAsync(user);
         await users.UpdateSecurityStampAsync(user);
-        TempData["Message"] = $"{user.Email} wurde einer anderen Familie zugeordnet.";
+        TempData["Message"] = Ui.F("{0} wurde einer anderen Familie zugeordnet.", user.Email);
         return RedirectToPage();
     }
 
@@ -166,12 +171,12 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         if (fam is null) return NotFound();
         if (!string.Equals(confirm?.Trim(), fam.Name, StringComparison.Ordinal))
         {
-            TempData["Error"] = "Zum Löschen bitte den Familiennamen exakt eingeben.";
+            TempData["Error"] = Ui.T("Zum Löschen bitte den Familiennamen exakt eingeben.");
             return RedirectToPage();
         }
         await admin.DeleteFamilyAsync(familyId);
         log.LogWarning("Familie {Family} gelöscht", familyId);
-        TempData["Message"] = $"Familie {fam.Name} mit allen Konten, Kindern, Geräten und Statistiken gelöscht.";
+        TempData["Message"] = Ui.F("Familie {0} mit allen Konten, Kindern, Geräten und Statistiken gelöscht.", fam.Name);
         return RedirectToPage();
     }
 

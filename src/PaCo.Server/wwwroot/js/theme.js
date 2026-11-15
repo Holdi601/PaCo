@@ -18,13 +18,14 @@
     }
 
     // The icon comes from CSS ([data-mode]); the button only carries the text label.
-    var labels = { auto: "Auto", light: "Hell", dark: "Dunkel" };
+    // Labels and the tooltip ("…: {0}") come from data-label-auto/-light/-dark and data-title in the user's language.
     var order = ["auto", "light", "dark"];
     function show(btn, mode) {
+        var text = btn.getAttribute("data-label-" + mode) || mode;
         btn.setAttribute("data-mode", mode);
-        btn.setAttribute("title", "Farbschema: " + labels[mode]);
+        btn.setAttribute("title", (btn.getAttribute("data-title") || "{0}").replace("{0}", function () { return text; }));
         var label = btn.querySelector(".theme-label");
-        if (label) label.textContent = labels[mode]; else btn.textContent = labels[mode];
+        if (label) label.textContent = text; else btn.textContent = text;
     }
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {

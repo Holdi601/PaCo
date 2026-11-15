@@ -1,18 +1,18 @@
 @page
 @model PaCo.Server.Pages.Admin.HealthModel
-@{ ViewData["Title"] = "Geräte-Zustand"; }
+@{ ViewData["Title"] = T("Geräte-Zustand"); }
 
 <div class="page-head">
     <div class="page-head-main">
         <span class="page-icon" aria-hidden="true"><span class="ico ico-activity" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Verwaltung</div>
-            <h1 class="h3 mb-0 page-title">Geräte-Zustand (technisch)</h1>
+            <div class="stat-label">@T("Verwaltung")</div>
+            <h1 class="h3 mb-0 page-title">@T("Geräte-Zustand (technisch)")</h1>
         </div>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Verwaltung</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>@T("Verwaltung")</a>
 </div>
-<p class="small text-muted">Nur technische Daten: Version, letzter Kontakt und Fehlermeldungen der PCs (7 Tage). Kinder, Nutzung, Alarme, Bilder und Standorte sind hier bewusst nicht sichtbar – das vollständige Diagnose-Log können die Eltern unter Geräte → Protokoll abrufen.</p>
+<p class="small text-muted">@T("Nur technische Daten: Version, letzter Kontakt und Fehlermeldungen der PCs (7 Tage). Kinder, Nutzung, Alarme, Bilder und Standorte sind hier bewusst nicht sichtbar – das vollständige Diagnose-Log können die Eltern unter Geräte → Protokoll abrufen.")</p>
 
 <div class="card">
     <div class="list-group list-group-flush">
@@ -24,22 +24,22 @@
             <div class="list-group-item py-3">
                 <div class="d-flex flex-wrap justify-content-between gap-2">
                     <div>
-                        <span class="fw-semibold">@d.Name</span> <span class="text-muted small">· Familie @h.Family</span>
-                        <div class="small text-muted">PaCo @d.ClientVersion @(outdated ? $"(neu: {Model.CurrentVersion})" : "") · @d.OsVersion</div>
+                        <span class="fw-semibold">@d.Name</span> <span class="text-muted small">· @F("Familie {0}", h.Family)</span>
+                        <div class="small text-muted">PaCo @d.ClientVersion @(outdated ? F("(neu: {0})", Model.CurrentVersion) : "") · @d.OsVersion</div>
                     </div>
                     <div class="text-end small">
-                        <span class="pill @(online ? "pill-ok" : "pill-muted")">@(online ? "online" : $"zuletzt {Format.Ago(d.LastSeenUtc, Model.Now)}")</span>
-                        <span class="pill @(h.Errors24h > 0 ? "pill-bad" : "pill-ok")">@h.Errors24h Fehler / 24 h</span>
+                        <span class="pill @(online ? "pill-ok" : "pill-muted")">@(online ? T("online") : F("zuletzt {0}", Format.Ago(d.LastSeenUtc, Model.Now)))</span>
+                        <span class="pill @(h.Errors24h > 0 ? "pill-bad" : "pill-ok")">@(h.Errors24h == 1 ? T("1 Fehler / 24 h") : F("{0} Fehler / 24 h", h.Errors24h))</span>
                     </div>
                 </div>
                 @if (h.RecentErrors.Count > 0)
                 {
                     <details class="mt-2">
-                        <summary class="small text-muted">Letzte Fehler</summary>
+                        <summary class="small text-muted">@T("Letzte Fehler")</summary>
                         <ul class="list-unstyled small mt-2 mb-0">
                             @foreach (var e in h.RecentErrors)
                             {
-                                <li class="mb-1"><span class="text-muted">@e.TimeUtc.ToLocalTime().ToString("dd.MM. HH:mm")</span> · @Format.Event(e.Kind): @e.Message</li>
+                                <li class="mb-1"><span class="text-muted">@e.TimeUtc.ToLocalTime().ToString("g")</span> · @Format.Event(e.Kind): @e.Message</li>
                             }
                         </ul>
                     </details>
@@ -48,7 +48,7 @@
         }
         @if (Model.Devices.Count == 0)
         {
-            <div class="list-group-item text-muted">Noch keine Geräte.</div>
+            <div class="list-group-item text-muted">@T("Noch keine Geräte.")</div>
         }
     </div>
 </div>
