@@ -1,65 +1,65 @@
 @page "{id:guid}"
 @model PaCo.Server.Pages.Devices.LogModel
-@{ ViewData["Title"] = $"Protokoll {Model.Device.Name}"; }
+@{ ViewData["Title"] = F("Protokoll {0}", Model.Device.Name); }
 
 <div class="page-head">
     <div class="page-head-main">
         <span class="page-icon" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Protokoll</div>
+            <div class="stat-label">@T("Protokoll")</div>
             <h1 class="h3 mb-0 page-title">@Model.Device.Name</h1>
         </div>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Geräte</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>@T("Geräte")</a>
 </div>
 
-<nav class="seg-row mb-3 small" aria-label="Filter">
-    Anzeigen:
+<nav class="seg-row mb-3 small" aria-label="@T("Filter")">
+    @T("Anzeigen:")
     <div class="seg">
-    <a asp-route-id="@Model.Device.Id" asp-route-filter="all" class="@(Model.Filter == "all" ? "fw-bold" : "")" aria-current="@(Model.Filter == "all" ? "true" : null)">alles</a>
-    <a asp-route-id="@Model.Device.Id" asp-route-filter="suspicious" class="@(Model.Filter == "suspicious" ? "fw-bold" : "")" aria-current="@(Model.Filter == "suspicious" ? "true" : null)">mögliche Umgehungsversuche</a>
-    <a asp-route-id="@Model.Device.Id" asp-route-filter="errors" class="@(Model.Filter == "errors" ? "fw-bold" : "")" aria-current="@(Model.Filter == "errors" ? "true" : null)">technische Fehler</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="all" class="@(Model.Filter == "all" ? "fw-bold" : "")" aria-current="@(Model.Filter == "all" ? "true" : null)">@T("alles")</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="suspicious" class="@(Model.Filter == "suspicious" ? "fw-bold" : "")" aria-current="@(Model.Filter == "suspicious" ? "true" : null)">@T("mögliche Umgehungsversuche")</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="errors" class="@(Model.Filter == "errors" ? "fw-bold" : "")" aria-current="@(Model.Filter == "errors" ? "true" : null)">@T("technische Fehler")</a>
     </div>
 </nav>
 
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>Ereignisse</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>@T("Ereignisse")</div>
             <div class="list-group list-group-flush small">
                 @foreach (var e in Model.Events)
                 {
                     var bad = Format.Suspicious.Contains(e.Kind) || e.Kind == DeviceEventKind.ClientError;
                     <div class="list-group-item">
-                        <span class="text-muted">@TimeZoneInfo.ConvertTime(e.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm:ss")</span>
+                        <span class="text-muted">@TimeZoneInfo.ConvertTime(e.TimeUtc, Model.Tz).ToString("G")</span>
                         · <span class="pill @(bad ? "pill-bad" : "pill-muted")">@Format.Event(e.Kind)</span>
                         @if (e.ChildId is { } cid && Model.ChildNames.TryGetValue(cid, out var n)) { <strong> @n</strong> }
-                        <div class="mt-1">@e.Message</div>
+                        <div class="mt-1">@e.Text()</div>
                     </div>
                 }
                 @if (Model.Events.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Keine Ereignisse für diese Auswahl.</div>
+                    <div class="list-group-item text-muted">@T("Keine Ereignisse für diese Auswahl.")</div>
                 }
             </div>
         </div>
     </div>
     <div class="col-lg-5">
         <div class="card mb-4">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-activity" aria-hidden="true"></span></span>Diagnose-Log des PCs</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-activity" aria-hidden="true"></span></span>@T("Diagnose-Log des PCs")</div>
             <div class="card-body">
-                <p class="small text-muted">Für die Fehlersuche: Der PC lädt die letzten Einträge seines Protokolls hoch (verschlüsselt gespeichert, die letzten 3 bleiben erhalten).</p>
+                <p class="small text-muted">@T("Für die Fehlersuche: Der PC lädt die letzten Einträge seines Protokolls hoch (verschlüsselt gespeichert, die letzten 3 bleiben erhalten).")</p>
                 <form method="post" asp-page-handler="Request" asp-route-id="@Model.Device.Id" asp-route-filter="@Model.Filter" class="d-flex align-items-center gap-2 mb-3">
-                    <button class="btn btn-outline-primary btn-sm" disabled="@Model.Waiting"><span class="ico ico-download" aria-hidden="true"></span>Diagnose-Log abrufen</button>
+                    <button class="btn btn-outline-primary btn-sm" disabled="@Model.Waiting"><span class="ico ico-download" aria-hidden="true"></span>@T("Diagnose-Log abrufen")</button>
                     @if (Model.Waiting)
                     {
-                        <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">warte auf den PC …</span>
+                        <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">@T("warte auf den PC …")</span>
                         <div data-autorefresh="5"></div>
                     }
                 </form>
                 @if (Model.DiagnosticsText is not null)
                 {
-                    <div class="small text-muted mb-1">Stand @TimeZoneInfo.ConvertTime(Model.DiagnosticsTime!.Value, Model.Tz).ToString("dd.MM. HH:mm")</div>
+                    <div class="small text-muted mb-1">@F("Stand {0}", TimeZoneInfo.ConvertTime(Model.DiagnosticsTime!.Value, Model.Tz).ToString("g"))</div>
                     <pre class="diag-log">@Model.DiagnosticsText</pre>
                 }
             </div>

@@ -54,7 +54,7 @@ public sealed class NotificationsModel(PaCoDb db, ParentActions actions, Notifie
         var fam = await actions.GetFamilyAsync(ct);
         fam.NtfyTopic = Notifier.NewTopic();
         await db.SaveChangesAsync(ct);
-        TempData["Message"] = "Neues Thema erzeugt. Bitte auf allen Eltern-Handys das alte Thema löschen und das neue abonnieren.";
+        TempData["Message"] = Ui.T("Neues Thema erzeugt. Bitte auf allen Eltern-Handys das alte Thema löschen und das neue abonnieren.");
         return RedirectToPage();
     }
 }

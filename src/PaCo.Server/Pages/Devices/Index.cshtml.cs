@@ -39,7 +39,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
     {
         if (!client.Available)
         {
-            TempData["Error"] = "Das Installationsprogramm ist auf dem Server nicht vorhanden.";
+            TempData["Error"] = Ui.T("Das Installationsprogramm ist auf dem Server nicht vorhanden.");
             return RedirectToPage();
         }
         var code = await CreatePairingCodeAsync();
@@ -63,8 +63,8 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         await db.SaveChangesAsync();
         var childName = childId is { } id ? (await db.Children.FirstAsync(c => c.Id == id)).Name : null;
         TempData["Message"] = childName is null
-            ? $"Konto „{acc.UserName}“ wird nicht mehr überwacht."
-            : $"Konto „{acc.UserName}“ gehört jetzt zu {childName}. Online-PCs übernehmen das innerhalb von 30 Sekunden.";
+            ? Ui.F("Konto „{0}“ wird nicht mehr überwacht.", acc.UserName)
+            : Ui.F("Konto „{0}“ gehört jetzt zu {1}. Online-PCs übernehmen das innerhalb von 30 Sekunden.", acc.UserName, childName);
         return RedirectToPage();
     }
 
@@ -74,12 +74,12 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         if (d is null) return NotFound();
         if (string.IsNullOrWhiteSpace(name))
         {
-            TempData["Error"] = "Bitte einen Namen für den PC eingeben.";
+            TempData["Error"] = Ui.T("Bitte einen Namen für den PC eingeben.");
             return RedirectToPage();
         }
         d.Name = name.Trim()[..Math.Min(100, name.Trim().Length)];
         await db.SaveChangesAsync();
-        TempData["Message"] = $"PC heißt jetzt „{d.Name}“.";
+        TempData["Message"] = Ui.F("PC heißt jetzt „{0}“.", d.Name);
         return RedirectToPage();
     }
 
@@ -90,7 +90,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         if (d is null) return NotFound();
         d.UpdateRequested = true;
         await db.SaveChangesAsync();
-        TempData["Message"] = $"{d.Name} installiert Version {client.Version} beim nächsten Kontakt (online: innerhalb von 30 Sekunden).";
+        TempData["Message"] = Ui.F("{0} installiert Version {1} beim nächsten Kontakt (online: innerhalb von 30 Sekunden).", d.Name, client.Version);
         return RedirectToPage();
     }
 
@@ -102,7 +102,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         if (d is null) return NotFound();
         d.Revoked = true;
         await db.SaveChangesAsync();
-        TempData["Message"] = $"{d.Name} wurde entfernt. Der PC hebt beim nächsten Kontakt alle Sperren auf; PaCo kann dann über „Apps & Features“ deinstalliert werden.";
+        TempData["Message"] = Ui.F("{0} wurde entfernt. Der PC hebt beim nächsten Kontakt alle Sperren auf; PaCo kann dann über „Apps & Features“ deinstalliert werden.", d.Name);
         return RedirectToPage();
     }
 
@@ -112,7 +112,7 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         if (d is null) return NotFound();
         db.Devices.Remove(d);
         await db.SaveChangesAsync();
-        TempData["Message"] = $"{d.Name} und seine Statistik wurden gelöscht.";
+        TempData["Message"] = Ui.F("{0} und seine Statistik wurden gelöscht.", d.Name);
         return RedirectToPage();
     }
 

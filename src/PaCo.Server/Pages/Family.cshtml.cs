@@ -44,7 +44,7 @@ public sealed class FamilyModel(UserManager<ParentUser> users, AccountAdmin admi
     public async Task<IActionResult> OnPostInviteAsync()
     {
         if (await users.FindByEmailAsync(InviteEmail.Trim()) is not null)
-            ModelState.AddModelError(nameof(InviteEmail), "Diese E-Mail-Adresse hat bereits ein Konto.");
+            ModelState.AddModelError(nameof(InviteEmail), Ui.T("Diese E-Mail-Adresse hat bereits ein Konto."));
         if (!ModelState.IsValid)
         {
             await OnGetAsync();
@@ -72,7 +72,7 @@ public sealed class FamilyModel(UserManager<ParentUser> users, AccountAdmin admi
         if (u is null) return NotFound();
         await users.DeleteAsync(u);
         log.LogWarning("Elternteil {Email} aus Familie {Family} entfernt durch {By}", u.Email, family.FamilyId, ParentActions.UserId(User));
-        TempData["Message"] = $"{u.DisplayName} wurde aus der Familie entfernt.";
+        TempData["Message"] = Ui.F("{0} wurde aus der Familie entfernt.", u.DisplayName);
         return RedirectToPage();
     }
 

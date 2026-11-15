@@ -115,7 +115,7 @@ public static class DeviceApi
         if (code is null || code.UsedUtc is not null || code.ExpiresUtc < now)
         {
             log.LogWarning("Kopplung mit ungültigem/abgelaufenem Code abgelehnt");
-            return Results.Problem("Der Kopplungscode ist ungültig, abgelaufen oder wurde schon benutzt. Bitte auf der Website ein neues Gerät hinzufügen.", statusCode: 400);
+            return Results.Problem(Ui.T("Der Kopplungscode ist ungültig, abgelaufen oder wurde schon benutzt. Bitte auf der Website ein neues Gerät hinzufügen."), statusCode: 400);
         }
 
         var family = await db.Families.SingleAsync(f => f.Id == code.FamilyId, ct);
@@ -166,7 +166,7 @@ public static class DeviceApi
     {
         var device = await AuthenticateAsync(http, db, ct);
         if (device is null) return Results.Unauthorized();
-        if (device.Revoked) return Results.Problem("Gerät wurde entfernt.", statusCode: 403);
+        if (device.Revoked) return Results.Problem(Ui.T("Gerät wurde entfernt."), statusCode: 403);
 
         var accounts = await db.DeviceAccounts.IgnoreQueryFilters().Where(a => a.DeviceId == device.Id && a.FamilyId == device.FamilyId).ToListAsync(ct);
         var children = await db.Children.IgnoreQueryFilters().Where(c => c.FamilyId == device.FamilyId).ToListAsync(ct);
