@@ -19,6 +19,7 @@ public sealed class PaCoFactory : WebApplicationFactory<Program>
     {
         builder.UseSetting("PaCo:DataDir", DataDir);
         builder.UseSetting("PaCo:AccountRateLimit", "1000");
+        builder.UseSetting("PaCo:WifiGeolocationUrl", ""); // never call external services from tests
         builder.UseEnvironment("Development");
     }
 

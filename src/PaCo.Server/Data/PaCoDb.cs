@@ -43,6 +43,8 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
 
     public DbSet<DeviceIpEntity> DeviceIps => Set<DeviceIpEntity>();
 
+    public DbSet<DiagnosticsEntity> Diagnostics => Set<DiagnosticsEntity>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // SQLite cannot compare/order DateTimeOffset; store as sortable binary (all values are UTC).
@@ -89,6 +91,8 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
         b.Entity<DeviceLocationEntity>().HasIndex(l => new { l.DeviceId, l.TimeUtc });
         b.Entity<DeviceIpEntity>().HasOne<Device>().WithMany().HasForeignKey(i => i.DeviceId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<DeviceIpEntity>().HasIndex(i => new { i.DeviceId, i.LastSeenUtc });
+
+        b.Entity<DiagnosticsEntity>().HasOne<Device>().WithMany().HasForeignKey(d => d.DeviceId).OnDelete(DeleteBehavior.Cascade);
 
         // Tenant isolation for every family-scoped entity.
         foreach (var type in b.Model.GetEntityTypes().Where(t => typeof(IFamilyScoped).IsAssignableFrom(t.ClrType)))

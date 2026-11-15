@@ -30,6 +30,12 @@ public sealed class ServerOptions
     /// <summary>ntfy access token with write permission (PaCo is the only publisher).</summary>
     public string? NtfyToken { get; set; }
 
+    /// <summary>MLS-compatible Wi-Fi geolocation endpoint (default: BeaconDB). Empty = disabled.</summary>
+    public string? WifiGeolocationUrl { get; set; } = "https://api.beacondb.net/v1/geolocate";
+
+    /// <summary>Optional Google Geolocation API key – used instead of BeaconDB when set.</summary>
+    public string? GoogleGeolocationApiKey { get; set; }
+
     /// <summary>GitHub repository ("owner/name") whose releases provide client updates.</summary>
     public string UpdateRepository { get; set; } = "Holdi601/PaCo";
 

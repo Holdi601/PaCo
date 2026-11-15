@@ -144,7 +144,8 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--paco-acce
 
 .auth-card { max-width: 440px; margin: 6vh auto 0; }
 
-.paco-map { height: 420px; border-radius: var(--paco-radius); }
+.paco-map { height: 420px; width: 100%; border-radius: var(--paco-radius); }
+.diag-log { max-height: 480px; overflow: auto; font-size: .72rem; background: var(--paco-surface-2); padding: .75rem; border-radius: 10px; white-space: pre-wrap; word-break: break-all; }
 [data-bs-theme="dark"] .paco-map .leaflet-tile-pane { filter: brightness(.8) contrast(1.1); }
 
 details > summary { cursor: pointer; user-select: none; }

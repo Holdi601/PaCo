@@ -111,7 +111,11 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
             list.Add(new Warning("warning", $"Die Uhr von {d.Name} geht {Math.Abs(d.ClockSkewSeconds) / 60} Minuten falsch."));
 
         var since = Now.AddDays(-3);
-        var serious = new[] { DeviceEventKind.ClockTampering, DeviceEventKind.PolicyRejected, DeviceEventKind.AgentFailure, DeviceEventKind.Uninstalled };
+        var serious = new[]
+        {
+            DeviceEventKind.ClockTampering, DeviceEventKind.PolicyRejected, DeviceEventKind.AgentFailure, DeviceEventKind.Uninstalled,
+            DeviceEventKind.SafeMode, DeviceEventKind.OfflineUsage, DeviceEventKind.AgentCrashed,
+        };
         var events = await db.DeviceEvents.Where(e => e.TimeUtc > since && serious.Contains(e.Kind)).OrderByDescending(e => e.TimeUtc).Take(5).ToListAsync();
         foreach (var e in events)
             list.Add(new Warning("warning", $"{Format.Ago(e.TimeUtc, Now)}: {e.Message}", "/Devices/Index"));

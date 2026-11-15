@@ -23,6 +23,17 @@ Die Logs rotieren automatisch (5 × 10 MB).
 Wichtige Ereignisse (gesperrt, abgemeldet, falscher Code, Uhr verstellt, Agent-Fehler) werden zusätzlich an den Server
 gemeldet. Sie erscheinen auf der Website unter **Statistik** des Kindes und als Warnung in der **Übersicht**.
 
+**Auf der Website:**
+
+- **Geräte → 📋 Protokoll** (Eltern): alle Ereignisse des PCs, filterbar nach *möglichen Umgehungsversuchen*
+  (Uhr verstellt, falscher Code, gesperrtes Programm gestartet, abgesicherter Modus, Nutzung ohne Internet,
+  Sitzungsprogramm beendet …) und *technischen Fehlern*. Mit **„Diagnose-Log abrufen“** lädt der PC die letzten
+  Einträge seiner `paco.log` hoch (verschlüsselt gespeichert, die letzten 3 bleiben erhalten).
+- **Verwaltung → 🩺 Geräte-Zustand** (Super-Admin): Version, letzter Kontakt und technische Fehler aller Geräte, ohne
+  Kinderdaten.
+
+Client-Fehler werden automatisch an den Server gemeldet, höchstens 20 pro Stunde und Gerät.
+
 Dienststatus am PC (Admin-PowerShell):
 
 ```powershell

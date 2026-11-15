@@ -28,6 +28,19 @@ public sealed class LocationModel(PaCoDb db, ParentActions actions, TimeProvider
 
     public bool Waiting => Device.LocateRequestedUtc is { } r && Now - r < TimeSpan.FromMinutes(2);
 
+    /// <summary>Newest point with coordinates (shown on the Google map).</summary>
+    public DeviceLocationEntity? Latest => Points.LastOrDefault(p => p.Latitude is not null && p.Longitude is not null);
+
+    /// <summary>Newest point with a Wi-Fi scan.</summary>
+    public DeviceLocationEntity? LatestScan => Points.LastOrDefault(p => p.NearbyJson.Length > 2);
+
+    public static string Coord(double v) => v.ToString("F6", CultureInfo.InvariantCulture);
+
+    /// <summary>Google Maps embed without API key (single marker).</summary>
+    public static string GoogleEmbed(double lat, double lon) => $"https://maps.google.com/maps?q={Coord(lat)},{Coord(lon)}&z=16&output=embed";
+
+    public static string GoogleLink(double lat, double lon) => $"https://www.google.com/maps/search/?api=1&query={Coord(lat)},{Coord(lon)}";
+
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var d = await db.Devices.FirstOrDefaultAsync(x => x.Id == id);

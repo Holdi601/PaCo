@@ -272,6 +272,9 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<long>("ClockSkewSeconds")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("DiagnosticsRequestedUtc")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("TEXT");
 
@@ -476,6 +479,10 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<double?>("Longitude")
                         .HasColumnType("REAL");
 
+                    b.Property<string>("NearbyJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PublicIp")
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
@@ -496,6 +503,32 @@ namespace PaCo.Server.Data.Migrations
                     b.HasIndex("DeviceId", "TimeUtc");
 
                     b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.DiagnosticsEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProtectedText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("TimeUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.ToTable("Diagnostics");
                 });
 
             modelBuilder.Entity("PaCo.Server.Data.Family", b =>
@@ -917,6 +950,15 @@ namespace PaCo.Server.Data.Migrations
                 });
 
             modelBuilder.Entity("PaCo.Server.Data.DeviceLocationEntity", b =>
+                {
+                    b.HasOne("PaCo.Server.Data.Device", null)
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.DiagnosticsEntity", b =>
                 {
                     b.HasOne("PaCo.Server.Data.Device", null)
                         .WithMany()

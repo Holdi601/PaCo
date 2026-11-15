@@ -47,9 +47,22 @@
     }
 </div>
 
-<div class="card mb-4">
+@if (Model.Latest is { } last)
+{
+    <div class="card mb-3">
+        <div class="card-header d-flex flex-wrap justify-content-between gap-2">
+            <span>Letzte Position · @TimeZoneInfo.ConvertTime(last.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm") · ±@((int)(last.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(last.Source)</span>
+            <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(last.Latitude!.Value, last.Longitude!.Value)" target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+        </div>
+        <iframe id="gmap" class="paco-map border-0" title="Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                src="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(last.Latitude!.Value, last.Longitude!.Value)"></iframe>
+    </div>
+}
+
+<details class="card mb-4">
+    <summary class="card-header">Verlauf auf der Karte (OpenStreetMap)</summary>
     <div id="paco-map" class="paco-map" data-points="@Model.MapJson"></div>
-</div>
+</details>
 
 <div class="row g-4">
     <div class="col-lg-7">
@@ -62,9 +75,12 @@
                         <span>@TimeZoneInfo.ConvertTime(p.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm")</span>
                         @if (p.Latitude is { } lat && p.Longitude is { } lon)
                         {
-                            <a href="https://www.openstreetmap.org/?mlat=@lat.ToString(System.Globalization.CultureInfo.InvariantCulture)&mlon=@lon.ToString(System.Globalization.CultureInfo.InvariantCulture)#map=17/@lat.ToString(System.Globalization.CultureInfo.InvariantCulture)/@lon.ToString(System.Globalization.CultureInfo.InvariantCulture)" target="_blank" rel="noopener noreferrer">
-                                @lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture), @lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
-                            </a>
+                            <span>
+                                <a href="#gmap" data-gmap="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(lat, lon)">
+                                    @lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture), @lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
+                                </a>
+                                <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(lat, lon)" target="_blank" rel="noopener noreferrer" title="In Google Maps öffnen">↗</a>
+                            </span>
                             <span class="text-muted">±@((int)(p.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(p.Source)</span>
                         }
                         else
@@ -93,6 +109,22 @@
         </div>
     </div>
     <div class="col-lg-5">
+        @if (Model.LatestScan is { } scan)
+        {
+            <div class="card mb-4">
+                <div class="card-header">WLANs in der Nähe <span class="small text-muted fw-normal">(@TimeZoneInfo.ConvertTime(scan.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm"))</span></div>
+                <div class="list-group list-group-flush small">
+                    @foreach (var n in scan.GetNearby())
+                    {
+                        <div class="list-group-item d-flex justify-content-between gap-2">
+                            <span class="text-truncate">@(string.IsNullOrEmpty(n.Ssid) ? "(verborgen)" : n.Ssid)</span>
+                            <span class="text-muted text-nowrap font-monospace">@n.Bssid · @n.Rssi dBm · @(n.FrequencyMhz >= 5000 ? "5 GHz" : "2,4 GHz")</span>
+                        </div>
+                    }
+                </div>
+                <div class="card-body small text-muted py-2">Findet Windows keine genaue Position, sucht PaCo diese WLANs in einer weltweiten WLAN-Karte.</div>
+            </div>
+        }
         <div class="card mb-4">
             <div class="card-header">Internet-Anschlüsse (IP-Adressen)</div>
             <div class="list-group list-group-flush small">

@@ -54,6 +54,15 @@ internal sealed partial class LocationWorker(Runtime rt) : BackgroundService
     {
         EnsureLocationAllowed();
         var ssid = CurrentSsid();
+        List<WifiNetwork> nearby = [];
+        try
+        {
+            nearby = await Task.Run(() => Native.WifiScanner.Scan(), ct);
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"WLAN-Scan: {ex.Message}");
+        }
         try
         {
             var locator = new Geolocator { DesiredAccuracy = PositionAccuracy.High };
@@ -61,18 +70,18 @@ internal sealed partial class LocationWorker(Runtime rt) : BackgroundService
             timeout.CancelAfter(TimeSpan.FromSeconds(45));
             var pos = await locator.GetGeopositionAsync(TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(40)).AsTask(timeout.Token);
             var c = pos.Coordinate;
-            Log.Info($"Standort ermittelt (±{c.Accuracy:F0} m, Quelle {c.PositionSource})");
+            Log.Info($"Standort ermittelt (±{c.Accuracy:F0} m, Quelle {c.PositionSource}, {nearby.Count} WLANs in der Nähe)");
             return new LocationPoint
             {
                 TimeUtc = DateTimeOffset.UtcNow, Latitude = c.Point.Position.Latitude, Longitude = c.Point.Position.Longitude,
-                AccuracyMeters = c.Accuracy, Source = c.PositionSource.ToString(), Ssid = ssid,
+                AccuracyMeters = c.Accuracy, Source = c.PositionSource.ToString(), Ssid = ssid, Nearby = nearby,
             };
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
             // No fix (location service off, no Wi-Fi around …): still report SSID – the server adds the public IP.
             Log.Warn($"Standort nicht ermittelbar: {ex.Message}");
-            return new LocationPoint { TimeUtc = DateTimeOffset.UtcNow, Ssid = ssid, Error = Trim(ex.Message, 200) };
+            return new LocationPoint { TimeUtc = DateTimeOffset.UtcNow, Ssid = ssid, Error = Trim(ex.Message, 200), Nearby = nearby };
         }
     }
 

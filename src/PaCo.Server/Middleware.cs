@@ -17,6 +17,7 @@ public static class Middleware
         var h = ctx.Response.Headers;
         // Map tiles come from OpenStreetMap; everything else only from this server.
         h.ContentSecurityPolicy = "default-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; style-src 'self'; script-src 'self'; " +
+                                  "frame-src https://maps.google.com https://www.google.com; " +
                                   "frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'";
         h.XContentTypeOptions = "nosniff";
         h.XFrameOptions = "DENY";

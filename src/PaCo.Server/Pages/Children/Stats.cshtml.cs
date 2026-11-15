@@ -62,15 +62,5 @@ public sealed class StatsModel(PaCoDb db, ParentActions actions) : PageModel
         return Page();
     }
 
-    public static string EventText(DeviceEventKind k) => k switch
-    {
-        DeviceEventKind.ForcedLogoff => "Abgemeldet",
-        DeviceEventKind.Locked => "Gesperrt",
-        DeviceEventKind.Unlocked => "Entsperrt",
-        DeviceEventKind.UnlockFailed => "Falscher Code",
-        DeviceEventKind.AppBlocked => "Programm blockiert",
-        DeviceEventKind.ClockTampering => "Uhr verstellt",
-        DeviceEventKind.ChildIsAdmin => "Admin-Rechte",
-        _ => k.ToString(),
-    };
+    public static string EventText(DeviceEventKind k) => Format.Event(k);
 }

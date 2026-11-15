@@ -1,0 +1,63 @@
+@page "{id:guid}"
+@model PaCo.Server.Pages.Devices.LogModel
+@{ ViewData["Title"] = $"Protokoll {Model.Device.Name}"; }
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="stat-label">Protokoll</div>
+        <h1 class="h3 mb-0 page-title">💻 @Model.Device.Name</h1>
+    </div>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">Zurück</a>
+</div>
+
+<div class="d-flex flex-wrap gap-3 mb-3 small">
+    Anzeigen:
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="all" class="@(Model.Filter == "all" ? "fw-bold" : "")">alles</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="suspicious" class="@(Model.Filter == "suspicious" ? "fw-bold" : "")">mögliche Umgehungsversuche</a>
+    <a asp-route-id="@Model.Device.Id" asp-route-filter="errors" class="@(Model.Filter == "errors" ? "fw-bold" : "")">technische Fehler</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Ereignisse</div>
+            <div class="list-group list-group-flush small">
+                @foreach (var e in Model.Events)
+                {
+                    var bad = Format.Suspicious.Contains(e.Kind) || e.Kind == DeviceEventKind.ClientError;
+                    <div class="list-group-item">
+                        <span class="text-muted">@TimeZoneInfo.ConvertTime(e.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm:ss")</span>
+                        · <span class="pill @(bad ? "pill-bad" : "pill-muted")">@Format.Event(e.Kind)</span>
+                        @if (e.ChildId is { } cid && Model.ChildNames.TryGetValue(cid, out var n)) { <strong> @n</strong> }
+                        <div class="mt-1">@e.Message</div>
+                    </div>
+                }
+                @if (Model.Events.Count == 0)
+                {
+                    <div class="list-group-item text-muted">Keine Ereignisse.</div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">Diagnose-Log des PCs</div>
+            <div class="card-body">
+                <p class="small text-muted">Für die Fehlersuche: Der PC lädt die letzten Einträge seines Protokolls hoch (verschlüsselt gespeichert, die letzten 3 bleiben erhalten).</p>
+                <form method="post" asp-page-handler="Request" asp-route-id="@Model.Device.Id" asp-route-filter="@Model.Filter" class="d-flex align-items-center gap-2 mb-3">
+                    <button class="btn btn-outline-primary btn-sm" @(Model.Waiting ? "disabled" : "")>Diagnose-Log abrufen</button>
+                    @if (Model.Waiting)
+                    {
+                        <span class="spinner-border spinner-border-sm text-primary"></span><span class="small">warte auf den PC …</span>
+                        <div data-autorefresh="5"></div>
+                    }
+                </form>
+                @if (Model.DiagnosticsText is not null)
+                {
+                    <div class="small text-muted mb-1">Stand @TimeZoneInfo.ConvertTime(Model.DiagnosticsTime!.Value, Model.Tz).ToString("dd.MM. HH:mm")</div>
+                    <pre class="diag-log">@Model.DiagnosticsText</pre>
+                }
+            </div>
+        </div>
+    </div>
+</div>

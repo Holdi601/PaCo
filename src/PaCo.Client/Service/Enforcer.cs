@@ -52,7 +52,12 @@ internal sealed class Enforcer : BackgroundService
     public Enforcer(Runtime rt)
     {
         _rt = rt;
-        _agents = new AgentManager(OnAgentMessageAsync);
+        _agents = new AgentManager(OnAgentMessageAsync, (sessionId, message) =>
+        {
+            Guid? child;
+            lock (_tracksGate) child = _tracks.GetValueOrDefault(sessionId)?.ChildId;
+            lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AgentCrashed, message, child);
+        });
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -469,6 +474,7 @@ internal sealed class Enforcer : BackgroundService
 
             case IpcMessage.LogLine:
                 Log.Warn($"Agent {sessionId}: {msg.Text}");
+                _rt.ReportError($"Sitzungsprogramm: {msg.Text}");
                 break;
         }
     }

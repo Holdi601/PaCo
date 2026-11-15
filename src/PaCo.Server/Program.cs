@@ -40,6 +40,8 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<Notifier>());
 builder.Services.AddSingleton<ScreenshotStore>();
 builder.Services.AddHostedService<Housekeeping>();
 builder.Services.AddScoped<FamilyInfo>();
+builder.Services.AddHttpClient("wifi-geo", c => c.Timeout = TimeSpan.FromSeconds(6));
+builder.Services.AddSingleton<WifiGeolocator>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = AccountAdmin.InviteLifetime);
 
 builder.Services.AddDataProtection()

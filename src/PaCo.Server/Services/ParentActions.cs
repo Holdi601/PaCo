@@ -173,6 +173,34 @@ public static class Format
 
     public static string Grant(int minutes) => minutes == 0 ? "unbegrenzt (heute)" : $"+{minutes} Min";
 
+    public static string Event(DeviceEventKind k) => k switch
+    {
+        DeviceEventKind.ServiceStarted => "Dienst gestartet",
+        DeviceEventKind.ForcedLogoff => "Abgemeldet",
+        DeviceEventKind.Locked => "Gesperrt",
+        DeviceEventKind.Unlocked => "Freigegeben",
+        DeviceEventKind.UnlockFailed => "Falscher Code",
+        DeviceEventKind.AppBlocked => "Programm blockiert",
+        DeviceEventKind.ClockTampering => "Uhr verstellt",
+        DeviceEventKind.ChildIsAdmin => "Admin-Rechte",
+        DeviceEventKind.PolicyRejected => "Regeln abgelehnt",
+        DeviceEventKind.AgentFailure => "Sperre nicht möglich",
+        DeviceEventKind.Uninstalled => "Deinstalliert",
+        DeviceEventKind.ClientError => "Technischer Fehler",
+        DeviceEventKind.SafeMode => "Abgesicherter Modus",
+        DeviceEventKind.OfflineUsage => "Nutzung ohne Internet",
+        DeviceEventKind.AgentCrashed => "Sitzungsprogramm beendet",
+        _ => "Info",
+    };
+
+    /// <summary>Events that may indicate an attempt to get around PaCo.</summary>
+    public static readonly DeviceEventKind[] Suspicious =
+    [
+        DeviceEventKind.ClockTampering, DeviceEventKind.UnlockFailed, DeviceEventKind.AppBlocked, DeviceEventKind.PolicyRejected,
+        DeviceEventKind.SafeMode, DeviceEventKind.OfflineUsage, DeviceEventKind.AgentCrashed, DeviceEventKind.AgentFailure,
+        DeviceEventKind.Uninstalled, DeviceEventKind.ChildIsAdmin,
+    ];
+
     public static readonly string[] WeekdayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 
     /// <summary>Monday-first order for display.</summary>

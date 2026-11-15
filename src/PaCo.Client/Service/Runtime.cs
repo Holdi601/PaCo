@@ -19,6 +19,32 @@ internal sealed class Runtime
         foreach (var n in notes) State.AddEvent(DeviceEventKind.ClockTampering, n);
     }
 
+    private readonly Queue<TimeSpan> _errorTimes = new();
+
+    /// <summary>Records a client error as event for the website – at most 20 per hour.</summary>
+    public void ReportError(string message)
+    {
+        lock (Gate)
+        {
+            while (_errorTimes.Count > 0 && Mono.Since(_errorTimes.Peek()) > TimeSpan.FromHours(1)) _errorTimes.Dequeue();
+            if (_errorTimes.Count >= 20) return;
+            _errorTimes.Enqueue(Mono.Now);
+            State.PendingEvents.Add(new DeviceEvent { TimeUtc = DateTimeOffset.UtcNow, Kind = DeviceEventKind.ClientError, Message = message.Length > 480 ? message[..480] : message });
+            MarkDirty();
+        }
+    }
+
+    private volatile bool _diagnosticsRequested;
+
+    public void RequestDiagnostics() => _diagnosticsRequested = true;
+
+    public bool TakeDiagnosticsRequest()
+    {
+        var r = _diagnosticsRequested;
+        _diagnosticsRequested = false;
+        return r;
+    }
+
     /// <summary>Tamper-resistant clock (monotonic while running, never backwards, server-confirmed).</summary>
     public TrustedClock Clock { get; }
 

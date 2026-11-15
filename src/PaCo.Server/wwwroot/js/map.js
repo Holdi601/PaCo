@@ -1,6 +1,25 @@
 // Location map (Leaflet + OpenStreetMap). Data comes from the data-points attribute (no inline script – CSP).
 (function () {
     "use strict";
+    // Clicking a coordinate in the list shows it on the Google map.
+    document.addEventListener("click", function (e) {
+        var a = e.target.closest("[data-gmap]");
+        var frame = document.getElementById("gmap");
+        if (!a || !frame) return;
+        e.preventDefault();
+        frame.src = a.getAttribute("data-gmap");
+        frame.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    // The OSM trail map lives in a <details>; Leaflet needs a visible container to size itself.
+    var details = document.querySelector("details:has(#paco-map)");
+    if (details && !details.open) {
+        details.addEventListener("toggle", function once() { details.removeEventListener("toggle", once); init(); });
+        return;
+    }
+    init();
+
+    function init() {
     var el = document.getElementById("paco-map");
     if (!el || !window.L) return;
     var points = JSON.parse(el.getAttribute("data-points") || "[]");
@@ -31,6 +50,7 @@
         (last.ssid ? "<br>WLAN: " + escapeHtml(last.ssid) : "")).addTo(map).openPopup();
     if (latlngs.length > 1) map.fitBounds(latlngs, { padding: [30, 30], maxZoom: 16 });
     else map.setView([last.lat, last.lon], 16);
+    }
 
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, function (c) {

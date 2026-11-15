@@ -125,7 +125,31 @@ internal static class Log
 
     public static void Warn(string message) => Write("WARN", message);
 
-    public static void Error(string message, Exception? ex = null) => Write("ERROR", ex is null ? message : $"{message}: {ex}");
+    public static void Error(string message, Exception? ex = null)
+    {
+        Write("ERROR", ex is null ? message : $"{message}: {ex}");
+        // Short version (no stack trace) to the server so problems are visible without access to the PC.
+        try { ErrorSink?.Invoke(ex is null ? message : $"{message}: {ex.GetType().Name}: {ex.Message}"); } catch { /* never throw from logging */ }
+    }
+
+    /// <summary>Set by the service: forwards errors to the server (rate-limited there).</summary>
+    public static Action<string>? ErrorSink { get; set; }
+
+    /// <summary>Last <paramref name="maxBytes"/> of the log (plus the rotated file if needed) for diagnostics.</summary>
+    public static string Tail(int maxBytes = 200_000)
+    {
+        lock (Gate)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var f in new[] { Paths.LogFile + ".1", Paths.LogFile })
+            {
+                if (!File.Exists(f)) continue;
+                sb.Append(File.ReadAllText(f, System.Text.Encoding.UTF8));
+            }
+            var s = sb.ToString();
+            return s.Length > maxBytes ? s[^maxBytes..] : s;
+        }
+    }
 
     private static void Write(string level, string message)
     {

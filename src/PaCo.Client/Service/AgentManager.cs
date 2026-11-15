@@ -32,7 +32,7 @@ internal sealed class AgentConnection : IDisposable
 }
 
 /// <summary>Starts, watches and restarts session agents.</summary>
-internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage) : IDisposable
+internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action<int, string>? onCrash = null) : IDisposable
 {
     private readonly Dictionary<int, AgentConnection> _agents = [];
     private readonly Dictionary<int, (int Failures, TimeSpan NextTry)> _backoff = [];
@@ -57,6 +57,12 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage) : IDis
             {
                 if (!a.Process.HasExited && (a.Connected || Mono.Now - a.StartedUtc < TimeSpan.FromSeconds(20))) return;
                 Log.Warn($"Agent in Sitzung {sessionId} läuft nicht mehr (exited={a.Process.HasExited}) – starte neu");
+                if (a.Process.HasExited)
+                {
+                    int code;
+                    try { code = a.Process.ExitCode; } catch { code = -1; }
+                    onCrash?.Invoke(sessionId, $"Sitzungsprogramm wurde unerwartet beendet (Code {code}) und neu gestartet.");
+                }
                 a.Dispose();
                 _agents.Remove(sessionId);
                 Fail(sessionId);

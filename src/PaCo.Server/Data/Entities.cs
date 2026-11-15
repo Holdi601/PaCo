@@ -166,6 +166,9 @@ public sealed class Device : IFamilyScoped
     [MaxLength(64)]
     public string? LastPublicIp { get; set; }
 
+    /// <summary>Diagnostic log requested at this time (pending until uploaded).</summary>
+    public DateTimeOffset? DiagnosticsRequestedUtc { get; set; }
+
     /// <summary>A parent/admin asked this device to install the newest client version.</summary>
     public bool UpdateRequested { get; set; }
 
@@ -368,6 +371,11 @@ public sealed class DeviceLocationEntity : IFamilyScoped
 
     [MaxLength(200)]
     public string? Error { get; set; }
+
+    /// <summary>JSON array of <see cref="WifiNetwork"/> seen around the device at that time.</summary>
+    public string NearbyJson { get; set; } = "[]";
+
+    public IReadOnlyList<WifiNetwork> GetNearby() => PaCoJson.Deserialize<WifiNetwork[]>(string.IsNullOrEmpty(NearbyJson) ? "[]" : NearbyJson);
 }
 
 /// <summary>Public IP addresses a device used (one row per change, kept 90 days) – useful for police after a theft.</summary>
@@ -385,6 +393,20 @@ public sealed class DeviceIpEntity : IFamilyScoped
     public DateTimeOffset FirstSeenUtc { get; set; }
 
     public DateTimeOffset LastSeenUtc { get; set; }
+}
+
+/// <summary>Uploaded client log (encrypted at rest, last 3 per device).</summary>
+public sealed class DiagnosticsEntity : IFamilyScoped
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public Guid FamilyId { get; set; }
+
+    public Guid DeviceId { get; set; }
+
+    public DateTimeOffset TimeUtc { get; set; }
+
+    public string ProtectedText { get; set; } = "";
 }
 
 public enum ScreenshotStatus

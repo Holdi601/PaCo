@@ -1,0 +1,51 @@
+@page
+@model PaCo.Server.Pages.Admin.HealthModel
+@{ ViewData["Title"] = "Geräte-Zustand"; }
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="stat-label">Verwaltung</div>
+        <h1 class="h3 mb-0 page-title">Geräte-Zustand (technisch)</h1>
+    </div>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">Zurück</a>
+</div>
+<p class="small text-muted">Nur technische Daten: Version, letzter Kontakt und Fehlermeldungen der PCs (7 Tage). Kinder, Nutzung, Alarme, Bilder und Standorte sind hier bewusst nicht sichtbar – das vollständige Diagnose-Log können die Eltern unter Geräte → Protokoll abrufen.</p>
+
+<div class="card">
+    <div class="list-group list-group-flush">
+        @foreach (var h in Model.Devices)
+        {
+            var d = h.Device;
+            var outdated = UpdateManifest.IsNewer(Model.CurrentVersion, d.ClientVersion);
+            var online = d.IsOnline(Model.Now);
+            <div class="list-group-item py-3">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <div>
+                        <span class="fw-semibold">@d.Name</span> <span class="text-muted small">· Familie @h.Family</span>
+                        <div class="small text-muted">PaCo @d.ClientVersion @(outdated ? $"(neu: {Model.CurrentVersion})" : "") · @d.OsVersion</div>
+                    </div>
+                    <div class="text-end small">
+                        <span class="pill @(online ? "pill-ok" : "pill-muted")">@(online ? "online" : $"zuletzt {Format.Ago(d.LastSeenUtc, Model.Now)}")</span>
+                        <span class="pill @(h.Errors24h > 0 ? "pill-bad" : "pill-ok")">@h.Errors24h Fehler / 24 h</span>
+                    </div>
+                </div>
+                @if (h.RecentErrors.Count > 0)
+                {
+                    <details class="mt-2">
+                        <summary class="small text-muted">Letzte Fehler</summary>
+                        <ul class="list-unstyled small mt-2 mb-0">
+                            @foreach (var e in h.RecentErrors)
+                            {
+                                <li class="mb-1"><span class="text-muted">@e.TimeUtc.ToLocalTime().ToString("dd.MM. HH:mm")</span> · @Format.Event(e.Kind): @e.Message</li>
+                            }
+                        </ul>
+                    </details>
+                }
+            </div>
+        }
+        @if (Model.Devices.Count == 0)
+        {
+            <div class="list-group-item text-muted">Noch keine Geräte.</div>
+        }
+    </div>
+</div>

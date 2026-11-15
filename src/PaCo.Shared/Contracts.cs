@@ -7,6 +7,7 @@ public static class ApiRoutes
     public const string Sync = "/api/device/sync";
     public const string ClientDownload = "/api/device/client";
     public const string Screenshot = "/api/device/screenshot";
+    public const string Diagnostics = "/api/device/diagnostics";
 }
 
 public enum LocationMode
@@ -38,6 +39,21 @@ public sealed record LocationPoint
     public string? Ssid { get; init; }
 
     public string? Error { get; init; }
+
+    /// <summary>Wi-Fi access points around the device (for Wi-Fi-map positioning on the server).</summary>
+    public IReadOnlyList<WifiNetwork> Nearby { get; init; } = [];
+}
+
+public sealed record WifiNetwork
+{
+    public string Bssid { get; init; } = "";
+
+    public string? Ssid { get; init; }
+
+    /// <summary>Signal strength in dBm.</summary>
+    public int Rssi { get; init; }
+
+    public int FrequencyMhz { get; init; }
 }
 
 public enum SecuritySeverity
@@ -142,6 +158,14 @@ public enum DeviceEventKind
     UnlockFailed,
     AppBlocked,
     Uninstalled,
+    /// <summary>Error from the client log (technical problem).</summary>
+    ClientError,
+    /// <summary>The PC was started in safe mode.</summary>
+    SafeMode,
+    /// <summary>The PC was used while it had no connection to the server.</summary>
+    OfflineUsage,
+    /// <summary>The session agent ended unexpectedly.</summary>
+    AgentCrashed,
 }
 
 public sealed record DeviceEvent
@@ -236,6 +260,9 @@ public sealed record SyncResponse
 
     /// <summary>A parent pressed "Jetzt orten".</summary>
     public bool LocateNow { get; init; }
+
+    /// <summary>A parent/admin asked for the client's diagnostic log.</summary>
+    public bool SendDiagnostics { get; init; }
 }
 
 /// <summary>Signed description of a client build the device may install.</summary>

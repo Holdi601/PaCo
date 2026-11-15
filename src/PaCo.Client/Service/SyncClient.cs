@@ -57,6 +57,13 @@ internal sealed class ServerApi : IDisposable
         await EnsureAsync(resp, ct);
     }
 
+    public async Task UploadDiagnosticsAsync(string text, CancellationToken ct = default)
+    {
+        using var content = new StringContent(text, System.Text.Encoding.UTF8, "text/plain");
+        using var resp = await _http.PostAsync(ApiRoutes.Diagnostics.TrimStart('/'), content, ct);
+        await EnsureAsync(resp, ct);
+    }
+
     /// <summary>Downloads the plain client exe offered by the server into <paramref name="target"/>.</summary>
     public async Task DownloadClientAsync(string target, CancellationToken ct = default)
     {
@@ -164,7 +171,11 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             try
             {
                 await SyncOnceAsync(api, ct);
-                if (failures > 0) Log.Info($"Server wieder erreichbar nach {failures} Fehlversuch(en)");
+                if (failures > 0)
+                {
+                    Log.Info($"Server wieder erreichbar nach {failures} Fehlversuch(en)");
+                    ReportOfflineUsage();
+                }
                 failures = 0;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -173,6 +184,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             }
             catch (Exception ex)
             {
+                if (failures == 0) _offlineSince = (Mono.Now, UsedSecondsToday());
                 failures++;
                 // Log every failure at first, later only every 10th to keep the log readable while offline.
                 if (failures <= 3 || failures % 10 == 0) Log.Warn($"Sync fehlgeschlagen ({failures}x): {ex.GetType().Name}: {ex.Message}");
@@ -185,6 +197,33 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             // Sleep until the interval is over or something urgent (alarm, screenshot) wakes us up.
             try { await rt.WaitForSyncSignalAsync(delay, ct); } catch (OperationCanceledException) { break; }
         }
+    }
+
+    private (TimeSpan Since, long Used)? _offlineSince;
+
+    private long UsedSecondsToday()
+    {
+        lock (rt.Gate)
+        {
+            var tz = FamilyClock.Resolve(rt.Policies.Current?.TimeZoneId ?? "Europe/Berlin");
+            var key = FamilyClock.DayKey(FamilyClock.Day(rt.Now(), tz));
+            return rt.State.Usage.Where(u => u.Key.EndsWith(key)).Sum(u => u.Value.TotalSeconds);
+        }
+    }
+
+    /// <summary>
+    /// After a connection loss: if the PC was used noticeably while offline, tell the parents – disconnecting
+    /// the Wi-Fi is a typical attempt to escape "Jetzt sperren" or extra-time limits.
+    /// </summary>
+    private void ReportOfflineUsage()
+    {
+        if (_offlineSince is not { } off) return;
+        _offlineSince = null;
+        var minutesOffline = (int)Mono.Since(off.Since).TotalMinutes;
+        var usedMinutes = (int)Math.Max(0, (UsedSecondsToday() - off.Used) / 60);
+        if (minutesOffline < 10 || usedMinutes < 5) return;
+        lock (rt.Gate)
+            rt.State.AddEvent(DeviceEventKind.OfflineUsage, $"Der PC war {minutesOffline} Min ohne Verbindung zum Server, davon wurde er {usedMinutes} Min von Kindern genutzt.");
     }
 
     private readonly HashSet<Guid> _handledScreenshots = [];
@@ -313,6 +352,12 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             rt.ScreenshotRequests.Enqueue(s);
         }
         if (_handledScreenshots.Count > 500) _handledScreenshots.Clear();
+
+        if (resp.SendDiagnostics && _installUpdates)
+        {
+            Log.Info("Diagnose-Log angefordert – wird hochgeladen");
+            await api.UploadDiagnosticsAsync(Log.Tail(), ct);
+        }
 
         if (resp.Update is { } update && _installUpdates)
             await TryUpdateAsync(api, update, ct);

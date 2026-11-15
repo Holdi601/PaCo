@@ -57,7 +57,14 @@ internal static class Program
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddWindowsService(o => o.ServiceName = Paths.ServiceName);
         var rt = new Runtime(device);
-        lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.ServiceStarted, $"PaCo-Dienst gestartet (Version {ServerApi.Version})");
+        Log.ErrorSink = rt.ReportError;
+        lock (rt.Gate)
+        {
+            rt.State.AddEvent(DeviceEventKind.ServiceStarted, $"PaCo-Dienst gestartet (Version {ServerApi.Version})");
+            // Safe mode is a classic way to try to get around protection software.
+            if (GetSystemMetrics(67 /* SM_CLEANBOOT */) != 0)
+                rt.State.AddEvent(DeviceEventKind.SafeMode, "Der PC wurde im abgesicherten Modus gestartet.");
+        }
         builder.Services.AddSingleton(rt);
         builder.Services.AddHostedService<Enforcer>();
         builder.Services.AddHostedService<SyncWorker>();
@@ -74,6 +81,9 @@ internal static class Program
         Log.Info("Dienst beendet");
         return 0;
     }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int index);
 
     private static int RunSetup()
     {

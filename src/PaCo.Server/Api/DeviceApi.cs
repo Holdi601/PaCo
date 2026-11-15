@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using PaCo.Server.Data;
 using PaCo.Server.Services;
@@ -24,11 +24,33 @@ public static class DeviceApi
         app.MapPost(ApiRoutes.Assign, AssignAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery();
         app.MapPost(ApiRoutes.Sync, SyncAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery();
         app.MapGet(ApiRoutes.ClientDownload, DownloadClientAsync).RequireRateLimiting(RateLimitPair);
+        app.MapPost(ApiRoutes.Diagnostics, UploadDiagnosticsAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
+            .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(MaxDiagnosticsBytes * 4));
         app.MapPost(ApiRoutes.Screenshot + "/{id:guid}", UploadScreenshotAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
             .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(MaxScreenshotBytes));
     }
 
     private const int MaxScreenshotBytes = 6 * 1024 * 1024;
+    private const int MaxDiagnosticsBytes = 512 * 1024;
+
+    /// <summary>Device uploads its log after a parent pressed "Diagnose-Log abrufen". Stored encrypted.</summary>
+    private static async Task<IResult> UploadDiagnosticsAsync(HttpContext http, PaCoDb db, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dp,
+        TimeProvider clock, CancellationToken ct)
+    {
+        var device = await AuthenticateAsync(http, db, ct);
+        if (device is null || device.Revoked) return Results.Unauthorized();
+        if (device.DiagnosticsRequestedUtc is null) return Results.NotFound(); // only on request
+        using var reader = new StreamReader(http.Request.Body, System.Text.Encoding.UTF8);
+        var text = await reader.ReadToEndAsync(ct);
+        if (text.Length > MaxDiagnosticsBytes) text = text[^MaxDiagnosticsBytes..];
+        var protector = dp.CreateProtector("PaCo.Diagnostics.v1");
+        db.Diagnostics.Add(new DiagnosticsEntity { FamilyId = device.FamilyId, DeviceId = device.Id, TimeUtc = clock.GetUtcNow(), ProtectedText = protector.Protect(text) });
+        var old = await db.Diagnostics.IgnoreQueryFilters().Where(d => d.DeviceId == device.Id).OrderByDescending(d => d.TimeUtc).Skip(2).ToListAsync(ct);
+        db.Diagnostics.RemoveRange(old);
+        device.DiagnosticsRequestedUtc = null;
+        await db.SaveChangesAsync(ct);
+        return Results.Ok();
+    }
 
     /// <summary>Device delivers a requested screenshot (JPEG) – or an empty body when the child is not at the PC.</summary>
     private static async Task<IResult> UploadScreenshotAsync(Guid id, HttpContext http, PaCoDb db, ScreenshotStore store, TimeProvider clock, CancellationToken ct)
@@ -180,7 +202,7 @@ public static class DeviceApi
     }
 
     private static async Task<IResult> SyncAsync(HttpContext http, SyncRequest req, PaCoDb db, PolicyBuilder policies, ClientPackage client, SigningKeyStore keys,
-        Notifier notifier, Microsoft.Extensions.Options.IOptions<ServerOptions> options, TimeProvider clock, CancellationToken ct)
+        Notifier notifier, WifiGeolocator wifiGeo, Microsoft.Extensions.Options.IOptions<ServerOptions> options, TimeProvider clock, CancellationToken ct)
     {
         var device = await AuthenticateAsync(http, db, ct);
         if (device is null) return Results.Unauthorized();
@@ -230,14 +252,27 @@ public static class DeviceApi
             foreach (var l in req.Locations.Take(200).Where(l => !known.Contains(l.Id)))
             {
                 var valid = l.Latitude is >= -90 and <= 90 && l.Longitude is >= -180 and <= 180;
-                db.Locations.Add(new DeviceLocationEntity
+                var nearby = l.Nearby.Take(30).Select(n => n with { Bssid = Trim(n.Bssid, 17), Ssid = n.Ssid is null ? null : Trim(n.Ssid, 32) }).ToList();
+                var e = new DeviceLocationEntity
                 {
                     Id = l.Id, FamilyId = device.FamilyId, DeviceId = device.Id, TimeUtc = l.TimeUtc.ToUniversalTime(),
                     Latitude = valid ? l.Latitude : null, Longitude = valid ? l.Longitude : null,
                     AccuracyMeters = l.AccuracyMeters is > 0 and < 1_000_000 ? l.AccuracyMeters : null,
                     Source = l.Source is null ? null : Trim(l.Source, 40), Ssid = l.Ssid is null ? null : Trim(l.Ssid, 64),
                     PublicIp = ip is null ? null : Trim(ip, 64), Error = l.Error is null ? null : Trim(l.Error, 200),
-                });
+                    NearbyJson = PaCoJson.Serialize(nearby),
+                };
+                // No or only coarse fix from Windows → ask the world Wi-Fi map (only for the newest point to stay fast).
+                if ((e.Latitude is null || e.AccuracyMeters is null or > 300) && nearby.Count >= 2 && l == req.Locations.Take(200).Last())
+                {
+                    var fix = await wifiGeo.LocateAsync(nearby, ct);
+                    if (fix is not null && (e.Latitude is null || fix.AccuracyMeters < (e.AccuracyMeters ?? double.MaxValue)))
+                    {
+                        (e.Latitude, e.Longitude, e.AccuracyMeters, e.Source) = (fix.Latitude, fix.Longitude, fix.AccuracyMeters, fix.Source);
+                        e.Error = null;
+                    }
+                }
+                db.Locations.Add(e);
             }
             if (device.LocateRequestedUtc is { } asked && req.Locations.Any(l => l.TimeUtc >= asked.AddSeconds(-30)))
                 device.LocateRequestedUtc = null;
@@ -282,6 +317,7 @@ public static class DeviceApi
             Screenshots = screenshots,
             LocationMode = device.Revoked ? LocationMode.Off : device.LocationMode,
             LocateNow = locateNow,
+            SendDiagnostics = device.DiagnosticsRequestedUtc is { } dr && now - dr < TimeSpan.FromMinutes(10) && !device.Revoked,
         });
     }
 

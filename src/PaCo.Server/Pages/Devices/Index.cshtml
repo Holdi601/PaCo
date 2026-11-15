@@ -54,6 +54,7 @@
                 <span class="small text-muted fw-normal">Zuletzt gemeldet: @Format.Ago(d.LastSeenUtc, Model.Now) · PaCo @d.ClientVersion · @d.OsVersion</span>
                 @if (!d.Revoked)
                 {
+                    <a asp-page="./Log" asp-route-id="@d.Id" class="btn btn-sm btn-outline-secondary">📋 Protokoll</a>
                     <a asp-page="./Location" asp-route-id="@d.Id" class="btn btn-sm btn-outline-primary">
                         📍 Standort @(d.LocationMode switch { LocationMode.Continuous => "(aufgezeichnet)", LocationMode.OnRequest => "(auf Anforderung)", _ => "(aus)" })
                     </a>

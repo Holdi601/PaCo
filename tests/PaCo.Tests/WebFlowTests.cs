@@ -49,6 +49,7 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
         var adminBrowser = Browser();
         await LoginAsync(adminBrowser, adminMail, adminPw, adminKey);
         Assert.Equal(HttpStatusCode.OK, (await adminBrowser.GetAsync("/Admin/Index")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await adminBrowser.GetAsync("/Admin/Health")).StatusCode);
         // Admin has no family → no access to family pages.
         Assert.NotEqual(HttpStatusCode.OK, (await adminBrowser.GetAsync("/Dashboard")).StatusCode);
 
@@ -301,6 +302,23 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
         Assert.Equal(HttpStatusCode.NotFound, (await b.GetAsync(locUrl)).StatusCode);
         var bDevices = await b.GetStringAsync("/Devices/Index");
         Assert.Equal(HttpStatusCode.NotFound, (await PostFormAsync(b, $"{locUrl}?handler=Locate", bDevices, [])).StatusCode);
+
+        // Diagnostics: only uploaded on request, readable only by the own family.
+        Assert.Equal(HttpStatusCode.NotFound, (await devA.PostAsync(ApiRoutes.Diagnostics, new StringContent("unaufgefordert"))).StatusCode);
+        var logUrl = $"/Devices/Log/{deviceA}";
+        Assert.Equal(HttpStatusCode.Redirect, (await PostFormAsync(a, $"{logUrl}?handler=Request", await a.GetStringAsync(logUrl), [])).StatusCode);
+        var r2 = await (await devA.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest
+        {
+            Events = [new DeviceEvent { TimeUtc = DateTimeOffset.UtcNow, Kind = DeviceEventKind.SafeMode, Message = "Abgesicherter Modus erkannt" }],
+        }, PaCoJson.Options)).Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options);
+        Assert.True(r2!.SendDiagnostics);
+        Assert.Equal(HttpStatusCode.OK, (await devA.PostAsync(ApiRoutes.Diagnostics, new StringContent("2026-11-15 [INFO] Testzeile Diagnose"))).StatusCode);
+        var logPage = await a.GetStringAsync(logUrl);
+        Assert.Contains("Testzeile Diagnose", logPage);
+        Assert.Contains("Abgesicherter Modus", logPage);
+        Assert.Equal(HttpStatusCode.NotFound, (await b.GetAsync(logUrl)).StatusCode);
+        // Parents cannot open the admin health page.
+        Assert.NotEqual(HttpStatusCode.OK, (await a.GetAsync("/Admin/Health")).StatusCode);
     }
 
     private async Task LoginAsync(HttpClient b, string mail, string pw, string totpKey)
