@@ -34,6 +34,11 @@ kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.
 - **Standort** pro Gerät (aus / auf Anforderung / alle 15 Minuten) über den Windows-Ortungsdienst, mit Karte
   (OpenStreetMap) und IP-Verlauf. Funktioniert auch am Anmeldebildschirm, z. B. bei Diebstahl. Speicherung 30 Tage.
 
+- **39 Sprachen**: alle EU-Amtssprachen, weitere europäische Sprachen (u. a. Norwegisch, Isländisch, Ukrainisch,
+  Türkisch, Serbisch) sowie Chinesisch (vereinfacht und traditionell/Taiwan), Japanisch und Koreanisch. Jedes
+  Elternteil wählt seine Sprache auf der Website. Pro Kind lässt sich die Sprache am PC einstellen (Sperrbildschirm,
+  Hinweise). Die Alarm-Stichwörter gibt es in jeder Sprache, und das Hilfsangebot nennt die Notrufnummern des Landes.
+
 **Für den Server-Betreiber (Super-Admin)**
 - Familien anlegen, Eltern per **Einladungslink** einladen (7 Tage gültig, einmalig). Es gibt keine offene Registrierung.
 - Konten sperren, Zugang zurücksetzen (Passwort vergessen / Handy verloren), Familien verwalten

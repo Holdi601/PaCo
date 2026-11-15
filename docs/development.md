@@ -54,6 +54,30 @@ dotnet publish src/PaCo.Client -c Release -o out/client
 Der Docker-Build macht das automatisch und legt die Datei als `PaCo-Setup.exe` in das Server-Image. Beim Download
 hängt der Server Serveradresse und Kopplungscode an die Datei an (`SetupPayload`).
 
+## Übersetzungen
+
+Quellsprache ist Deutsch. Der deutsche Text ist zugleich der Schlüssel (wie bei gettext):
+
+- Website: `@T("…")` / `@F("… {0}", x)` in Razor, `Ui.T` / `Ui.F` in C# → `src/PaCo.Server/I18n/server.{lang}.json`
+- Client: `L.T` / `L.F` / `L.In(lang, …)` → `src/PaCo.Client/I18n/client.{lang}.json`
+- Gemeinsame Texte (Ereignisse, Sicherheits-Check, Alarm-Kategorien, Hilfsangebot): `LocText.Of("…", args)`,
+  `SharedText.T` → `src/PaCo.Shared/I18n/shared.{lang}.json`
+- Alarm-Stichwörter je Sprache: `src/PaCo.Shared/I18n/keywords.{lang}.json`
+- Tabellen von Beschriftungen stehen zwischen `// i18n-keys:start <katalog>` und `// i18n-keys:end`.
+
+Der Client speichert Ereignisse mit Vorlage und Argumenten (`LocText`), damit die Website sie in der Sprache des
+jeweiligen Elternteils anzeigt. Push-Nachrichten gehen in der Sprache, die die meisten Eltern der Familie gewählt haben.
+
+Nach dem Ändern oder Hinzufügen von Texten:
+
+```
+python tools/i18n/extract.py      # aktualisiert tools/i18n/keys/*.json
+python tools/i18n/check.py        # zeigt fehlende Übersetzungen und Platzhalterfehler
+```
+
+`I18nTests` schlägt fehl, wenn eine Sprache einen Text nicht übersetzt, Platzhalter `{0}` abweichen oder die
+Schlüssellisten veraltet sind. Eine neue Sprache kommt in `Languages.All` (`src/PaCo.Shared/I18n/Languages.cs`).
+
 ## Datenbank-Migrationen
 
 ```bash

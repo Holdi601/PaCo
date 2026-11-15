@@ -337,6 +337,50 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
         Assert.Equal("/", r2.Headers.Location?.ToString());
     }
 
+    [Fact]
+    public async Task EveryPageRendersInEveryLanguage()
+    {
+        var (b, fam) = await ParentOfNewFamilyAsync("lang-parent@test.local");
+        Guid child, device;
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var c = new Child { FamilyId = fam, Name = "Mia" };
+            var d = new Device { FamilyId = fam, Name = "Laptop", TokenHash = Secrets.Sha256Hex(Secrets.DeviceToken()), LastSeenUtc = DateTimeOffset.UtcNow };
+            db.Children.Add(c);
+            db.Devices.Add(d);
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = fam, DeviceId = d.Id, Sid = "S-1-5-21-9-9-9-1001", UserName = "mia", ChildId = c.Id });
+            var ev = PaCo.Shared.I18n.LocText.Of("Freischaltcode eingelöst: für {0} Minuten", 30);
+            db.DeviceEvents.Add(new DeviceEventEntity { FamilyId = fam, DeviceId = d.Id, ChildId = c.Id, TimeUtc = DateTimeOffset.UtcNow, Kind = DeviceEventKind.Unlocked, Message = ev.German, Template = ev.Template, ArgsJson = PaCoJson.Serialize(ev.Args) });
+            db.Alerts.Add(new AlertEntity { FamilyId = fam, ChildId = c.Id, DeviceId = d.Id, TimeUtc = DateTimeOffset.UtcNow, Category = AlertCategory.SelfHarm, Keyword = "suizid", App = "chrome", Snippet = "…" });
+            await db.SaveChangesAsync();
+            (child, device) = (c.Id, d.Id);
+        }
+
+        string[] pages = ["/Dashboard", "/Children", $"/Children/Edit/{child}", $"/Children/Stats/{child}", "/Devices",
+            $"/Devices/Log/{device}", $"/Devices/Location/{device}", "/Alerts", "/Family", "/Notifications", "/Account/Manage"];
+        foreach (var lang in PaCo.Shared.I18n.Languages.All)
+        {
+            var page = await b.GetStringAsync("/Account/Manage");
+            var set = await PostFormAsync(b, "/Language", page, new() { ["lang"] = lang.Code, ["returnUrl"] = "/Dashboard" });
+            Assert.Equal(HttpStatusCode.Redirect, set.StatusCode);
+            foreach (var p in pages)
+            {
+                var r = await b.GetAsync(p);
+                Assert.True(r.StatusCode == HttpStatusCode.OK, $"{lang.Code} {p}: {(int)r.StatusCode}");
+                var html = await r.Content.ReadAsStringAsync();
+                Assert.Contains($"<html lang=\"{lang.Code}\"", html);
+            }
+        }
+
+        // The choice is stored in the account (used again at the next sign-in).
+        using (var scope = _f.Services.CreateScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<ParentUser>>();
+            Assert.Equal(PaCo.Shared.I18n.Languages.All[^1].Code, (await users.FindByEmailAsync("lang-parent@test.local"))!.Language);
+        }
+    }
+
     private static async Task<HttpResponseMessage> PostFormAsync(HttpClient b, string url, string pageHtml, Dictionary<string, string> fields)
     {
         var token = TokenRegex().Match(pageHtml).Groups[1].Value;
