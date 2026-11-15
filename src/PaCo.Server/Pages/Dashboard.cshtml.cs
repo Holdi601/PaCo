@@ -47,8 +47,8 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         await actions.GrantAsync(child, minutes, User);
         var name = (await actions.FindChildAsync(child))?.Name;
         TempData["Message"] = minutes == 0
-            ? $"{name} darf heute unbegrenzt an den PC. Ist der PC online, gilt das in wenigen Sekunden."
-            : $"{name} hat {minutes} Minuten mehr bekommen. Ist der PC online, gilt das in wenigen Sekunden.";
+            ? Ui.F("{0} darf heute unbegrenzt an den PC. Ist der PC online, gilt das in wenigen Sekunden.", name)
+            : Ui.F("{0} hat {1} Minuten mehr bekommen. Ist der PC online, gilt das in wenigen Sekunden.", name, minutes);
         return RedirectToPage();
     }
 
@@ -56,7 +56,7 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
     {
         await actions.RevokeTodayGrantsAsync(child);
         var name = (await actions.FindChildAsync(child))?.Name;
-        TempData["Message"] = $"Zusatzzeit für {name} heute zurückgenommen.";
+        TempData["Message"] = Ui.F("Zusatzzeit für {0} heute zurückgenommen.", name);
         return RedirectToPage();
     }
 
@@ -65,8 +65,8 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         await actions.SetLockedAsync(child, locked);
         var name = (await actions.FindChildAsync(child))?.Name;
         TempData["Message"] = locked
-            ? $"{name} ist jetzt gesperrt. Ist der PC online, erscheint der Sperrbildschirm in wenigen Sekunden."
-            : $"Sperre für {name} aufgehoben.";
+            ? Ui.F("{0} ist jetzt gesperrt. Ist der PC online, erscheint der Sperrbildschirm in wenigen Sekunden.", name)
+            : Ui.F("Sperre für {0} aufgehoben.", name);
         return RedirectToPage();
     }
 
@@ -74,7 +74,7 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
     {
         foreach (var c in await db.Children.ToListAsync()) c.LockedByParent = locked;
         await db.SaveChangesAsync();
-        TempData["Message"] = locked ? "Alle Kinder sind jetzt gesperrt." : "Alle Sperren aufgehoben.";
+        TempData["Message"] = locked ? Ui.T("Alle Kinder sind jetzt gesperrt.") : Ui.T("Alle Sperren aufgehoben.");
         return RedirectToPage();
     }
 
@@ -97,7 +97,7 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         var c = await actions.FindChildAsync(child);
         if (c is null) return NotFound();
         NewCode = await actions.CreateUnlockCodeAsync(child, minutes, User);
-        NewCodeInfo = $"Freischaltcode für {c.Name}: {Format.Grant(minutes)}";
+        NewCodeInfo = Ui.F("Freischaltcode für {0}: {1}", c.Name, Format.Grant(minutes));
         return RedirectToPage();
     }
 
@@ -109,15 +109,16 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
             .Where(a => a.ChildId != null && a.IsAdmin).ToListAsync();
         foreach (var a in adminKids)
             list.Add(new Warning("danger",
-                $"Das Windows-Konto „{a.UserName}“ ({a.Child?.Name}) auf {a.Device?.Name} hat Administratorrechte – damit könnte PaCo umgangen werden. Bitte in ein Standardkonto umwandeln.",
+                Ui.F("Das Windows-Konto „{0}“ ({1}) auf {2} hat Administratorrechte – damit könnte PaCo umgangen werden. Bitte in ein Standardkonto umwandeln.",
+                    a.UserName, a.Child?.Name, a.Device?.Name),
                 "/Devices/Index"));
         foreach (var d in devices.Where(d => d.LastSeenUtc is { } s && Now - s > TimeSpan.FromDays(2)))
-            list.Add(new Warning("warning", $"{d.Name} hat sich {Format.Ago(d.LastSeenUtc, Now)} zuletzt gemeldet. Ist der PC aus, ist alles ok – sonst bitte prüfen.", "/Devices/Index"));
+            list.Add(new Warning("warning", Ui.F("{0} hat sich {1} zuletzt gemeldet. Ist der PC aus, ist alles ok – sonst bitte prüfen.", d.Name, Format.Ago(d.LastSeenUtc, Now)), "/Devices/Index"));
         foreach (var d in devices)
             foreach (var x in d.GetSecurity().Where(x => x.Severity == SecuritySeverity.Critical && !x.Code.StartsWith("child-admin")))
-                list.Add(new Warning("danger", $"{d.Name}: {x.Text}", "/Devices/Index"));
+                list.Add(new Warning("danger", $"{d.Name}: {Ui.Render(x.Template, x.Args, x.Text)}", "/Devices/Index"));
         foreach (var d in devices.Where(d => Math.Abs(d.ClockSkewSeconds) > 600))
-            list.Add(new Warning("warning", $"Die Uhr von {d.Name} geht {Math.Abs(d.ClockSkewSeconds) / 60} Minuten falsch."));
+            list.Add(new Warning("warning", Ui.F("Die Uhr von {0} geht {1} Minuten falsch.", d.Name, Math.Abs(d.ClockSkewSeconds) / 60)));
 
         var since = Now.AddDays(-3);
         var serious = new[]
@@ -127,7 +128,7 @@ public sealed class DashboardModel(ParentActions actions, PaCoDb db, TimeProvide
         };
         var events = await db.DeviceEvents.Where(e => e.TimeUtc > since && serious.Contains(e.Kind)).OrderByDescending(e => e.TimeUtc).Take(5).ToListAsync();
         foreach (var e in events)
-            list.Add(new Warning("warning", $"{Format.Ago(e.TimeUtc, Now)}: {e.Message}", "/Devices/Index"));
+            list.Add(new Warning("warning", $"{Format.Ago(e.TimeUtc, Now)}: {e.Text()}", "/Devices/Index"));
         return list;
     }
 }

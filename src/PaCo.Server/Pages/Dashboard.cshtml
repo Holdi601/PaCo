@@ -1,7 +1,7 @@
 @page
 @model PaCo.Server.Pages.DashboardModel
 @{
-    ViewData["Title"] = "Übersicht";
+    ViewData["Title"] = T("Übersicht");
     var anyLocked = Model.Children.Any(s => s.Child.LockedByParent);
     var showFirstRun = Model.Children.Count == 0 || !Model.HasDevices;
 }
@@ -10,8 +10,8 @@
     <div class="page-head-main">
         <span class="page-icon" aria-hidden="true"><span class="ico ico-home" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Übersicht</div>
-            <h1 class="h3 mb-0 page-title">Familie @Model.FamilyName</h1>
+            <div class="stat-label">@T("Übersicht")</div>
+            <h1 class="h3 mb-0 page-title">@F("Familie {0}", Model.FamilyName)</h1>
         </div>
     </div>
     @if (Model.Children.Count > 1)
@@ -19,13 +19,13 @@
         <div class="d-flex gap-2">
             <form method="post" asp-page-handler="LockAll">
                 <input type="hidden" name="locked" value="true" />
-                <button class="btn btn-outline-danger btn-sm" data-confirm="Alle Kinder sofort sperren?"><span class="ico ico-lock" aria-hidden="true"></span>Alle sperren</button>
+                <button class="btn btn-outline-danger btn-sm" data-confirm="@T("Alle Kinder sofort sperren?")"><span class="ico ico-lock" aria-hidden="true"></span>@T("Alle sperren")</button>
             </form>
             @if (anyLocked)
             {
                 <form method="post" asp-page-handler="LockAll">
                     <input type="hidden" name="locked" value="false" />
-                    <button class="btn btn-outline-secondary btn-sm"><span class="ico ico-unlock" aria-hidden="true"></span>Alle entsperren</button>
+                    <button class="btn btn-outline-secondary btn-sm"><span class="ico ico-unlock" aria-hidden="true"></span>@T("Alle entsperren")</button>
                 </form>
             }
         </div>
@@ -37,11 +37,11 @@
     <div class="alert alert-info text-center code-alert" role="status">
         <div class="fw-semibold">@Model.NewCodeInfo</div>
         <div id="unlock-code" class="code-box my-2">@Model.NewCode</div>
-        <div class="small mb-2">Das Kind tippt den Code am gesperrten Bildschirm ein. Gilt nur heute und nur einmal – klappt auch, wenn der PC kein Internet hat.</div>
+        <div class="small mb-2">@T("Das Kind tippt den Code am gesperrten Bildschirm ein. Gilt nur heute und nur einmal – klappt auch, wenn der PC kein Internet hat.")</div>
         <div class="d-flex flex-wrap justify-content-center gap-2">
-            <button type="button" class="btn btn-sm btn-outline-primary" data-copy="#unlock-code"><span class="ico ico-copy" aria-hidden="true"></span>Code kopieren</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-share="#unlock-code" data-share-title="Freischaltcode" hidden><span class="ico ico-send" aria-hidden="true"></span>Code senden</button>
-            <a asp-page="/Dashboard" class="btn btn-sm btn-link">Fertig, ausblenden</a>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-copy="#unlock-code"><span class="ico ico-copy" aria-hidden="true"></span>@T("Code kopieren")</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-share="#unlock-code" data-share-title="@T("Freischaltcode")" hidden><span class="ico ico-send" aria-hidden="true"></span>@T("Code senden")</button>
+            <a asp-page="/Dashboard" class="btn btn-sm btn-link">@T("Fertig, ausblenden")</a>
         </div>
     </div>
 }
@@ -50,7 +50,7 @@
 {
     <div class="alert alert-@w.Level py-2" role="@(w.Level == "danger" ? "alert" : null)">
         @w.Text
-        @if (w.Link is not null) { <a href="@w.Link" class="alert-link ms-1">Ansehen</a> }
+        @if (w.Link is not null) { <a href="@w.Link" class="alert-link ms-1">@T("Ansehen")</a> }
     </div>
 }
 
@@ -62,31 +62,31 @@
         <div class="card-body p-4">
             <partial name="_ArtWelcome" />
             <div>
-            <h2 id="first-run-title" class="h5">@(step1 || step2 ? "Fast geschafft!" : "Willkommen! So richtest du PaCo ein")</h2>
-            <p class="text-muted">Drei Schritte, dann siehst du hier, wer gerade wie lange am PC ist.</p>
+            <h2 id="first-run-title" class="h5">@(step1 || step2 ? T("Fast geschafft!") : T("Willkommen! So richtest du PaCo ein"))</h2>
+            <p class="text-muted">@T("Drei Schritte, dann siehst du hier, wer gerade wie lange am PC ist.")</p>
             <ol class="list-unstyled mb-0">
                 <li class="d-flex gap-3 mb-3 @(step1 ? "step-done" : "")">
                     <span class="step-num" aria-hidden="true">@if (step1) { <span class="ico ico-check" aria-hidden="true"></span> } else { <text>1</text> }</span>
                     <div>
-                        <div class="fw-semibold">PaCo auf dem PC des Kindes installieren @if (step1) { <span class="visually-hidden">(erledigt)</span> }</div>
-                        <div class="small text-muted mb-2">Am Kinder-PC im Administrator-Konto das Installationsprogramm starten und die Windows-Konten der Kinder ankreuzen. Die Kinder erscheinen dann automatisch hier.</div>
-                        @if (!step1) { <a asp-page="/Devices/Index" class="btn btn-primary"><span class="ico ico-plus" aria-hidden="true"></span>PC hinzufügen</a> }
+                        <div class="fw-semibold">@T("PaCo auf dem PC des Kindes installieren") @if (step1) { <span class="visually-hidden">@T("(erledigt)")</span> }</div>
+                        <div class="small text-muted mb-2">@T("Am Kinder-PC im Administrator-Konto das Installationsprogramm starten und die Windows-Konten der Kinder ankreuzen. Die Kinder erscheinen dann automatisch hier.")</div>
+                        @if (!step1) { <a asp-page="/Devices/Index" class="btn btn-primary"><span class="ico ico-plus" aria-hidden="true"></span>@T("PC hinzufügen")</a> }
                     </div>
                 </li>
                 <li class="d-flex gap-3 mb-3 @(step2 ? "step-done" : "")">
                     <span class="step-num" aria-hidden="true">@if (step2) { <span class="ico ico-check" aria-hidden="true"></span> } else { <text>2</text> }</span>
                     <div>
-                        <div class="fw-semibold">Bildschirmzeit festlegen @if (step2) { <span class="visually-hidden">(erledigt)</span> }</div>
-                        <div class="small text-muted mb-2">Pro Kind: wie lange pro Tag und von wann bis wann. Voreingestellt sind 2 Stunden täglich zwischen 7 und 20 Uhr.</div>
-                        <a asp-page="/Children/Index" class="btn btn-outline-primary"><span class="ico ico-sliders" aria-hidden="true"></span>@(step2 ? "Regeln ansehen" : "Kind vorab anlegen")</a>
+                        <div class="fw-semibold">@T("Bildschirmzeit festlegen") @if (step2) { <span class="visually-hidden">@T("(erledigt)")</span> }</div>
+                        <div class="small text-muted mb-2">@T("Pro Kind: wie lange pro Tag und von wann bis wann. Voreingestellt sind 2 Stunden täglich zwischen 7 und 20 Uhr.")</div>
+                        <a asp-page="/Children/Index" class="btn btn-outline-primary"><span class="ico ico-sliders" aria-hidden="true"></span>@(step2 ? T("Regeln ansehen") : T("Kind vorab anlegen"))</a>
                     </div>
                 </li>
                 <li class="d-flex gap-3">
                     <span class="step-num" aria-hidden="true">3</span>
                     <div>
-                        <div class="fw-semibold">Alarme aufs Handy bekommen</div>
-                        <div class="small text-muted mb-2">Mit der kostenlosen App ntfy kommen wichtige Alarme sofort aufs Handy (ca. 3 Minuten).</div>
-                        <a asp-page="/Notifications" class="btn btn-outline-primary"><span class="ico ico-phone" aria-hidden="true"></span>Handy einrichten</a>
+                        <div class="fw-semibold">@T("Alarme aufs Handy bekommen")</div>
+                        <div class="small text-muted mb-2">@T("Mit der kostenlosen App ntfy kommen wichtige Alarme sofort aufs Handy (ca. 3 Minuten).")</div>
+                        <a asp-page="/Notifications" class="btn btn-outline-primary"><span class="ico ico-phone" aria-hidden="true"></span>@T("Handy einrichten")</a>
                     </div>
                 </li>
             </ol>
@@ -102,18 +102,18 @@
     var used = s.Today.TotalSeconds;
     var limitSec = s.Rule.LimitMinutes is { } lm ? lm * 60L : (long?)null;
     string badge, pill;
-    if (c.Paused) { badge = "Überwachung pausiert"; pill = "pill-muted"; }
+    if (c.Paused) { badge = T("Überwachung pausiert"); pill = "pill-muted"; }
     else if (!s.Eval.Allowed)
     {
         pill = "pill-bad";
         badge = s.Eval.Reason switch
         {
-            BlockReason.LockedByParent => "Von Eltern gesperrt",
-            BlockReason.OutsideWindow => "Außerhalb der erlaubten Zeit",
-            _ => "Zeit aufgebraucht",
+            BlockReason.LockedByParent => T("Von Eltern gesperrt"),
+            BlockReason.OutsideWindow => T("Außerhalb der erlaubten Zeit"),
+            _ => T("Zeit aufgebraucht"),
         };
     }
-    else { badge = "Darf den PC nutzen"; pill = "pill-ok"; }
+    else { badge = T("Darf den PC nutzen"); pill = "pill-ok"; }
     // Presentation only: ring fill, card accent and avatar colour.
     var pct = limitSec is > 0 ? (int)Math.Min(100, Math.Round(used * 100.0 / limitSec.Value)) : 0;
     var ringState = c.Paused ? "" : !s.Eval.Allowed ? "is-out" : pct >= 80 ? "is-high" : "";
@@ -133,13 +133,13 @@
 
                 @if (Model.UnreadAlerts.GetValueOrDefault(c.Id) is > 0 and var n)
                 {
-                    <a asp-page="/Alerts" asp-route-child="@c.Id" class="alert alert-danger d-block py-2 mb-3 text-decoration-none fw-semibold">@n neue@(n == 1 ? "r" : "") Alarm@(n == 1 ? "" : "e") – ansehen</a>
+                    <a asp-page="/Alerts" asp-route-child="@c.Id" class="alert alert-danger d-block py-2 mb-3 text-decoration-none fw-semibold">@(n == 1 ? T("1 neuer Alarm – ansehen") : F("{0} neue Alarme – ansehen", n))</a>
                 }
                 <div class="small mb-3">
-                    @if (s.IsOnLockScreen) { <span class="status-blocked live-line"><span class="dot" aria-hidden="true"></span> sieht gerade den Sperrbildschirm</span> }
-                    else if (s.IsActive) { <span class="status-ok live-line"><span class="dot dot-live" aria-hidden="true"></span> ist gerade am PC</span> }
-                    else if (s.DeviceCount == 0) { <span class="text-muted live-line"><span class="ico ico-laptop" aria-hidden="true"></span><span>Noch keinem PC zugeordnet – <a asp-page="/Devices/Index">unter Geräte zuordnen</a></span></span> }
-                    else { <span class="text-muted live-line"><span class="dot" aria-hidden="true"></span> nicht am PC</span> }
+                    @if (s.IsOnLockScreen) { <span class="status-blocked live-line"><span class="dot" aria-hidden="true"></span> @T("sieht gerade den Sperrbildschirm")</span> }
+                    else if (s.IsActive) { <span class="status-ok live-line"><span class="dot dot-live" aria-hidden="true"></span> @T("ist gerade am PC")</span> }
+                    else if (s.DeviceCount == 0) { <span class="text-muted live-line"><span class="ico ico-laptop" aria-hidden="true"></span><span>@Html.Raw(F("Noch keinem PC zugeordnet – <a href=\"{0}\">unter Geräte zuordnen</a>", Url.Page("/Devices/Index")))</span></span> }
+                    else { <span class="text-muted live-line"><span class="dot" aria-hidden="true"></span> @T("nicht am PC")</span> }
                 </div>
 
                 <div class="usage">
@@ -158,45 +158,45 @@
                     </div>
                     <div class="usage-stats">
                         <div>
-                            <div class="stat-label">Heute genutzt</div>
+                            <div class="stat-label">@T("Heute genutzt")</div>
                             <div class="big-number">@Format.Duration(used)</div>
                         </div>
                         <div class="usage-rest">
-                            <div class="stat-label">Noch übrig</div>
+                            <div class="stat-label">@T("Noch übrig")</div>
                             <div class="fs-5 fw-semibold @(s.Eval.Allowed ? "status-ok" : "status-blocked")">@(c.Paused ? "—" : Format.Remaining(s.RemainingSeconds))</div>
                         </div>
                     </div>
                 </div>
                 @if (limitSec is > 0)
                 {
-                    <progress class="visually-hidden" max="@limitSec" value="@Math.Min(used, limitSec.Value)" aria-label="Heute genutzt von @Format.Limit(s.Rule)"></progress>
+                    <progress class="visually-hidden" max="@limitSec" value="@Math.Min(used, limitSec.Value)" aria-label="@F("Heute genutzt von {0}", Format.Limit(s.Rule))"></progress>
                 }
                 <div class="small text-muted my-3 rule-line">
                     <span class="ico ico-clock" aria-hidden="true"></span>
                     <div>
-                        Heute erlaubt: @Format.Limit(s.Rule), @Format.Window(s.Rule)
+                        @F("Heute erlaubt: {0}, {1}", Format.Limit(s.Rule), Format.Window(s.Rule))
                         @if (s.TodayGrants.Count > 0)
                         {
-                            <br /><span>Zusatzzeit heute: @string.Join(", ", s.TodayGrants.Select(g => Format.Grant(g.Minutes)))</span>
+                            <br /><span>@F("Zusatzzeit heute: {0}", string.Join(", ", s.TodayGrants.Select(g => Format.Grant(g.Minutes))))</span>
                         }
                     </div>
                 </div>
 
                 @* Most frequent tasks first: more time, lock, unlock code. *@
-                <div class="stat-label mb-1" id="grant-label-@c.Id">Mehr Zeit für heute</div>
+                <div class="stat-label mb-1" id="grant-label-@c.Id">@T("Mehr Zeit für heute")</div>
                 <div class="chip-row mb-3" role="group" aria-labelledby="grant-label-@c.Id">
                     @foreach (var m in new[] { 15, 30, 60 })
                     {
                         <form method="post" asp-page-handler="Grant">
                             <input type="hidden" name="child" value="@c.Id" />
                             <input type="hidden" name="minutes" value="@m" />
-                            <button class="btn btn-chip">+@m Min<span class="visually-hidden"> für @c.Name</span></button>
+                            <button class="btn btn-chip">+@F("{0} Min", m)<span class="visually-hidden"> @F("für {0}", c.Name)</span></button>
                         </form>
                     }
                     <form method="post" asp-page-handler="Grant">
                         <input type="hidden" name="child" value="@c.Id" />
                         <input type="hidden" name="minutes" value="0" />
-                        <button class="btn btn-chip" title="Heute unbegrenzt">∞ heute<span class="visually-hidden"> unbegrenzt für @c.Name</span></button>
+                        <button class="btn btn-chip" title="@T("Heute unbegrenzt")">@T("∞ heute")<span class="visually-hidden"> @F("unbegrenzt für {0}", c.Name)</span></button>
                     </form>
                 </div>
 
@@ -206,7 +206,7 @@
                         <form method="post" asp-page-handler="Lock">
                             <input type="hidden" name="child" value="@c.Id" />
                             <input type="hidden" name="locked" value="false" />
-                            <button class="btn btn-primary"><span class="ico ico-unlock" aria-hidden="true"></span>Sperre aufheben</button>
+                            <button class="btn btn-primary"><span class="ico ico-unlock" aria-hidden="true"></span>@T("Sperre aufheben")</button>
                         </form>
                     }
                     else
@@ -214,49 +214,49 @@
                         <form method="post" asp-page-handler="Lock">
                             <input type="hidden" name="child" value="@c.Id" />
                             <input type="hidden" name="locked" value="true" />
-                            <button class="btn btn-danger" data-confirm="@c.Name jetzt sofort sperren?"><span class="ico ico-lock" aria-hidden="true"></span>Jetzt sperren</button>
+                            <button class="btn btn-danger" data-confirm="@F("{0} jetzt sofort sperren?", c.Name)"><span class="ico ico-lock" aria-hidden="true"></span>@T("Jetzt sperren")</button>
                         </form>
                     }
                     @if (s.TodayGrants.Count > 0)
                     {
                         <form method="post" asp-page-handler="RevokeGrants">
                             <input type="hidden" name="child" value="@c.Id" />
-                            <button class="btn btn-outline-secondary" data-confirm="Zusatzzeit von heute für @c.Name zurücknehmen?"><span class="ico ico-refresh" aria-hidden="true"></span>Zusatzzeit zurücknehmen</button>
+                            <button class="btn btn-outline-secondary" data-confirm="@F("Zusatzzeit von heute für {0} zurücknehmen?", c.Name)"><span class="ico ico-refresh" aria-hidden="true"></span>@T("Zusatzzeit zurücknehmen")</button>
                         </form>
                     }
                 </div>
 
                 <form method="post" asp-page-handler="Code" class="mb-3 code-form">
                     <input type="hidden" name="child" value="@c.Id" />
-                    <label for="code-minutes-@c.Id" class="form-label small mb-1"><span class="ico ico-key text-primary me-1" aria-hidden="true"></span>Freischaltcode <span class="text-muted">(zum Eintippen am gesperrten PC – klappt auch offline)</span></label>
+                    <label for="code-minutes-@c.Id" class="form-label small mb-1"><span class="ico ico-key text-primary me-1" aria-hidden="true"></span>@T("Freischaltcode") <span class="text-muted">@T("(zum Eintippen am gesperrten PC – klappt auch offline)")</span></label>
                     <div class="input-group">
                         <select id="code-minutes-@c.Id" name="minutes" class="form-select">
                             @foreach (var m in UnlockCodes.AllowedMinutes)
                             {
-                                <option value="@m">@(m == 0 ? "Rest des Tages" : $"{m} Minuten")</option>
+                                <option value="@m">@(m == 0 ? T("Rest des Tages") : F("{0} Minuten", m))</option>
                             }
                         </select>
-                        <button class="btn btn-outline-primary">Code erzeugen</button>
+                        <button class="btn btn-outline-primary">@T("Code erzeugen")</button>
                     </div>
                 </form>
 
                 @if (s.Devices.Count > 0)
                 {
-                    <div class="stat-label mb-1">PCs</div>
+                    <div class="stat-label mb-1">@T("PCs")</div>
                     <ul class="list-unstyled small device-list mb-3">
                         @foreach (var d in s.Devices)
                         {
                             <li class="d-flex justify-content-between gap-2 py-2 device-row">
                                 <span class="text-truncate d-inline-flex align-items-center gap-2 min-w-0">
-                                    @if (d.Online) { <span class="status-ok" title="verbunden"><span class="dot" aria-hidden="true"></span><span class="visually-hidden">online:</span></span> }
-                                    else { <span class="text-muted" title="nicht verbunden"><span class="dot" aria-hidden="true"></span><span class="visually-hidden">offline:</span></span> }
+                                    @if (d.Online) { <span class="status-ok" title="@T("verbunden")"><span class="dot" aria-hidden="true"></span><span class="visually-hidden">@T("online:")</span></span> }
+                                    else { <span class="text-muted" title="@T("nicht verbunden")"><span class="dot" aria-hidden="true"></span><span class="visually-hidden">@T("offline:")</span></span> }
                                     <span class="text-truncate fw-semibold">@d.Name</span>
                                 </span>
                                 <span class="text-muted text-end">
-                                    @if (!d.Online) { <span>offline · zuletzt @Format.Ago(d.LastSeenUtc, Model.Now)</span> }
-                                    else if (d.Live is { LockShown: true }) { <span class="status-blocked">Sperrbildschirm</span> }
-                                    else if (d.Live is { Active: true } l) { <span class="status-ok">@(l.CurrentApp ?? "aktiv") · noch @Format.Remaining(l.RemainingSeconds)</span> }
-                                    else { <span>verbunden</span> }
+                                    @if (!d.Online) { <span>@F("offline · zuletzt {0}", Format.Ago(d.LastSeenUtc, Model.Now))</span> }
+                                    else if (d.Live is { LockShown: true }) { <span class="status-blocked">@T("Sperrbildschirm")</span> }
+                                    else if (d.Live is { Active: true } l) { <span class="status-ok">@F("{0} · noch {1}", l.CurrentApp ?? T("aktiv"), Format.Remaining(l.RemainingSeconds))</span> }
+                                    else { <span>@T("verbunden")</span> }
                                     · @Format.Duration(d.UsedTodaySeconds)
                                 </span>
                             </li>
@@ -266,7 +266,7 @@
 
                 @if (s.TopApps.Count > 0)
                 {
-                    <div class="stat-label mb-1">Heute am meisten genutzt</div>
+                    <div class="stat-label mb-1">@T("Heute am meisten genutzt")</div>
                     <ul class="list-unstyled small mb-3 top-apps">
                         @foreach (var a in s.TopApps)
                         {
@@ -276,13 +276,13 @@
                 }
 
                 <div class="card-actions">
-                    <a asp-page="/Children/Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary"><span class="ico ico-sliders" aria-hidden="true"></span>Regeln ändern</a>
-                    <a asp-page="/Children/Stats" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary"><span class="ico ico-chart" aria-hidden="true"></span>Statistik</a>
+                    <a asp-page="/Children/Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary"><span class="ico ico-sliders" aria-hidden="true"></span>@T("Regeln ändern")</a>
+                    <a asp-page="/Children/Stats" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary"><span class="ico ico-chart" aria-hidden="true"></span>@T("Statistik")</a>
                     @if (s.IsActive || s.IsOnLockScreen)
                     {
                         <form method="post" asp-page-handler="Screenshot">
                             <input type="hidden" name="child" value="@c.Id" />
-                            <button class="btn btn-sm btn-outline-primary"><span class="ico ico-camera" aria-hidden="true"></span>Bildschirmfoto</button>
+                            <button class="btn btn-sm btn-outline-primary"><span class="ico ico-camera" aria-hidden="true"></span>@T("Bildschirmfoto")</button>
                         </form>
                     }
                 </div>

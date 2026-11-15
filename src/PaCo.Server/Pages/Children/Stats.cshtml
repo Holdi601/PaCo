@@ -1,7 +1,7 @@
 @page "{id:guid}"
 @model PaCo.Server.Pages.Children.StatsModel
 @{
-    ViewData["Title"] = $"Statistik {Model.Child.Name}";
+    ViewData["Title"] = F("Statistik {0}", Model.Child.Name);
     var max = Math.Max(1, Model.Last14.Max(x => Math.Max(x.Seconds, x.LimitSeconds ?? 0)));
     var tz = Model.Tz;
 }
@@ -10,28 +10,28 @@
     <div class="page-head-main">
         <span class="page-icon" aria-hidden="true"><span class="ico ico-chart" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Statistik</div>
+            <div class="stat-label">@T("Statistik")</div>
             <h1 class="h3 mb-0 page-title">@Model.Child.Name</h1>
         </div>
     </div>
     <div class="d-flex gap-2">
-        <a asp-page="./Edit" asp-route-id="@Model.Child.Id" class="btn btn-outline-secondary btn-sm"><span class="ico ico-sliders" aria-hidden="true"></span>Regeln</a>
-        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Übersicht</a>
+        <a asp-page="./Edit" asp-route-id="@Model.Child.Id" class="btn btn-outline-secondary btn-sm"><span class="ico ico-sliders" aria-hidden="true"></span>@T("Regeln")</a>
+        <a asp-page="/Dashboard" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>@T("Übersicht")</a>
     </div>
 </div>
 
 <div class="row g-3">
     <div class="col-lg-5 order-2 order-lg-1">
         <div class="card h-100">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-calendar" aria-hidden="true"></span></span>Letzte 14 Tage <span class="visually-hidden">(Tag antippen für Details)</span><span class="text-muted fw-normal small">· Ø 7 Tage: @Format.Duration(Model.WeekAverage)</span></div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-calendar" aria-hidden="true"></span></span>@T("Letzte 14 Tage") <span class="visually-hidden">@T("(Tag antippen für Details)")</span><span class="text-muted fw-normal small">· @F("Ø 7 Tage: {0}", Format.Duration(Model.WeekAverage))</span></div>
             <div class="list-group list-group-flush">
                 @foreach (var d in Model.Last14)
                 {
                     var over = d.LimitSeconds is { } l && d.Seconds > l;
-                    <a asp-route-id="@Model.Child.Id" asp-route-day="@d.Day.ToString("yyyy-MM-dd")"
+                    <a asp-route-id="@Model.Child.Id" asp-route-day="@d.Day.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)"
                        class="list-group-item list-group-item-action @(d.Day == Model.Day ? "active" : "")" aria-current="@(d.Day == Model.Day ? "date" : null)">
                         <div class="day-bar small">
-                            <span class="day-name">@Format.WeekdayNames[(int)d.Day.DayOfWeek][..2], @d.Day.ToString("dd.MM.")</span>
+                            <span class="day-name">@Format.ShortDayName(d.Day.DayOfWeek), @Format.DayMonth(d.Day)</span>
                             <progress class="w-100 @(over ? "is-over" : "")" max="@max" value="@d.Seconds" aria-hidden="true"></progress>
                             <span class="day-val @(over && d.Day != Model.Day ? "status-warn" : "")">@Format.Duration(d.Seconds)</span>
                         </div>
@@ -42,22 +42,22 @@
     </div>
     <div class="col-lg-7 order-1 order-lg-2">
         <div class="card mb-3">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>@(Model.Day == Model.Today ? "Heute" : Model.Day.ToString("dddd, dd.MM.yyyy", new System.Globalization.CultureInfo("de-DE")))</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>@(Model.Day == Model.Today ? T("Heute") : Model.Day.ToString("D"))</div>
             <div class="card-body">
                 <div class="big-number">@Format.Duration(Model.DayTotal)</div>
                 @if (Model.DayBonus > 0)
                 {
-                    <div class="small text-muted">davon @Format.Duration(Model.DayBonus) Zusatzzeit</div>
+                    <div class="small text-muted">@F("davon {0} Zusatzzeit", Format.Duration(Model.DayBonus))</div>
                 }
                 @if (Model.Apps.Count == 0)
                 {
-                    <p class="text-muted mt-3 mb-0">An diesem Tag wurde der PC nicht benutzt.</p>
+                    <p class="text-muted mt-3 mb-0">@T("An diesem Tag wurde der PC nicht benutzt.")</p>
                 }
                 else
                 {
                     var appMax = Math.Max(1, Model.Apps[0].Seconds);
                     <table class="table table-sm mt-3 mb-0">
-                        <thead><tr><th>Programm <span class="fw-normal text-muted small">(Programmname zum Sperren)</span></th><th class="text-end">Zeit</th></tr></thead>
+                        <thead><tr><th>@T("Programm") <span class="fw-normal text-muted small">@T("(Programmname zum Sperren)")</span></th><th class="text-end">@T("Zeit")</th></tr></thead>
                         <tbody>
                             @foreach (var a in Model.Apps)
                             {
@@ -75,20 +75,20 @@
             </div>
         </div>
         <div class="card">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>Ereignisse (14 Tage)</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>@T("Ereignisse (14 Tage)")</div>
             <div class="list-group list-group-flush small event-list">
                 @foreach (var e in Model.Events)
                 {
                     <div class="list-group-item">
-                        <span class="text-muted">@TimeZoneInfo.ConvertTime(e.TimeUtc, tz).ToString("dd.MM. HH:mm")</span>
+                        <span class="text-muted">@Format.DayMonthTime(TimeZoneInfo.ConvertTime(e.TimeUtc, tz))</span>
                         · <strong>@PaCo.Server.Pages.Children.StatsModel.EventText(e.Kind)</strong>
-                        · @e.Message
+                        · @e.Text()
                         <span class="text-muted">(@Model.DeviceNames.GetValueOrDefault(e.DeviceId))</span>
                     </div>
                 }
                 @if (Model.Events.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Keine besonderen Ereignisse in den letzten 14 Tagen.</div>
+                    <div class="list-group-item text-muted">@T("Keine besonderen Ereignisse in den letzten 14 Tagen.")</div>
                 }
             </div>
         </div>

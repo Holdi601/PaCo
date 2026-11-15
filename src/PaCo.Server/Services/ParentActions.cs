@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using PaCo.Server.Data;
 using PaCo.Shared;
@@ -149,48 +151,51 @@ public static class Format
 {
     public static string Duration(long seconds)
     {
-        if (seconds < 60) return seconds <= 0 ? "0 Min" : "< 1 Min";
+        if (seconds < 60) return seconds <= 0 ? Ui.T("0 Min") : Ui.T("< 1 Min");
         var ts = TimeSpan.FromSeconds(seconds);
-        return ts.TotalHours >= 1 ? $"{(int)ts.TotalHours} Std {ts.Minutes:00} Min" : $"{ts.Minutes} Min";
+        return ts.TotalHours >= 1
+            ? Ui.F("{0} Std {1} Min", (int)ts.TotalHours, ts.Minutes.ToString("00", CultureInfo.InvariantCulture))
+            : Ui.F("{0} Min", ts.Minutes);
     }
 
-    public static string Remaining(long? seconds) => seconds is null ? "unbegrenzt" : Duration(seconds.Value);
+    public static string Remaining(long? seconds) => seconds is null ? Ui.T("unbegrenzt") : Duration(seconds.Value);
 
     public static string Window(DayRule r) =>
-        r.WindowStart is { } s && r.WindowEnd is { } e ? $"{s:HH\\:mm}–{e:HH\\:mm} Uhr" : "ganztags";
+        r.WindowStart is { } s && r.WindowEnd is { } e ? Ui.F("{0}–{1} Uhr", s.ToString("t"), e.ToString("t")) : Ui.T("ganztags");
 
-    public static string Limit(DayRule r) => r.LimitMinutes is { } m ? Duration(m * 60L) : "unbegrenzt";
+    public static string Limit(DayRule r) => r.LimitMinutes is { } m ? Duration(m * 60L) : Ui.T("unbegrenzt");
 
     public static string Ago(DateTimeOffset? t, DateTimeOffset now)
     {
-        if (t is null) return "noch nie";
+        if (t is null) return Ui.T("noch nie");
         var d = now - t.Value;
-        if (d < TimeSpan.FromMinutes(2)) return "gerade eben";
-        if (d < TimeSpan.FromHours(1)) return $"vor {(int)d.TotalMinutes} Min";
-        if (d < TimeSpan.FromDays(1)) return $"vor {(int)d.TotalHours} Std";
-        return $"vor {(int)d.TotalDays} Tagen";
+        if (d < TimeSpan.FromMinutes(2)) return Ui.T("gerade eben");
+        if (d < TimeSpan.FromHours(1)) return Ui.F("vor {0} Min", (int)d.TotalMinutes);
+        if (d < TimeSpan.FromDays(1)) return Ui.F("vor {0} Std", (int)d.TotalHours);
+        var days = (int)d.TotalDays;
+        return days == 1 ? Ui.T("vor 1 Tag") : Ui.F("vor {0} Tagen", days);
     }
 
-    public static string Grant(int minutes) => minutes == 0 ? "unbegrenzt (heute)" : $"+{minutes} Min";
+    public static string Grant(int minutes) => minutes == 0 ? Ui.T("unbegrenzt (heute)") : Ui.F("+{0} Min", minutes);
 
     public static string Event(DeviceEventKind k) => k switch
     {
-        DeviceEventKind.ServiceStarted => "Dienst gestartet",
-        DeviceEventKind.ForcedLogoff => "Abgemeldet",
-        DeviceEventKind.Locked => "Gesperrt",
-        DeviceEventKind.Unlocked => "Freigegeben",
-        DeviceEventKind.UnlockFailed => "Falscher Code",
-        DeviceEventKind.AppBlocked => "Programm blockiert",
-        DeviceEventKind.ClockTampering => "Uhr verstellt",
-        DeviceEventKind.ChildIsAdmin => "Admin-Rechte",
-        DeviceEventKind.PolicyRejected => "Regeln abgelehnt",
-        DeviceEventKind.AgentFailure => "Sperre nicht möglich",
-        DeviceEventKind.Uninstalled => "Deinstalliert",
-        DeviceEventKind.ClientError => "Technischer Fehler",
-        DeviceEventKind.SafeMode => "Abgesicherter Modus",
-        DeviceEventKind.OfflineUsage => "Nutzung ohne Internet",
-        DeviceEventKind.AgentCrashed => "Sitzungsprogramm beendet",
-        _ => "Info",
+        DeviceEventKind.ServiceStarted => Ui.T("Dienst gestartet"),
+        DeviceEventKind.ForcedLogoff => Ui.T("Abgemeldet"),
+        DeviceEventKind.Locked => Ui.T("Gesperrt"),
+        DeviceEventKind.Unlocked => Ui.T("Freigegeben"),
+        DeviceEventKind.UnlockFailed => Ui.T("Falscher Code"),
+        DeviceEventKind.AppBlocked => Ui.T("Programm blockiert"),
+        DeviceEventKind.ClockTampering => Ui.T("Uhr verstellt"),
+        DeviceEventKind.ChildIsAdmin => Ui.T("Admin-Rechte"),
+        DeviceEventKind.PolicyRejected => Ui.T("Regeln abgelehnt"),
+        DeviceEventKind.AgentFailure => Ui.T("Sperre nicht möglich"),
+        DeviceEventKind.Uninstalled => Ui.T("Deinstalliert"),
+        DeviceEventKind.ClientError => Ui.T("Technischer Fehler"),
+        DeviceEventKind.SafeMode => Ui.T("Abgesicherter Modus"),
+        DeviceEventKind.OfflineUsage => Ui.T("Nutzung ohne Internet"),
+        DeviceEventKind.AgentCrashed => Ui.T("Sitzungsprogramm beendet"),
+        _ => Ui.T("Info"),
     };
 
     /// <summary>Events that may indicate an attempt to get around PaCo.</summary>
@@ -201,7 +206,30 @@ public static class Format
         DeviceEventKind.Uninstalled, DeviceEventKind.ChildIsAdmin,
     ];
 
-    public static readonly string[] WeekdayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+    /// <summary>Weekday names in the current language, indexed by <see cref="DayOfWeek"/> (0 = Sunday).</summary>
+    public static string[] WeekdayNames => CultureInfo.CurrentCulture.DateTimeFormat.DayNames;
+
+    /// <summary>Weekday name in the current language ("Montag").</summary>
+    public static string DayName(DayOfWeek d) => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(d);
+
+    /// <summary>Short weekday name in the current language ("Mo").</summary>
+    public static string ShortDayName(DayOfWeek d) => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(d);
+
+    /// <summary>Day and month without the year in the current culture's order ("15.11.", "11/15", "11/15").</summary>
+    public static string DayMonth(DateTime d) => d.ToString(DayMonthPattern(CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
+
+    public static string DayMonth(DateOnly d) => DayMonth(d.ToDateTime(TimeOnly.MinValue));
+
+    /// <summary>Short day/month plus time ("15.11. 14:05") for lists of recent events.</summary>
+    public static string DayMonthTime(DateTimeOffset local) => $"{DayMonth(local.DateTime)} {local.ToString("t", CultureInfo.CurrentCulture)}";
+
+    /// <summary>The culture's short date pattern with the year (and literal suffixes like 'г.') removed.</summary>
+    private static string DayMonthPattern(CultureInfo culture)
+    {
+        var p = Regex.Replace(culture.DateTimeFormat.ShortDatePattern, @"\s*'[^']*'\.?", "");
+        p = Regex.Replace(p, @"y+\.?\s*", "").Trim(' ', '/', '-', ',', '\u200f', '\u200e');
+        return p.Contains('d') && p.Contains('M') ? p : culture.DateTimeFormat.MonthDayPattern;
+    }
 
     /// <summary>Monday-first order for display.</summary>
     public static readonly DayOfWeek[] WeekOrder =

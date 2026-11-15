@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using PaCo.Server.Data;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Server.Pages.Children;
 
@@ -23,15 +24,25 @@ public sealed class DayInput
 
 public sealed class EditModel(PaCoDb db) : PageModel
 {
+    // Preset names are form values (German key) and translated for display.
+    // i18n-keys:start server
+    private const string PresetSocial = "Soziale Netzwerke";
+    private const string PresetVideo = "Video-Plattformen (außer YouTube)";
+    private const string PresetYouTube = "YouTube komplett";
+    private const string PresetGames = "Online-Spiele im Browser";
+    private const string PresetGambling = "Glücksspiel";
+    private const string PresetChats = "Anonyme Chats";
+    // i18n-keys:end
+
     /// <summary>Preset site lists parents can add with one click.</summary>
     public static readonly IReadOnlyDictionary<string, string[]> SitePresets = new Dictionary<string, string[]>
     {
-        ["Soziale Netzwerke"] = ["tiktok.com", "instagram.com", "snapchat.com", "facebook.com", "x.com", "twitter.com", "threads.net", "bsky.app"],
-        ["Video-Plattformen (außer YouTube)"] = ["twitch.tv", "kick.com", "dailymotion.com", "vimeo.com"],
-        ["YouTube komplett"] = ["youtube.com", "youtu.be", "youtube-nocookie.com"],
-        ["Online-Spiele im Browser"] = ["poki.com", "crazygames.com", "miniclip.com", "y8.com", "friv.com", "kizi.com"],
-        ["Glücksspiel"] = ["bet365.com", "tipico.de", "bwin.de", "interwetten.com", "pokerstars.de", "stake.com", "lottoland.com"],
-        ["Anonyme Chats"] = ["omegle.com", "chatroulette.com", "ome.tv", "chathub.cam", "emeraldchat.com"],
+        [PresetSocial] = ["tiktok.com", "instagram.com", "snapchat.com", "facebook.com", "x.com", "twitter.com", "threads.net", "bsky.app"],
+        [PresetVideo] = ["twitch.tv", "kick.com", "dailymotion.com", "vimeo.com"],
+        [PresetYouTube] = ["youtube.com", "youtu.be", "youtube-nocookie.com"],
+        [PresetGames] = ["poki.com", "crazygames.com", "miniclip.com", "y8.com", "friv.com", "kizi.com"],
+        [PresetGambling] = ["bet365.com", "tipico.de", "bwin.de", "interwetten.com", "pokerstars.de", "stake.com", "lottoland.com"],
+        [PresetChats] = ["omegle.com", "chatroulette.com", "ome.tv", "chathub.cam", "emeraldchat.com"],
     };
 
     /// <summary>Browsers our policies do not cover – blocking them closes the loophole.</summary>
@@ -41,6 +52,14 @@ public sealed class EditModel(PaCoDb db) : PageModel
 
     [BindProperty, Required(ErrorMessage = "Bitte einen Namen eingeben."), StringLength(60)]
     public string Name { get; set; } = "";
+
+    /// <summary>Language on the child's PC (lock screen, notices, alarm keyword list). Empty = keep the saved one.</summary>
+    [BindProperty]
+    public string? ChildLanguage { get; set; }
+
+    /// <summary>Choices for <see cref="ChildLanguage"/>, by native name.</summary>
+    public static IReadOnlyList<Language> LanguageOptions { get; } =
+        Languages.All.OrderBy(l => l.NativeName, StringComparer.InvariantCultureIgnoreCase).ToList();
 
     [BindProperty]
     public ExpiryAction ExpiryAction { get; set; }
@@ -109,18 +128,22 @@ public sealed class EditModel(PaCoDb db) : PageModel
         if (child is null) return NotFound();
         Id = id;
 
-        if (Days.Count != 7) ModelState.AddModelError("", "Ungültiger Wochenplan.");
+        if (Days.Count != 7) ModelState.AddModelError("", Ui.T("Ungültiger Wochenplan."));
         for (var i = 0; i < Days.Count; i++)
         {
             var d = Days[i];
             if (!d.Unlimited && d.LimitMinutes is null)
-                ModelState.AddModelError($"Days[{i}].LimitMinutes", $"{Services.Format.WeekdayNames[i]}: Bitte Minuten angeben oder „unbegrenzt“ wählen.");
+                ModelState.AddModelError($"Days[{i}].LimitMinutes", Ui.F("{0}: Bitte Minuten angeben oder „unbegrenzt“ wählen.", Services.Format.DayName((DayOfWeek)i)));
             if (!d.AllDay && (d.From is null || d.To is null || d.From >= d.To))
-                ModelState.AddModelError($"Days[{i}].From", $"{Services.Format.WeekdayNames[i]}: Die Uhrzeit „von“ muss vor „bis“ liegen.");
+                ModelState.AddModelError($"Days[{i}].From", Ui.F("{0}: Die Uhrzeit „von“ muss vor „bis“ liegen.", Services.Format.DayName((DayOfWeek)i)));
         }
+        if (!string.IsNullOrEmpty(ChildLanguage) && !Languages.IsSupported(ChildLanguage))
+            ModelState.AddModelError(nameof(ChildLanguage), Ui.T("Bitte eine Sprache aus der Liste wählen."));
         if (!ModelState.IsValid) return Page();
 
         child.Name = Name.Trim();
+        // Saved languages are picked up by the policy each PC fetches on its next sync, like every other rule.
+        if (!string.IsNullOrEmpty(ChildLanguage)) child.Language = CanonicalLanguage(ChildLanguage);
         child.ExpiryAction = ExpiryAction;
         child.Paused = Paused;
         child.SetDays(Days.Select(d => new DayRule
@@ -157,7 +180,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
         child.BlockSystemTools = BlockSystemTools;
 
         await db.SaveChangesAsync();
-        TempData["Message"] = $"Regeln für {child.Name} gespeichert. Online-PCs übernehmen sie innerhalb von 30 Sekunden.";
+        TempData["Message"] = Ui.F("Regeln für {0} gespeichert. Online-PCs übernehmen sie innerhalb von 30 Sekunden.", child.Name);
         return RedirectToPage(new { id });
     }
 
@@ -167,7 +190,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
         if (child is null) return NotFound();
         db.Children.Remove(child);
         await db.SaveChangesAsync();
-        TempData["Message"] = $"{child.Name} wurde gelöscht. Zugeordnete Windows-Konten werden nicht mehr überwacht.";
+        TempData["Message"] = Ui.F("{0} wurde gelöscht. Zugeordnete Windows-Konten werden nicht mehr überwacht.", child.Name);
         return RedirectToPage("./Index");
     }
 
@@ -175,6 +198,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
     {
         Id = c.Id;
         Name = c.Name;
+        ChildLanguage = Languages.IsSupported(c.Language) ? CanonicalLanguage(c.Language) : Languages.Source;
         ExpiryAction = c.ExpiryAction;
         Paused = c.Paused;
         Days = c.GetDays().Select(d => new DayInput
@@ -202,6 +226,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
         NotifyChildOnScreenshot = c.NotifyChildOnScreenshot;
         BlockSystemTools = c.BlockSystemTools;
     }
+
+    private static string CanonicalLanguage(string code) =>
+        Languages.All.First(l => l.Code.Equals(code, StringComparison.OrdinalIgnoreCase)).Code;
 
     private static IEnumerable<string> SplitLines(string? s) =>
         (s ?? "").Split(['\n', '\r', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
