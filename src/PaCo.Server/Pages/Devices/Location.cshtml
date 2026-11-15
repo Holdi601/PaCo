@@ -1,6 +1,6 @@
 @page "{id:guid}"
 @model PaCo.Server.Pages.Devices.LocationModel
-@{ ViewData["Title"] = $"Standort {Model.Device.Name}"; }
+@{ ViewData["Title"] = F("Standort {0}", Model.Device.Name); }
 @section Scripts {
     <script src="~/lib/leaflet/leaflet.js"></script>
     <script src="~/js/map.js" asp-append-version="true"></script>
@@ -11,47 +11,47 @@
     <div class="page-head-main">
         <span class="page-icon" aria-hidden="true"><span class="ico ico-pin" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Standort</div>
+            <div class="stat-label">@T("Standort")</div>
             <h1 class="h3 mb-0 page-title">@Model.Device.Name</h1>
         </div>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Geräte</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>@T("Geräte")</a>
 </div>
 
 <div class="card mb-3">
     <div class="card-body d-flex flex-wrap gap-3 align-items-center justify-content-between">
         <form method="post" asp-page-handler="Mode" asp-route-id="@Model.Device.Id" class="d-flex gap-2 align-items-center">
-            <label for="mode" class="small text-muted text-nowrap">Aufzeichnung</label>
+            <label for="mode" class="small text-muted text-nowrap">@T("Aufzeichnung")</label>
             <select id="mode" name="mode" class="form-select form-select-sm">
-                <option value="Off" selected="@(Model.Device.LocationMode == LocationMode.Off)">Aus</option>
-                <option value="OnRequest" selected="@(Model.Device.LocationMode == LocationMode.OnRequest)">Nur auf Anforderung</option>
-                <option value="Continuous" selected="@(Model.Device.LocationMode == LocationMode.Continuous)">Dauerhaft (alle 15 Min)</option>
+                <option value="Off" selected="@(Model.Device.LocationMode == LocationMode.Off)">@T("Aus")</option>
+                <option value="OnRequest" selected="@(Model.Device.LocationMode == LocationMode.OnRequest)">@T("Nur auf Anforderung")</option>
+                <option value="Continuous" selected="@(Model.Device.LocationMode == LocationMode.Continuous)">@T("Dauerhaft (alle 15 Min)")</option>
             </select>
-            <button class="btn btn-sm btn-outline-primary"><span class="ico ico-check" aria-hidden="true"></span>Speichern</button>
+            <button class="btn btn-sm btn-outline-primary"><span class="ico ico-check" aria-hidden="true"></span>@T("Speichern")</button>
         </form>
         <div class="d-flex gap-2 align-items-center">
             @if (Model.Waiting)
             {
-                <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">Orte … (PC muss online sein)</span>
+                <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">@T("Orte … (PC muss online sein)")</span>
                 <div data-autorefresh="4"></div>
             }
             <form method="post" asp-page-handler="Locate" asp-route-id="@Model.Device.Id">
-                <button class="btn btn-primary" disabled="@Model.Waiting"><span class="ico ico-locate" aria-hidden="true"></span>Jetzt orten</button>
+                <button class="btn btn-primary" disabled="@Model.Waiting"><span class="ico ico-locate" aria-hidden="true"></span>@T("Jetzt orten")</button>
             </form>
         </div>
         @if (Model.Device.LocationMode == LocationMode.Off)
         {
-            <div class="small text-muted w-100">Die Aufzeichnung ist aus. „Jetzt orten“ schaltet sie auf „Nur auf Anforderung“ – es wird nur geortet, wenn du darauf tippst.</div>
+            <div class="small text-muted w-100">@T("Die Aufzeichnung ist aus. „Jetzt orten“ schaltet sie auf „Nur auf Anforderung“ – es wird nur geortet, wenn du darauf tippst.")</div>
         }
     </div>
 </div>
 
-<nav class="seg-row mb-3 small" aria-label="Zeitraum">
-    Zeitraum:
+<nav class="seg-row mb-3 small" aria-label="@T("Zeitraum")">
+    @T("Zeitraum:")
     <div class="seg">
     @foreach (var d in new[] { 1, 7, 30 })
     {
-        <a asp-route-id="@Model.Device.Id" asp-route-days="@d" class="@(Model.Days == d ? "fw-bold" : "")" aria-current="@(Model.Days == d ? "true" : null)">@(d == 1 ? "24 Stunden" : $"{d} Tage")</a>
+        <a asp-route-id="@Model.Device.Id" asp-route-days="@d" class="@(Model.Days == d ? "fw-bold" : "")" aria-current="@(Model.Days == d ? "true" : null)">@(d == 1 ? T("24 Stunden") : F("{0} Tage", d))</a>
     }
     </div>
 </nav>
@@ -60,8 +60,8 @@
 {
     <div class="card mb-3 map-frame">
         <div class="card-header d-flex flex-wrap justify-content-between gap-2">
-            <span class="d-inline-flex align-items-center gap-2"><span class="head-ico" aria-hidden="true"><span class="ico ico-pin" aria-hidden="true"></span></span><span>Letzte Position · @TimeZoneInfo.ConvertTime(last.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm") · ±@((int)(last.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(last.Source)</span></span>
-            <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(last.Latitude!.Value, last.Longitude!.Value)" target="_blank" rel="noopener noreferrer" class="d-inline-flex align-items-center gap-1 fw-semibold">In Google Maps öffnen<span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
+            <span class="d-inline-flex align-items-center gap-2"><span class="head-ico" aria-hidden="true"><span class="ico ico-pin" aria-hidden="true"></span></span><span>@F("Letzte Position · {0} · ±{1} m · {2}", TimeZoneInfo.ConvertTime(last.TimeUtc, Model.Tz).ToString("g"), (int)(last.AccuracyMeters ?? 0), PaCo.Server.Pages.Devices.LocationModel.SourceText(last.Source))</span></span>
+            <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(last.Latitude!.Value, last.Longitude!.Value)" target="_blank" rel="noopener noreferrer" class="d-inline-flex align-items-center gap-1 fw-semibold">@T("In Google Maps öffnen")<span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
         </div>
         <iframe id="gmap" class="paco-map border-0" title="Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                 src="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(last.Latitude!.Value, last.Longitude!.Value)"></iframe>
@@ -69,49 +69,51 @@
 }
 
 <details class="card mb-4 map-frame">
-    <summary class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>Verlauf auf der Karte (OpenStreetMap)</summary>
-    <div id="paco-map" class="paco-map" data-points="@Model.MapJson"></div>
+    <summary class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>@T("Verlauf auf der Karte (OpenStreetMap)")</summary>
+    <div id="paco-map" class="paco-map" data-points="@Model.MapJson"
+         data-txt-attribution="@T("© OpenStreetMap-Mitwirkende")" data-txt-wifi="@T("WLAN: {0}")"
+         data-txt-last="@T("Zuletzt: {0}")" data-txt-accuracy="@T("Genauigkeit ±{0} m")"></div>
 </details>
 
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>Verlauf</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>@T("Verlauf")</div>
             <div class="list-group list-group-flush small">
                 @foreach (var p in Model.Points.AsEnumerable().Reverse().Take(60))
                 {
                     <div class="list-group-item d-flex flex-wrap justify-content-between gap-2">
-                        <span>@TimeZoneInfo.ConvertTime(p.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm")</span>
+                        <span>@TimeZoneInfo.ConvertTime(p.TimeUtc, Model.Tz).ToString("g")</span>
                         @if (p.Latitude is { } lat && p.Longitude is { } lon)
                         {
                             <span>
                                 <a href="#gmap" data-gmap="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(lat, lon)">
                                     @lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture), @lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
                                 </a>
-                                <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(lat, lon)" target="_blank" rel="noopener noreferrer" title="In Google Maps öffnen" aria-label="In Google Maps öffnen" class="ms-1"><span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
+                                <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(lat, lon)" target="_blank" rel="noopener noreferrer" title="@T("In Google Maps öffnen")" aria-label="@T("In Google Maps öffnen")" class="ms-1"><span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
                             </span>
                             <span class="text-muted">±@((int)(p.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(p.Source)</span>
                         }
                         else
                         {
-                            <span class="text-muted">keine Ortung möglich (@p.Error)</span>
+                            <span class="text-muted">@F("keine Ortung möglich ({0})", p.Error)</span>
                         }
                         <span class="text-muted">
-                            @if (p.Ssid is not null) { <span>WLAN „@p.Ssid“</span> }
+                            @if (p.Ssid is not null) { <span>@F("WLAN „{0}“", p.Ssid)</span> }
                             @if (p.PublicIp is not null) { <span> · IP @p.PublicIp</span> }
                         </span>
                     </div>
                 }
                 @if (Model.Points.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Keine Standorte in diesem Zeitraum. @(Model.Device.LocationMode == LocationMode.Off ? "Die Aufzeichnung ist ausgeschaltet – tippe oben auf „Jetzt orten“." : "")</div>
+                    <div class="list-group-item text-muted">@T("Keine Standorte in diesem Zeitraum.") @(Model.Device.LocationMode == LocationMode.Off ? T("Die Aufzeichnung ist ausgeschaltet – tippe oben auf „Jetzt orten“.") : "")</div>
                 }
             </div>
             @if (Model.Points.Count > 0)
             {
                 <div class="card-body pt-2">
                     <form method="post" asp-page-handler="Clear" asp-route-id="@Model.Device.Id" class="text-end">
-                        <button class="btn btn-sm btn-link text-danger" data-confirm="Gesamten Standortverlauf dieses Geräts löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Verlauf löschen</button>
+                        <button class="btn btn-sm btn-link text-danger" data-confirm="@T("Gesamten Standortverlauf dieses Geräts löschen?")"><span class="ico ico-trash" aria-hidden="true"></span>@T("Verlauf löschen")</button>
                     </form>
                 </div>
             }
@@ -121,43 +123,43 @@
         @if (Model.LatestScan is { } scan)
         {
             <div class="card mb-4">
-                <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-wifi" aria-hidden="true"></span></span>WLANs in der Nähe <span class="small text-muted fw-normal">(@TimeZoneInfo.ConvertTime(scan.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm"))</span></div>
+                <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-wifi" aria-hidden="true"></span></span>@T("WLANs in der Nähe") <span class="small text-muted fw-normal">(@TimeZoneInfo.ConvertTime(scan.TimeUtc, Model.Tz).ToString("g"))</span></div>
                 <div class="list-group list-group-flush small">
                     @foreach (var n in scan.GetNearby())
                     {
                         <div class="list-group-item d-flex justify-content-between gap-2">
-                            <span class="text-truncate">@(string.IsNullOrEmpty(n.Ssid) ? "(verborgen)" : n.Ssid)</span>
-                            <span class="text-muted text-nowrap font-monospace">@n.Bssid · @n.Rssi dBm · @(n.FrequencyMhz >= 5000 ? "5 GHz" : "2,4 GHz")</span>
+                            <span class="text-truncate">@(string.IsNullOrEmpty(n.Ssid) ? T("(verborgen)") : n.Ssid)</span>
+                            <span class="text-muted text-nowrap font-monospace">@n.Bssid · @n.Rssi dBm · @(n.FrequencyMhz >= 5000 ? "5 GHz" : $"{2.4:0.0} GHz")</span>
                         </div>
                     }
                 </div>
-                <div class="card-body small text-muted py-2">Findet Windows keine genaue Position, sucht PaCo diese WLANs in einer weltweiten WLAN-Karte.</div>
+                <div class="card-body small text-muted py-2">@T("Findet Windows keine genaue Position, sucht PaCo diese WLANs in einer weltweiten WLAN-Karte.")</div>
             </div>
         }
         <div class="card mb-4">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>Internet-Anschlüsse (IP-Adressen)</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-globe" aria-hidden="true"></span></span>@T("Internet-Anschlüsse (IP-Adressen)")</div>
             <div class="list-group list-group-flush small">
                 @foreach (var i in Model.Ips)
                 {
                     <div class="list-group-item">
                         <div class="font-monospace">@i.Ip</div>
-                        <div class="text-muted">@TimeZoneInfo.ConvertTime(i.FirstSeenUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm") – @TimeZoneInfo.ConvertTime(i.LastSeenUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm")</div>
+                        <div class="text-muted">@TimeZoneInfo.ConvertTime(i.FirstSeenUtc, Model.Tz).ToString("g") – @TimeZoneInfo.ConvertTime(i.LastSeenUtc, Model.Tz).ToString("g")</div>
                     </div>
                 }
                 @if (Model.Ips.Count == 0)
                 {
-                    <div class="list-group-item text-muted">Noch keine Daten.</div>
+                    <div class="list-group-item text-muted">@T("Noch keine Daten.")</div>
                 }
             </div>
         </div>
         <div class="card">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-info" aria-hidden="true"></span></span>Gut zu wissen</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-info" aria-hidden="true"></span></span>@T("Gut zu wissen")</div>
             <div class="card-body small">
                 <ul class="mb-0">
-                    <li>Laptops ohne GPS orten über WLAN-Netze in der Nähe – meist auf 20–100 m genau. Ohne WLAN ist keine genaue Ortung möglich.</li>
-                    <li>PaCo ortet auch, wenn niemand angemeldet ist (z. B. ein gestohlener Laptop am Anmeldebildschirm), sofern er online ist.</li>
-                    <li><strong>Diebstahl:</strong> Die IP-Adressen mit Uhrzeit helfen der Polizei, den Internet-Anschluss zu ermitteln. Bitte nicht selbst hinfahren.</li>
-                    <li>Standorte werden nach 30 Tagen automatisch gelöscht und sind nur für eure Familie sichtbar. Benutzen Erwachsene das Gerät, wird auch ihr Standort erfasst.</li>
+                    <li>@T("Laptops ohne GPS orten über WLAN-Netze in der Nähe – meist auf 20–100 m genau. Ohne WLAN ist keine genaue Ortung möglich.")</li>
+                    <li>@T("PaCo ortet auch, wenn niemand angemeldet ist (z. B. ein gestohlener Laptop am Anmeldebildschirm), sofern er online ist.")</li>
+                    <li>@Html.Raw(T("<strong>Diebstahl:</strong> Die IP-Adressen mit Uhrzeit helfen der Polizei, den Internet-Anschluss zu ermitteln. Bitte nicht selbst hinfahren."))</li>
+                    <li>@T("Standorte werden nach 30 Tagen automatisch gelöscht und sind nur für eure Familie sichtbar. Benutzen Erwachsene das Gerät, wird auch ihr Standort erfasst.")</li>
                 </ul>
             </div>
         </div>

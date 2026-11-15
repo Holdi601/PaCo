@@ -1,53 +1,58 @@
 @page
 @model PaCo.Server.Pages.AlertsModel
 @{
-    ViewData["Title"] = "Alarme";
+    ViewData["Title"] = T("Alarme");
     var filteredName = Model.Child is { } fc ? Model.ChildNames.GetValueOrDefault(fc) : null;
+    // Country-specific help numbers: translators replace them with the emergency number / parents' helpline of their language area.
+    var emergencyNumber = T("112");
+    var helplineName = T("Elterntelefon (kostenlos, anonym)");
+    var helplineNumber = T("0800 111 0 550");
+    static string Tel(string number) => "tel:" + new string(number.Where(c => char.IsDigit(c) || c == '+').ToArray());
 }
 
 <div class="page-head">
     <div class="page-head-main">
         <span class="page-icon is-warm" aria-hidden="true"><span class="ico ico-bell" aria-hidden="true"></span></span>
         <div class="min-w-0">
-            <div class="stat-label">Jugendschutz</div>
-            <h1 class="h3 mb-0 page-title">Alarme</h1>
+            <div class="stat-label">@T("Jugendschutz")</div>
+            <h1 class="h3 mb-0 page-title">@T("Alarme")</h1>
         </div>
     </div>
     <div class="d-flex flex-wrap gap-2">
         @if (Model.ChildNames.Count > 1)
         {
             <form method="get" class="d-flex gap-2">
-                <label for="alert-child" class="visually-hidden">Alarme anzeigen für</label>
+                <label for="alert-child" class="visually-hidden">@T("Alarme anzeigen für")</label>
                 <select id="alert-child" name="child" class="form-select form-select-sm" data-autosubmit>
-                    <option value="">Alle Kinder</option>
+                    <option value="">@T("Alle Kinder")</option>
                     @foreach (var (id, name) in Model.ChildNames.OrderBy(x => x.Value))
                     {
                         <option value="@id" selected="@(Model.Child == id)">@name</option>
                     }
                 </select>
-                <noscript><button class="btn btn-sm btn-outline-secondary"><span class="ico ico-filter" aria-hidden="true"></span>Anzeigen</button></noscript>
+                <noscript><button class="btn btn-sm btn-outline-secondary"><span class="ico ico-filter" aria-hidden="true"></span>@T("Anzeigen")</button></noscript>
             </form>
         }
         @if (Model.UnreadTotal > 0)
         {
             <form method="post" asp-page-handler="ReadAll" asp-route-child="@Model.Child">
-                <button class="btn btn-sm btn-outline-primary"><span class="ico ico-check" aria-hidden="true"></span>Alle als gelesen markieren</button>
+                <button class="btn btn-sm btn-outline-primary"><span class="ico ico-check" aria-hidden="true"></span>@T("Alle als gelesen markieren")</button>
             </form>
         }
     </div>
 </div>
 
 <div class="alert alert-info small">
-    <p class="mb-2">Ein Treffer kann auch harmlos sein (Hausaufgaben, Nachrichten). Bitte sprich in Ruhe mit deinem Kind, bevor du Schlüsse ziehst.</p>
+    <p class="mb-2">@T("Ein Treffer kann auch harmlos sein (Hausaufgaben, Nachrichten). Bitte sprich in Ruhe mit deinem Kind, bevor du Schlüsse ziehst.")</p>
     <div class="d-flex flex-wrap gap-2">
-        <a href="tel:112" class="btn btn-sm btn-danger"><span class="ico ico-phone" aria-hidden="true"></span>Akute Gefahr: 112 anrufen</a>
-        <a href="tel:08001110550" class="btn btn-sm btn-outline-primary"><span class="ico ico-lifebuoy" aria-hidden="true"></span>Elterntelefon 0800 111 0 550 (kostenlos)</a>
+        <a href="@Tel(emergencyNumber)" class="btn btn-sm btn-danger"><span class="ico ico-phone" aria-hidden="true"></span>@F("Akute Gefahr: {0} anrufen", emergencyNumber)</a>
+        <a href="@Tel(helplineNumber)" class="btn btn-sm btn-outline-primary"><span class="ico ico-lifebuoy" aria-hidden="true"></span>@F("{0}: {1}", helplineName, helplineNumber)</a>
     </div>
     <details class="mt-2">
-        <summary>Wie entstehen Alarme?</summary>
-        <p class="mt-2 mb-0">PaCo prüft auf dem PC des Kindes <strong>lokal</strong> Fenstertitel (z. B. Suchen) und – wenn eingeschaltet – den sichtbaren Text im aktiven Fenster (z. B. Chats) auf Stichwörter.
-            Hier steht nur der Treffer mit einem kurzen Ausschnitt, keine kompletten Chats. Welche Stichwörter, legst du pro Kind unter <a asp-page="/Children/Index">Kinder → Regeln</a> fest.
-            Damit du Alarme sofort bemerkst: <a asp-page="/Notifications">Handy-Benachrichtigungen einrichten</a>.</p>
+        <summary>@T("Wie entstehen Alarme?")</summary>
+        <p class="mt-2 mb-0">@Html.Raw(T("PaCo prüft auf dem PC des Kindes <strong>lokal</strong> Fenstertitel (z. B. Suchen) und – wenn eingeschaltet – den sichtbaren Text im aktiven Fenster (z. B. Chats) auf Stichwörter."))
+            @T("Hier steht nur der Treffer mit einem kurzen Ausschnitt, keine kompletten Chats.") @Html.Raw(F("Welche Stichwörter, legst du pro Kind unter <a href=\"{0}\">Kinder → Regeln</a> fest.", Html.Encode(Url.Page("/Children/Index"))))
+            @Html.Raw(F("Damit du Alarme sofort bemerkst: <a href=\"{0}\">Handy-Benachrichtigungen einrichten</a>.", Html.Encode(Url.Page("/Notifications"))))</p>
     </details>
 </div>
 
@@ -56,10 +61,10 @@
     <div class="card">
         <div class="card-body empty-state">
             <partial name="_ArtAllClear" />
-            <div class="fw-semibold mb-1 empty-title">@(filteredName is null ? "Keine Alarme – alles ruhig." : $"Keine Alarme für {filteredName}.")</div>
+            <div class="fw-semibold mb-1 empty-title">@(filteredName is null ? T("Keine Alarme – alles ruhig.") : F("Keine Alarme für {0}.", filteredName))</div>
             <div class="text-muted small">
-                Damit du einen Alarm sofort mitbekommst, richte die <a asp-page="/Notifications">Handy-Benachrichtigungen</a> ein.
-                @if (filteredName is not null) { <a asp-page="/Alerts">Alarme aller Kinder anzeigen</a> }
+                @Html.Raw(F("Damit du einen Alarm sofort mitbekommst, richte die <a href=\"{0}\">Handy-Benachrichtigungen</a> ein.", Html.Encode(Url.Page("/Notifications"))))
+                @if (filteredName is not null) { <a asp-page="/Alerts">@T("Alarme aller Kinder anzeigen")</a> }
             </div>
         </div>
     </div>
@@ -73,20 +78,20 @@
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                 <div>
-                    <span class="pill @(urgent ? "pill-bad" : "pill-muted")">@AlertKeywords.Label(a.Category)</span>
+                    <span class="pill @(urgent ? "pill-bad" : "pill-muted")">@Ui.S(AlertKeywords.Label(a.Category))</span>
                     <strong class="ms-2">@Model.ChildNames.GetValueOrDefault(a.ChildId)</strong>
-                    @if (a.ReadUtc is null) { <span class="badge bg-danger ms-1">neu</span> }
+                    @if (a.ReadUtc is null) { <span class="badge bg-danger ms-1">@T("neu")</span> }
                 </div>
-                <div class="small text-muted">@TimeZoneInfo.ConvertTime(a.TimeUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm") · @Model.DeviceNames.GetValueOrDefault(a.DeviceId)</div>
+                <div class="small text-muted">@TimeZoneInfo.ConvertTime(a.TimeUtc, Model.Tz).ToString("g") · @Model.DeviceNames.GetValueOrDefault(a.DeviceId)</div>
             </div>
-            <div class="mb-1">Stichwort <strong>„@a.Keyword“</strong> in <strong>@a.App</strong> <span class="text-muted small">(@a.Source)</span></div>
+            <div class="mb-1">@Html.Raw(F("Stichwort <strong>„{0}“</strong> in <strong>{1}</strong>", Html.Encode(a.Keyword), Html.Encode(a.App))) <span class="text-muted small">(@PaCo.Server.Pages.AlertsModel.SourceText(a.Source))</span></div>
             @if (!string.IsNullOrWhiteSpace(a.WindowTitle))
             {
-                <div class="small text-muted mb-2">Fenster: @a.WindowTitle</div>
+                <div class="small text-muted mb-2">@F("Fenster: {0}", a.WindowTitle)</div>
             }
             <blockquote class="snippet small mb-2">@a.Snippet</blockquote>
             <form method="post" asp-page-handler="Delete" asp-route-id="@a.Id" asp-route-child="@Model.Child" class="text-end">
-                <button class="btn btn-sm btn-link text-muted" data-confirm="Diesen Alarm löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Alarm löschen</button>
+                <button class="btn btn-sm btn-link text-muted" data-confirm="@T("Diesen Alarm löschen?")"><span class="ico ico-trash" aria-hidden="true"></span>@T("Alarm löschen")</button>
             </form>
         </div>
     </article>

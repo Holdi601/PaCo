@@ -13,6 +13,11 @@ namespace PaCo.Server.Services;
 /// </summary>
 public sealed class WifiGeolocator(IHttpClientFactory http, IOptions<ServerOptions> options, ILogger<WifiGeolocator> log)
 {
+    /// <summary>Stored source names (German identifiers; translated for display in Devices/Location).</summary>
+    public const string GoogleSource = "WLAN-Karte (Google)";
+
+    public const string BeaconDbSource = "WLAN-Karte (BeaconDB)";
+
     public sealed record Fix(double Latitude, double Longitude, double AccuracyMeters, string Source);
 
     public bool Enabled => !string.IsNullOrWhiteSpace(options.Value.GoogleGeolocationApiKey) || !string.IsNullOrWhiteSpace(options.Value.WifiGeolocationUrl);
@@ -34,7 +39,7 @@ public sealed class WifiGeolocator(IHttpClientFactory http, IOptions<ServerOptio
             string source;
             if (!string.IsNullOrWhiteSpace(options.Value.GoogleGeolocationApiKey))
             {
-                source = "WLAN-Karte (Google)";
+                source = GoogleSource;
                 resp = await client.PostAsJsonAsync($"https://www.googleapis.com/geolocation/v1/geolocate?key={options.Value.GoogleGeolocationApiKey}", new
                 {
                     considerIp = false,
@@ -43,7 +48,7 @@ public sealed class WifiGeolocator(IHttpClientFactory http, IOptions<ServerOptio
             }
             else
             {
-                source = "WLAN-Karte (BeaconDB)";
+                source = BeaconDbSource;
                 resp = await client.PostAsJsonAsync(options.Value.WifiGeolocationUrl, new
                 {
                     considerIp = false,

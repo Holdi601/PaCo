@@ -38,7 +38,7 @@ public sealed class AlertsModel(PaCoDb db, ParentActions actions, TimeProvider c
         var now = clock.GetUtcNow();
         foreach (var a in await db.Alerts.Where(a => a.ReadUtc == null).ToListAsync()) a.ReadUtc = now;
         await db.SaveChangesAsync();
-        TempData["Message"] = "Alle Alarme sind als gelesen markiert.";
+        TempData["Message"] = Ui.T("Alle Alarme sind als gelesen markiert.");
         return RedirectToPage(new { Child });
     }
 
@@ -48,7 +48,15 @@ public sealed class AlertsModel(PaCoDb db, ParentActions actions, TimeProvider c
         if (a is null) return NotFound();
         db.Alerts.Remove(a);
         await db.SaveChangesAsync();
-        TempData["Message"] = "Alarm gelöscht.";
+        TempData["Message"] = Ui.T("Alarm gelöscht.");
         return RedirectToPage(new { Child });
     }
+
+    /// <summary>Where the client found the keyword (sent as German identifier, shown in the current language).</summary>
+    public static string SourceText(string source) => source switch
+    {
+        "Fenstertitel" => Ui.T("Fenstertitel"),
+        "Bildschirmtext" => Ui.T("Bildschirmtext"),
+        _ => source,
+    };
 }

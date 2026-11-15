@@ -1,6 +1,6 @@
 @page
 @model PaCo.Server.Pages.NotificationsModel
-@{ ViewData["Title"] = "Handy-Benachrichtigungen"; }
+@{ ViewData["Title"] = T("Handy-Benachrichtigungen"); }
 
 <div class="notify-hero">
     <partial name="_ArtNotify" />
@@ -8,78 +8,78 @@
         <div class="page-head-main mb-2">
             <span class="page-icon is-warm" aria-hidden="true"><span class="ico ico-phone" aria-hidden="true"></span></span>
             <div class="min-w-0">
-                <div class="stat-label">Einrichtung</div>
-                <h1 class="h3 mb-0 page-title">Alarme aufs Handy</h1>
+                <div class="stat-label">@T("Einrichtung")</div>
+                <h1 class="h3 mb-0 page-title">@T("Alarme aufs Handy")</h1>
             </div>
         </div>
-        <p class="text-muted mb-0">PaCo schickt wichtige Alarme (z. B. wenn dein Kind nach „Suizid“ sucht oder jemand im Chat „sag es niemandem“ schreibt) sofort als Push-Nachricht aufs Handy – über die kostenlose App <strong>ntfy</strong> und euren eigenen Server. Jedes Elternteil richtet das einmal auf dem eigenen Handy ein (ca. 3 Minuten).</p>
+        <p class="text-muted mb-0">@Html.Raw(F("PaCo schickt wichtige Alarme (z. B. wenn dein Kind nach „Suizid“ sucht oder jemand im Chat „sag es niemandem“ schreibt) sofort als Push-Nachricht aufs Handy – über die kostenlose App {0} und euren eigenen Server. Jedes Elternteil richtet das einmal auf dem eigenen Handy ein (ca. 3 Minuten).", "<strong>ntfy</strong>"))</p>
     </div>
 </div>
 
 @if (!Model.Configured)
 {
-    <div class="alert alert-warning">Push-Benachrichtigungen sind auf dem Server noch nicht eingerichtet. Bitte den Server-Betreiber fragen. Alarme erscheinen trotzdem unter <a asp-page="/Alerts">Alarme</a>.</div>
+    <div class="alert alert-warning">@Html.Raw(F("Push-Benachrichtigungen sind auf dem Server noch nicht eingerichtet. Bitte den Server-Betreiber fragen. Alarme erscheinen trotzdem unter <a href=\"{0}\">Alarme</a>.", Html.Encode(Url.Page("/Alerts"))))</div>
 }
 
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card mb-4">
-            <div class="card-header"><span class="step-badge" aria-hidden="true">1</span>Schritt 1 – App installieren</div>
+            <div class="card-header"><span class="step-badge" aria-hidden="true">1</span>@T("Schritt 1 – App installieren")</div>
             <div class="card-body">
-                <p class="mb-2">Installiere die App <strong>ntfy</strong> (kostenlos, ohne Konto, ohne Werbung):</p>
+                <p class="mb-2">@Html.Raw(F("Installiere die App {0} (kostenlos, ohne Konto, ohne Werbung):", "<strong>ntfy</strong>"))</p>
                 <ul class="mb-0">
-                    <li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" rel="noopener noreferrer" target="_blank">Google Play</a> oder <a href="https://f-droid.org/packages/io.heckel.ntfy/" rel="noopener noreferrer" target="_blank">F-Droid</a></li>
+                    <li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" rel="noopener noreferrer" target="_blank">Google Play</a> @T("oder") <a href="https://f-droid.org/packages/io.heckel.ntfy/" rel="noopener noreferrer" target="_blank">F-Droid</a></li>
                     <li><strong>iPhone:</strong> <a href="https://apps.apple.com/app/ntfy/id1625396347" rel="noopener noreferrer" target="_blank">App Store</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="card mb-4">
-            <div class="card-header"><span class="step-badge" aria-hidden="true">2</span>Schritt 2 – Eure Familie abonnieren</div>
+            <div class="card-header"><span class="step-badge" aria-hidden="true">2</span>@T("Schritt 2 – Eure Familie abonnieren")</div>
             <div class="card-body">
-                <p><strong>Android – am schnellsten:</strong> Wenn ntfy installiert ist, hier am Handy tippen:</p>
-                <a href="@Model.DeepLink" class="btn btn-primary mb-3"><span class="ico ico-bell" aria-hidden="true"></span>In ntfy abonnieren</a>
-                <p class="mb-2 d-none d-lg-block">…oder den QR-Code rechts mit der Handy-Kamera scannen.</p>
-                <p class="mb-2 small text-muted d-lg-none">Am PC zeigt diese Seite zusätzlich einen QR-Code zum Scannen an.</p>
+                <p>@Html.Raw(T("<strong>Android – am schnellsten:</strong> Wenn ntfy installiert ist, hier am Handy tippen:"))</p>
+                <a href="@Model.DeepLink" class="btn btn-primary mb-3"><span class="ico ico-bell" aria-hidden="true"></span>@T("In ntfy abonnieren")</a>
+                <p class="mb-2 d-none d-lg-block">@T("…oder den QR-Code rechts mit der Handy-Kamera scannen.")</p>
+                <p class="mb-2 small text-muted d-lg-none">@T("Am PC zeigt diese Seite zusätzlich einen QR-Code zum Scannen an.")</p>
                 <hr />
-                <p class="mb-2"><strong>iPhone (und Android von Hand):</strong></p>
+                <p class="mb-2"><strong>@T("iPhone (und Android von Hand):")</strong></p>
                 <ol class="mb-3">
-                    <li>In ntfy unten rechts auf <strong>+</strong> tippen.</li>
-                    <li>Bei <strong>Thema</strong> eintragen:
+                    <li>@Html.Raw(T("In ntfy unten rechts auf <strong>+</strong> tippen."))</li>
+                    <li>@Html.Raw(T("Bei <strong>Thema</strong> eintragen:"))
                         <div class="input-group input-group-sm my-1">
-                            <input id="ntfy-topic" class="form-control font-monospace" value="@Model.Topic" readonly aria-label="Thema" />
-                            <button class="btn btn-outline-secondary" type="button" data-copy="#ntfy-topic"><span class="ico ico-copy" aria-hidden="true"></span>Kopieren</button>
+                            <input id="ntfy-topic" class="form-control font-monospace" value="@Model.Topic" readonly aria-label="@T("Thema")" />
+                            <button class="btn btn-outline-secondary" type="button" data-copy="#ntfy-topic"><span class="ico ico-copy" aria-hidden="true"></span>@T("Kopieren")</button>
                         </div>
                     </li>
-                    <li><strong>„Anderen Server verwenden“</strong> einschalten und als Server eintragen:
+                    <li>@Html.Raw(T("<strong>„Anderen Server verwenden“</strong> einschalten und als Server eintragen:"))
                         <div class="input-group input-group-sm my-1">
-                            <input id="ntfy-server" class="form-control font-monospace" value="@Model.ServerUrl" readonly aria-label="Server" />
-                            <button class="btn btn-outline-secondary" type="button" data-copy="#ntfy-server"><span class="ico ico-copy" aria-hidden="true"></span>Kopieren</button>
+                            <input id="ntfy-server" class="form-control font-monospace" value="@Model.ServerUrl" readonly aria-label="@T("Server")" />
+                            <button class="btn btn-outline-secondary" type="button" data-copy="#ntfy-server"><span class="ico ico-copy" aria-hidden="true"></span>@T("Kopieren")</button>
                         </div>
                     </li>
-                    <li><strong>Abonnieren</strong> tippen.</li>
+                    <li>@Html.Raw(T("<strong>Abonnieren</strong> tippen."))</li>
                 </ol>
             </div>
         </div>
 
         <div class="card mb-4">
-            <div class="card-header"><span class="step-badge" aria-hidden="true">3</span>Schritt 3 – Damit nichts verloren geht</div>
+            <div class="card-header"><span class="step-badge" aria-hidden="true">3</span>@T("Schritt 3 – Damit nichts verloren geht")</div>
             <div class="card-body">
                 <ul class="mb-0">
-                    <li class="mb-1"><strong>Benachrichtigungen erlauben</strong>, wenn ntfy danach fragt.</li>
-                    <li class="mb-1"><strong>Android:</strong> Im Thema oben auf ⋮ → <em>Abo-Einstellungen</em> → <strong>„Sofortige Zustellung“</strong> einschalten. In den Android-Einstellungen für ntfy den <strong>Akku-Optimierung</strong> ausschalten (sonst kommen Nachrichten verspätet).</li>
-                    <li class="mb-1"><strong>iPhone:</strong> Einstellungen → Mitteilungen → ntfy → <em>Mitteilungen erlauben</em> und <em>Zeitkritisch</em> einschalten.</li>
-                    <li>Optional: In ntfy für dieses Thema einen eigenen, auffälligen Ton wählen.</li>
+                    <li class="mb-1">@Html.Raw(T("<strong>Benachrichtigungen erlauben</strong>, wenn ntfy danach fragt."))</li>
+                    <li class="mb-1">@Html.Raw(T("<strong>Android:</strong> Im Thema oben auf ⋮ → <em>Abo-Einstellungen</em> → <strong>„Sofortige Zustellung“</strong> einschalten. In den Android-Einstellungen für ntfy den <strong>Akku-Optimierung</strong> ausschalten (sonst kommen Nachrichten verspätet)."))</li>
+                    <li class="mb-1">@Html.Raw(T("<strong>iPhone:</strong> Einstellungen → Mitteilungen → ntfy → <em>Mitteilungen erlauben</em> und <em>Zeitkritisch</em> einschalten."))</li>
+                    <li>@T("Optional: In ntfy für dieses Thema einen eigenen, auffälligen Ton wählen.")</li>
                 </ul>
             </div>
         </div>
 
         <div class="card mb-4">
-            <div class="card-header"><span class="step-badge" aria-hidden="true">4</span>Schritt 4 – Testen</div>
+            <div class="card-header"><span class="step-badge" aria-hidden="true">4</span>@T("Schritt 4 – Testen")</div>
             <div class="card-body">
                 <form method="post" asp-page-handler="Test" class="d-flex flex-wrap align-items-center gap-3">
-                    <button class="btn btn-success" disabled="@(!Model.Configured)"><span class="ico ico-send" aria-hidden="true"></span>Test-Benachrichtigung senden</button>
-                    <span class="text-muted small">Sollte innerhalb weniger Sekunden auf allen eingerichteten Handys ankommen. Kommt nichts an? Schritt 2 und 3 noch einmal prüfen.</span>
+                    <button class="btn btn-success" disabled="@(!Model.Configured)"><span class="ico ico-send" aria-hidden="true"></span>@T("Test-Benachrichtigung senden")</button>
+                    <span class="text-muted small">@T("Sollte innerhalb weniger Sekunden auf allen eingerichteten Handys ankommen. Kommt nichts an? Schritt 2 und 3 noch einmal prüfen.")</span>
                 </form>
             </div>
         </div>
@@ -87,34 +87,34 @@
 
     <div class="col-lg-5">
         <div class="card mb-4 text-center d-none d-lg-block">
-            <div class="card-header justify-content-center"><span class="head-ico" aria-hidden="true"><span class="ico ico-qr" aria-hidden="true"></span></span>QR-Code (Android)</div>
+            <div class="card-header justify-content-center"><span class="head-ico" aria-hidden="true"><span class="ico ico-qr" aria-hidden="true"></span></span>@T("QR-Code (Android)")</div>
             <div class="card-body">
-                <div class="qr"><img src="@Model.QrDataUri" alt="QR-Code zum Abonnieren in ntfy" /></div>
-                <div class="small text-muted mt-2">Mit der Handy-Kamera scannen → „In ntfy öffnen“.</div>
+                <div class="qr"><img src="@Model.QrDataUri" alt="@T("QR-Code zum Abonnieren in ntfy")" /></div>
+                <div class="small text-muted mt-2">@T("Mit der Handy-Kamera scannen → „In ntfy öffnen“.")</div>
             </div>
         </div>
 
         <div class="card mb-4">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-bell" aria-hidden="true"></span></span>Wann kommt eine Nachricht?</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-bell" aria-hidden="true"></span></span>@T("Wann kommt eine Nachricht?")</div>
             <div class="card-body small">
                 <ul class="mb-2">
-                    <li><strong>Alarm-Stichwörter</strong> in Suchen, Fenstertiteln oder Chats auf dem PC (welche, legst du pro Kind unter <a asp-page="/Children/Index">Kinder → Regeln</a> fest). Suizid- und Grooming-Alarme kommen mit höchster Dringlichkeit.</li>
-                    <li>Wenn PaCo auf einem PC <strong>deinstalliert</strong> wird.</li>
+                    <li>@Html.Raw(F("<strong>Alarm-Stichwörter</strong> in Suchen, Fenstertiteln oder Chats auf dem PC (welche, legst du pro Kind unter <a href=\"{0}\">Kinder → Regeln</a> fest). Suizid- und Grooming-Alarme kommen mit höchster Dringlichkeit.", Html.Encode(Url.Page("/Children/Index"))))</li>
+                    <li>@Html.Raw(T("Wenn PaCo auf einem PC <strong>deinstalliert</strong> wird."))</li>
                 </ul>
-                <p class="mb-0 text-muted">Gleiche Treffer werden höchstens alle 30 Minuten gemeldet. Alle Alarme findest du zusätzlich unter <a asp-page="/Alerts">Alarme</a>.</p>
+                <p class="mb-0 text-muted">@Html.Raw(F("Gleiche Treffer werden höchstens alle 30 Minuten gemeldet. Alle Alarme findest du zusätzlich unter <a href=\"{0}\">Alarme</a>.", Html.Encode(Url.Page("/Alerts"))))</p>
             </div>
         </div>
 
         <div class="card mb-4">
-            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-shield-check" aria-hidden="true"></span></span>Datenschutz & Sicherheit</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-shield-check" aria-hidden="true"></span></span>@T("Datenschutz & Sicherheit")</div>
             <div class="card-body small">
                 <ul class="mb-3">
-                    <li>Die Nachrichten laufen über euren <strong>eigenen Server</strong>. Sie enthalten Name des Kindes, Stichwort, Programm und einen kurzen Textausschnitt.</li>
-                    <li>Das Thema ist ein <strong>geheimer Zufallsname</strong> nur für eure Familie. Nur PaCo darf dort senden. Teile es nur mit Eltern eurer Familie.</li>
-                    <li>iPhone: Apple braucht für Push einen Weckruf über ntfy.sh – dabei wird <em>kein</em> Inhalt übertragen, nur ein Signal „neue Nachricht abholen“.</li>
+                    <li>@Html.Raw(T("Die Nachrichten laufen über euren <strong>eigenen Server</strong>. Sie enthalten Name des Kindes, Stichwort, Programm und einen kurzen Textausschnitt."))</li>
+                    <li>@Html.Raw(T("Das Thema ist ein <strong>geheimer Zufallsname</strong> nur für eure Familie. Nur PaCo darf dort senden. Teile es nur mit Eltern eurer Familie."))</li>
+                    <li>@Html.Raw(T("iPhone: Apple braucht für Push einen Weckruf über ntfy.sh – dabei wird <em>kein</em> Inhalt übertragen, nur ein Signal „neue Nachricht abholen“."))</li>
                 </ul>
                 <form method="post" asp-page-handler="Rotate">
-                    <button class="btn btn-sm btn-outline-danger" data-confirm="Neues geheimes Thema erzeugen? Danach müssen alle Eltern neu abonnieren."><span class="ico ico-refresh" aria-hidden="true"></span>Thema versehentlich weitergegeben? Neues erzeugen</button>
+                    <button class="btn btn-sm btn-outline-danger" data-confirm="@T("Neues geheimes Thema erzeugen? Danach müssen alle Eltern neu abonnieren.")"><span class="ico ico-refresh" aria-hidden="true"></span>@T("Thema versehentlich weitergegeben? Neues erzeugen")</button>
                 </form>
             </div>
         </div>

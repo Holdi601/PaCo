@@ -55,7 +55,7 @@ public sealed class LocationModel(PaCoDb db, ParentActions actions, TimeProvider
         MapJson = PaCoJson.Serialize(Points.Where(p => p.Latitude is not null && p.Longitude is not null).Select(p => new
         {
             lat = p.Latitude, lon = p.Longitude, acc = p.AccuracyMeters, ssid = p.Ssid,
-            time = TimeZoneInfo.ConvertTime(p.TimeUtc, Tz).ToString("dd.MM. HH:mm", CultureInfo.GetCultureInfo("de-DE")),
+            time = TimeZoneInfo.ConvertTime(p.TimeUtc, Tz).ToString("g", CultureInfo.CurrentCulture),
         }));
         return Page();
     }
@@ -68,9 +68,9 @@ public sealed class LocationModel(PaCoDb db, ParentActions actions, TimeProvider
         await db.SaveChangesAsync();
         TempData["Message"] = mode switch
         {
-            LocationMode.Off => "Standort-Erfassung ausgeschaltet.",
-            LocationMode.OnRequest => "Standort wird nur noch auf Anforderung („Jetzt orten“) ermittelt.",
-            _ => "Standort wird alle 15 Minuten aufgezeichnet (30 Tage gespeichert).",
+            LocationMode.Off => Ui.T("Standort-Erfassung ausgeschaltet."),
+            LocationMode.OnRequest => Ui.T("Standort wird nur noch auf Anforderung („Jetzt orten“) ermittelt."),
+            _ => Ui.T("Standort wird alle 15 Minuten aufgezeichnet (30 Tage gespeichert)."),
         };
         return RedirectToPage(new { id });
     }
@@ -91,16 +91,19 @@ public sealed class LocationModel(PaCoDb db, ParentActions actions, TimeProvider
         if (d is null) return NotFound();
         db.Locations.RemoveRange(await db.Locations.Where(l => l.DeviceId == id).ToListAsync());
         await db.SaveChangesAsync();
-        TempData["Message"] = "Standortverlauf gelöscht.";
+        TempData["Message"] = Ui.T("Standortverlauf gelöscht.");
         return RedirectToPage(new { id });
     }
 
+    /// <summary>Display name of a position source (Windows source names or the server's Wi-Fi map lookups).</summary>
     public static string SourceText(string? s) => s switch
     {
-        "WiFi" => "WLAN-Ortung",
+        "WiFi" => Ui.T("WLAN-Ortung"),
         "Satellite" => "GPS",
-        "Cellular" => "Mobilfunk",
-        "IPAddress" => "IP-Adresse (ungenau)",
+        "Cellular" => Ui.T("Mobilfunk"),
+        "IPAddress" => Ui.T("IP-Adresse (ungenau)"),
+        WifiGeolocator.GoogleSource => Ui.T("WLAN-Karte (Google)"),
+        WifiGeolocator.BeaconDbSource => Ui.T("WLAN-Karte (BeaconDB)"),
         null => "–",
         _ => s,
     };

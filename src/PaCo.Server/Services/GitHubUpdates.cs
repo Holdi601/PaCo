@@ -28,20 +28,20 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
         try
         {
             using var resp = await gh.GetAsync($"https://api.github.com/repos/{repo}/releases/latest", ct);
-            if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return new(false, $"Im Repository {repo} gibt es noch kein Release.");
+            if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return new(false, Ui.F("Im Repository {0} gibt es noch kein Release.", repo));
             resp.EnsureSuccessStatusCode();
             release = (await JsonDocument.ParseAsync(await resp.Content.ReadAsStreamAsync(ct), cancellationToken: ct)).RootElement.Clone();
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
-            return new(false, $"GitHub nicht erreichbar: {ex.Message}");
+            return new(false, Ui.F("GitHub nicht erreichbar: {0}", ex.Message));
         }
 
         var tag = release.GetProperty("tag_name").GetString() ?? "";
         var version = tag.TrimStart('v', 'V');
-        if (!Version.TryParse(version, out _)) return new(false, $"Release-Tag „{tag}“ ist keine gültige Version.");
+        if (!Version.TryParse(version, out _)) return new(false, Ui.F("Release-Tag „{0}“ ist keine gültige Version.", tag));
         if (!UpdateManifest.IsNewer(version, client.Version))
-            return new(true, $"Kein Update nötig: Version {client.Version} ist aktuell (neuestes Release: {version}).", client.Version);
+            return new(true, Ui.F("Kein Update nötig: Version {0} ist aktuell (neuestes Release: {1}).", client.Version, version), client.Version);
 
         string? exeUrl = null, shaUrl = null;
         foreach (var a in release.GetProperty("assets").EnumerateArray())
@@ -51,10 +51,10 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
             if (name == "PaCo-Setup.exe") exeUrl = url;
             if (name == "PaCo-Setup.exe.sha256") shaUrl = url;
         }
-        if (exeUrl is null || shaUrl is null) return new(false, $"Release {tag} enthält nicht PaCo-Setup.exe und PaCo-Setup.exe.sha256.");
+        if (exeUrl is null || shaUrl is null) return new(false, Ui.F("Release {0} enthält nicht PaCo-Setup.exe und PaCo-Setup.exe.sha256.", tag));
 
         var expected = (await gh.GetStringAsync(shaUrl, ct)).Trim().Split(' ', 2)[0].ToLowerInvariant();
-        if (expected.Length != 64) return new(false, "Prüfsummen-Datei ist ungültig.");
+        if (expected.Length != 64) return new(false, Ui.T("Prüfsummen-Datei ist ungültig."));
 
         Directory.CreateDirectory(client.UpdatesDir);
         var tmp = Path.Combine(client.UpdatesDir, $"download-{Guid.NewGuid():N}.tmp");
@@ -63,7 +63,7 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
             using (var resp = await gh.GetAsync(exeUrl, HttpCompletionOption.ResponseHeadersRead, ct))
             {
                 resp.EnsureSuccessStatusCode();
-                if (resp.Content.Headers.ContentLength > MaxSize) return new(false, "Datei ist zu groß.");
+                if (resp.Content.Headers.ContentLength > MaxSize) return new(false, Ui.T("Datei ist zu groß."));
                 await using var src = await resp.Content.ReadAsStreamAsync(ct);
                 await using var dst = File.Create(tmp);
                 var buffer = new byte[81920];
@@ -72,7 +72,7 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
                 while ((n = await src.ReadAsync(buffer, ct)) > 0)
                 {
                     total += n;
-                    if (total > MaxSize) return new(false, "Datei ist zu groß.");
+                    if (total > MaxSize) return new(false, Ui.T("Datei ist zu groß."));
                     await dst.WriteAsync(buffer.AsMemory(0, n), ct);
                 }
             }
@@ -81,11 +81,11 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
             if (actual != expected)
             {
                 log.LogError("Update {Version}: Prüfsumme falsch (erwartet {Expected}, erhalten {Actual})", version, expected, actual);
-                return new(false, "Die Prüfsumme der heruntergeladenen Datei stimmt nicht – Update verworfen.");
+                return new(false, Ui.T("Die Prüfsumme der heruntergeladenen Datei stimmt nicht – Update verworfen."));
             }
             File.Move(tmp, Path.Combine(client.UpdatesDir, $"PaCo-Setup-{version}.exe"), overwrite: true);
             log.LogInformation("Client-Update {Version} von GitHub geladen und geprüft ({Sha})", version, actual);
-            return new(true, $"Version {version} von GitHub geladen und geprüft. Sie kann jetzt an die Geräte verteilt werden.", version);
+            return new(true, Ui.F("Version {0} von GitHub geladen und geprüft. Sie kann jetzt an die Geräte verteilt werden.", version), version);
         }
         finally
         {

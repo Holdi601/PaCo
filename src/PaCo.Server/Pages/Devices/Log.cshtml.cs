@@ -51,7 +51,7 @@ public sealed class LogModel(PaCoDb db, ParentActions actions, IDataProtectionPr
         {
             DiagnosticsTime = diag.TimeUtc;
             try { DiagnosticsText = dp.CreateProtector("PaCo.Diagnostics.v1").Unprotect(diag.ProtectedText); }
-            catch (System.Security.Cryptography.CryptographicException) { DiagnosticsText = "(nicht lesbar)"; }
+            catch (System.Security.Cryptography.CryptographicException) { DiagnosticsText = Ui.T("(nicht lesbar)"); }
         }
         return Page();
     }
