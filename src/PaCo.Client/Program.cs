@@ -5,6 +5,7 @@ using PaCo.Client.Config;
 using PaCo.Client.Service;
 using PaCo.Client.Setup;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client;
 
@@ -60,10 +61,10 @@ internal static class Program
         Log.ErrorSink = rt.ReportError;
         lock (rt.Gate)
         {
-            rt.State.AddEvent(DeviceEventKind.ServiceStarted, $"PaCo-Dienst gestartet (Version {ServerApi.Version})");
+            rt.State.AddEvent(DeviceEventKind.ServiceStarted, LocText.Of("PaCo-Dienst gestartet (Version {0})", ServerApi.Version));
             // Safe mode is a classic way to try to get around protection software.
             if (GetSystemMetrics(67 /* SM_CLEANBOOT */) != 0)
-                rt.State.AddEvent(DeviceEventKind.SafeMode, "Der PC wurde im abgesicherten Modus gestartet.");
+                rt.State.AddEvent(DeviceEventKind.SafeMode, LocText.Of("Der PC wurde im abgesicherten Modus gestartet."));
         }
         builder.Services.AddSingleton(rt);
         builder.Services.AddHostedService<Enforcer>();
@@ -105,18 +106,18 @@ internal static class Program
     private static int RunUninstall()
     {
         ApplicationConfiguration.Initialize();
-        if (MessageBox.Show("PaCo Kinderschutz von diesem PC entfernen?\n\nDanach gelten hier keine Regeln mehr.", "PaCo",
+        if (MessageBox.Show(L.T("PaCo Kinderschutz von diesem PC entfernen?") + "\n\n" + L.T("Danach gelten hier keine Regeln mehr."), "PaCo",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
             return 1;
         Installer.UninstallAsync(new Progress<string>(s => Log.Info(s))).GetAwaiter().GetResult();
-        MessageBox.Show("PaCo wurde entfernt.", "PaCo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show(L.T("PaCo wurde entfernt."), "PaCo", MessageBoxButtons.OK, MessageBoxIcon.Information);
         return 0;
     }
 
     /// <summary>Replaces the installed program with this exe, keeping pairing, rules and usage.</summary>
     private static int RunSilentUpdate()
     {
-        if (!Installer.IsInstalled) throw new InvalidOperationException("PaCo ist nicht installiert.");
+        if (!Installer.IsInstalled) throw new InvalidOperationException(L.T("PaCo ist nicht installiert."));
         SecureStore.EnsureDataDir();
         Log.Info($"Unbeaufsichtigtes Update auf {ServerApi.Version}");
         Installer.InstallBinariesAndServiceAsync(new Progress<string>(s => Log.Info(s))).GetAwaiter().GetResult();

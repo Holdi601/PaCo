@@ -64,8 +64,16 @@ public enum SecuritySeverity
     Critical,
 }
 
-/// <summary>Result of one security check on the child's PC.</summary>
-public sealed record SecurityFinding(string Code, SecuritySeverity Severity, string Text, bool Fixable = false);
+/// <summary>
+/// Result of one security check on the child's PC. <see cref="Text"/> is German; <see cref="Template"/> + <see cref="Args"/>
+/// let the website show it in the parent's language.
+/// </summary>
+public sealed record SecurityFinding(string Code, SecuritySeverity Severity, string Text, bool Fixable = false)
+{
+    public string? Template { get; init; }
+
+    public IReadOnlyList<string> Args { get; init; } = [];
+}
 
 /// <summary>A parent asked for a screenshot of the child's screen.</summary>
 public sealed record ScreenshotRequest(Guid RequestId, Guid ChildId);
@@ -178,7 +186,13 @@ public sealed record DeviceEvent
 
     public Guid? ChildId { get; init; }
 
+    /// <summary>German text (also used when no template is available).</summary>
     public string Message { get; init; } = "";
+
+    /// <summary>German composite-format template of <see cref="Message"/> – translated on the website.</summary>
+    public string? Template { get; init; }
+
+    public IReadOnlyList<string> Args { get; init; } = [];
 }
 
 public sealed record SyncRequest

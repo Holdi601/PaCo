@@ -57,6 +57,9 @@ public sealed record ChildPolicy
 
     public string Name { get; init; } = "";
 
+    /// <summary>UI language for the child's PC (lock screen, warnings, help) – a code from <see cref="I18n.Languages"/>.</summary>
+    public string Language { get; init; } = "de";
+
     /// <summary>Monitoring switched off by the parents: nothing is enforced, usage is still recorded.</summary>
     public bool Paused { get; init; }
 

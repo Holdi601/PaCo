@@ -119,9 +119,9 @@ internal sealed class LockForm : Form
     private readonly Label _text = new() { ForeColor = Color.Gainsboro, Font = new Font("Segoe UI", 14), AutoSize = false, TextAlign = ContentAlignment.TopCenter, Dock = DockStyle.Top, Height = 90 };
     private readonly Label _countdown = new() { ForeColor = Color.Orange, Font = new Font("Segoe UI", 13, FontStyle.Bold), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 36 };
     private readonly TextBox _code = new() { Font = new Font("Consolas", 22), Width = 300, MaxLength = 13, TextAlign = HorizontalAlignment.Center, PlaceholderText = "12345-67890" };
-    private readonly Button _unlock = new() { Text = "Freischalten", Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(47, 93, 138), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+    private readonly Button _unlock = new() { Text = L.T("Freischalten"), Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(47, 93, 138), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
     private readonly Label _result = new() { ForeColor = Color.Gainsboro, Font = new Font("Segoe UI", 12), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 40 };
-    private readonly Button _logoff = new() { Text = "Abmelden", Font = new Font("Segoe UI", 11), Width = 140, Height = 40, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+    private readonly Button _logoff = new() { Text = L.T("Abmelden"), Font = new Font("Segoe UI", 11), Width = 140, Height = 40, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
     private readonly System.Windows.Forms.Timer _timer = new() { Interval = 1000 };
     private readonly Action<string> _onCode;
     private bool _allowClose;
@@ -150,7 +150,7 @@ internal sealed class LockForm : Form
         entry.Controls.Add(_unlock);
         var hint = new Label
         {
-            Text = "Freischaltcode der Eltern eingeben. Deine Eltern können dir auch über die PaCo-Website mehr Zeit geben.",
+            Text = L.T("Freischaltcode der Eltern eingeben. Deine Eltern können dir auch über die PaCo-Website mehr Zeit geben."),
             ForeColor = Color.Gray, Font = new Font("Segoe UI", 10), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 40,
         };
         var bottom = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 60, Padding = new Padding(310, 10, 0, 0) };
@@ -183,7 +183,7 @@ internal sealed class LockForm : Form
         _title.Text = title;
         _text.Text = text;
         _secondsLeft = logoffInSeconds;
-        _countdown.Text = logoffInSeconds is { } s ? $"Du wirst in {s} Sekunden abgemeldet." : "";
+        _countdown.Text = logoffInSeconds is { } s ? L.F("Du wirst in {0} Sekunden abgemeldet.", s) : "";
     }
 
     public void SetResult(bool ok, string message)
@@ -207,7 +207,7 @@ internal sealed class LockForm : Form
         if (code.Length == 0) return;
         _unlock.Enabled = false;
         _result.ForeColor = Color.Gainsboro;
-        _result.Text = "Prüfe Code …";
+        _result.Text = L.T("Prüfe Code …");
         _onCode(code);
     }
 
@@ -216,7 +216,7 @@ internal sealed class LockForm : Form
         if (_secondsLeft is > 0)
         {
             _secondsLeft--;
-            _countdown.Text = $"Du wirst in {_secondsLeft} Sekunden abgemeldet.";
+            _countdown.Text = L.F("Du wirst in {0} Sekunden abgemeldet.", _secondsLeft);
         }
         if (!_allowClose && !TopMost) TopMost = true;
     }

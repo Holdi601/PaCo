@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using PaCo.Client.Config;
 using PaCo.Client.Service;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Setup;
 
@@ -29,6 +30,9 @@ internal static class SecurityAudit
         return f;
     }
 
+    private static SecurityFinding Finding(string code, SecuritySeverity severity, LocText text, bool fixable = false) =>
+        new(code, severity, text.German, fixable) { Template = text.Template, Args = text.Args };
+
     private static void Safe(List<SecurityFinding> f, string area, Action check)
     {
         try
@@ -38,7 +42,7 @@ internal static class SecurityAudit
         catch (Exception ex)
         {
             Log.Warn($"Sicherheits-Check {area}: {ex.Message}");
-            f.Add(new SecurityFinding(area + "-error", SecuritySeverity.Info, $"Prüfung „{area}“ war nicht möglich: {ex.Message}"));
+            f.Add(Finding(area + "-error", SecuritySeverity.Info, LocText.Of("Prüfung „{0}“ war nicht möglich: {1}", area, ex.Message)));
         }
     }
 
@@ -48,8 +52,8 @@ internal static class SecurityAudit
         foreach (var a in accounts.Where(a => childSids.Contains(a.Sid)))
         {
             f.Add(a.IsAdmin
-                ? new SecurityFinding("child-admin:" + a.Sid, SecuritySeverity.Critical, $"Das Kinderkonto „{a.UserName}“ hat Administratorrechte – damit kann PaCo umgangen werden.", true)
-                : new SecurityFinding("child-standard:" + a.Sid, SecuritySeverity.Ok, $"Kinderkonto „{a.UserName}“ ist ein Standardkonto."));
+                ? Finding("child-admin:" + a.Sid, SecuritySeverity.Critical, LocText.Of("Das Kinderkonto „{0}“ hat Administratorrechte – damit kann PaCo umgangen werden.", a.UserName), true)
+                : Finding("child-standard:" + a.Sid, SecuritySeverity.Ok, LocText.Of("Kinderkonto „{0}“ ist ein Standardkonto.", a.UserName)));
         }
 
         // Enabled admin accounts without password: a child could just click "Yes" at the admin prompt.
@@ -61,14 +65,14 @@ internal static class SecurityAudit
             {
                 if (m.Enabled != true || m.SamAccountName is null) continue;
                 if (HasBlankPassword(m.SamAccountName))
-                    f.Add(new SecurityFinding("admin-blank:" + m.SamAccountName, SecuritySeverity.Critical,
-                        $"Das Administrator-Konto „{m.SamAccountName}“ hat KEIN Passwort. Bitte ein Passwort setzen, das die Kinder nicht kennen."));
+                    f.Add(Finding("admin-blank:" + m.SamAccountName, SecuritySeverity.Critical,
+                        LocText.Of("Das Administrator-Konto „{0}“ hat KEIN Passwort. Bitte ein Passwort setzen, das die Kinder nicht kennen.", m.SamAccountName)));
             }
         }
 
         using var guest = UserPrincipal.FindByIdentity(ctx, IdentityType.Sid, new SecurityIdentifier(WellKnownSidType.AccountGuestSid, LocalDomainSid(ctx)).Value);
         if (guest?.Enabled == true)
-            f.Add(new SecurityFinding("guest-enabled", SecuritySeverity.Warning, "Das Gastkonto ist aktiv – darüber könnte das Kind ohne Regeln am PC sein.", true));
+            f.Add(Finding("guest-enabled", SecuritySeverity.Warning, LocText.Of("Das Gastkonto ist aktiv – darüber könnte das Kind ohne Regeln am PC sein."), true));
     }
 
     private static SecurityIdentifier? LocalDomainSid(PrincipalContext ctx)
@@ -84,11 +88,11 @@ internal static class SecurityAudit
         using var k = Registry.LocalMachine.OpenSubKey(UacKey);
         var lua = k?.GetValue("EnableLUA") as int? ?? 1;
         if (lua == 0)
-            f.Add(new SecurityFinding("uac-off", SecuritySeverity.Critical, "Die Benutzerkontensteuerung (UAC) ist ausgeschaltet.", true));
+            f.Add(Finding("uac-off", SecuritySeverity.Critical, LocText.Of("Die Benutzerkontensteuerung (UAC) ist ausgeschaltet."), true));
         var user = k?.GetValue("ConsentPromptBehaviorUser") as int? ?? 3;
         f.Add(user == 0
-            ? new SecurityFinding("uac-user-deny", SecuritySeverity.Ok, "Standardkonten bekommen keine Admin-Passwortabfrage (sicherste Einstellung).")
-            : new SecurityFinding("uac-user-prompt", SecuritySeverity.Info, "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.", true));
+            ? Finding("uac-user-deny", SecuritySeverity.Ok, LocText.Of("Standardkonten bekommen keine Admin-Passwortabfrage (sicherste Einstellung)."))
+            : Finding("uac-user-prompt", SecuritySeverity.Info, LocText.Of("Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten."), true));
     }
 
     private static void CheckAntivirus(List<SecurityFinding> f)
@@ -125,18 +129,18 @@ internal static class SecurityAudit
         if (!defenderKnown && !centerKnown)
         {
             // Windows security services not (yet) answering – do not raise a false alarm.
-            f.Add(new SecurityFinding("av-unknown", SecuritySeverity.Info, "Virenschutz-Status konnte gerade nicht abgefragt werden – wird beim nächsten Check erneut geprüft."));
+            f.Add(Finding("av-unknown", SecuritySeverity.Info, LocText.Of("Virenschutz-Status konnte gerade nicht abgefragt werden – wird beim nächsten Check erneut geprüft.")));
             return;
         }
 
         if (defenderOn)
             f.Add(sigAge is > 7
-                ? new SecurityFinding("av-outdated", SecuritySeverity.Warning, $"Microsoft Defender ist aktiv, aber die Virensignaturen sind {sigAge} Tage alt – bitte Windows-Updates installieren.")
-                : new SecurityFinding("av-ok", SecuritySeverity.Ok, "Virenschutz (Microsoft Defender) ist aktiv und aktuell."));
+                ? Finding("av-outdated", SecuritySeverity.Warning, LocText.Of("Microsoft Defender ist aktiv, aber die Virensignaturen sind {0} Tage alt – bitte Windows-Updates installieren.", sigAge))
+                : Finding("av-ok", SecuritySeverity.Ok, LocText.Of("Virenschutz (Microsoft Defender) ist aktiv und aktuell.")));
         else if (others.Count > 0)
-            f.Add(new SecurityFinding("av-other", SecuritySeverity.Ok, $"Virenschutz aktiv: {string.Join(", ", others)}."));
+            f.Add(Finding("av-other", SecuritySeverity.Ok, LocText.Of("Virenschutz aktiv: {0}.", string.Join(", ", others))));
         else
-            f.Add(new SecurityFinding("av-off", SecuritySeverity.Critical, "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten."));
+            f.Add(Finding("av-off", SecuritySeverity.Critical, LocText.Of("Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.")));
     }
 
     private static void CheckFirewall(List<SecurityFinding> f)
@@ -146,8 +150,8 @@ internal static class SecurityAudit
         foreach (ManagementObject o in s.Get())
             if (Convert.ToInt32(o["Enabled"] ?? 1) == 0) off.Add(o["Name"]?.ToString() ?? "?");
         f.Add(off.Count == 0
-            ? new SecurityFinding("fw-ok", SecuritySeverity.Ok, "Windows-Firewall ist eingeschaltet.")
-            : new SecurityFinding("fw-off", SecuritySeverity.Warning, $"Windows-Firewall ist aus für: {string.Join(", ", off)}.", true));
+            ? Finding("fw-ok", SecuritySeverity.Ok, LocText.Of("Windows-Firewall ist eingeschaltet."))
+            : Finding("fw-off", SecuritySeverity.Warning, LocText.Of("Windows-Firewall ist aus für: {0}.", string.Join(", ", off)), true));
     }
 
     private static void CheckSmartScreen(List<SecurityFinding> f)
@@ -157,8 +161,8 @@ internal static class SecurityAudit
         var off = pol?.GetValue("EnableSmartScreen") as int? == 0 ||
                   string.Equals(exp?.GetValue("SmartScreenEnabled") as string, "Off", StringComparison.OrdinalIgnoreCase);
         f.Add(off
-            ? new SecurityFinding("smartscreen-off", SecuritySeverity.Warning, "SmartScreen (Warnung vor gefährlichen Downloads) ist ausgeschaltet.", true)
-            : new SecurityFinding("smartscreen-ok", SecuritySeverity.Ok, "SmartScreen warnt vor gefährlichen Downloads."));
+            ? Finding("smartscreen-off", SecuritySeverity.Warning, LocText.Of("SmartScreen (Warnung vor gefährlichen Downloads) ist ausgeschaltet."), true)
+            : Finding("smartscreen-ok", SecuritySeverity.Ok, LocText.Of("SmartScreen warnt vor gefährlichen Downloads.")));
     }
 
     private static void CheckAutoLogon(List<SecurityFinding> f)
@@ -168,7 +172,7 @@ internal static class SecurityAudit
         var user = k.GetValue("DefaultUserName") as string ?? "";
         var isAdmin = LocalAccounts.List().Any(a => a.IsAdmin && string.Equals(a.UserName, user, StringComparison.OrdinalIgnoreCase));
         if (isAdmin)
-            f.Add(new SecurityFinding("autologon-admin", SecuritySeverity.Critical, $"Der PC meldet sich beim Start automatisch als Administrator „{user}“ an – das Kind hätte dann volle Rechte."));
+            f.Add(Finding("autologon-admin", SecuritySeverity.Critical, LocText.Of("Der PC meldet sich beim Start automatisch als Administrator „{0}“ an – das Kind hätte dann volle Rechte.", user)));
     }
 
     /// <summary>Applies the automatic fixes for the given finding codes. Returns texts of what was done.</summary>

@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["suicide*", "suicidal", "kill myself", "want to die", "self harm", "selfharm", "cutting myself", "end my life", "kys", "overdose"],
+  "Drugs": ["buy weed", "cocaine", "crystal meth", "ecstasy", "mdma", "lsd", "heroin", "ketamine", "xanax", "drug dealer"],
+  "Violence": ["school shooting", "buy a gun", "make a bomb", "i will kill you", "stab him"],
+  "Sexual": ["porn*", "nudes", "onlyfans", "hentai", "nsfw", "xxx"],
+  "Bullying": ["nobody likes you", "everyone hates you", "kill yourself", "you are worthless"],
+  "Grooming": ["don't tell anyone", "dont tell anyone", "send me a pic", "send me a photo", "are you alone", "our secret", "delete this chat", "where do you live", "lets meet"],
+  "Extremism": ["white power", "race war"]
+}

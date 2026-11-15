@@ -30,6 +30,9 @@ public sealed record AlertSettings
 
     /// <summary>Own words/phrases of the parents. A trailing * matches word beginnings ("selbstmord*").</summary>
     public IReadOnlyList<string> CustomKeywords { get; init; } = [];
+
+    /// <summary>Languages whose built-in keyword lists are used (codes from <see cref="I18n.Languages"/>).</summary>
+    public IReadOnlyList<string> Languages { get; init; } = ["de", "en"];
 }
 
 /// <summary>One match, reported by the device. Contains only the hit and a short snippet – never full texts.</summary>
@@ -75,69 +78,66 @@ public static class AlertKeywords
         _ => "Eigene Stichwörter",
     };
 
-    public static readonly IReadOnlyDictionary<AlertCategory, string[]> BuiltIn = new Dictionary<AlertCategory, string[]>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, IReadOnlyDictionary<AlertCategory, string[]>> Lists = new();
+
+    /// <summary>Built-in keyword list of one language (embedded "I18n/keywords.{lang}.json"); empty if none.</summary>
+    public static IReadOnlyDictionary<AlertCategory, string[]> ForLanguage(string language) => Lists.GetOrAdd(language, lang =>
     {
-        [AlertCategory.SelfHarm] =
-        [
-            "suizid*", "selbstmord*", "suicide*", "suicidal", "umbringen", "mich umbringen", "bring mich um", "will sterben", "will nicht mehr leben",
-            "nicht mehr leben", "lebensmüde", "das leben nehmen", "ritzen", "ritze mich", "selbstverletz*", "überdosis", "schmerzlos sterben",
-            "wie bringe ich mich", "kill myself", "want to die", "self harm", "selfharm", "cutting myself", "end my life", "kys",
-        ],
-        [AlertCategory.Drugs] =
-        [
-            "drogen kaufen", "gras kaufen", "weed kaufen", "kokain", "koks", "crystal meth", "meth", "ecstasy", "mdma", "lsd", "heroin",
-            "ketamin", "tilidin", "xanax", "lean trinken", "dealer", "buy weed", "cocaine",
-        ],
-        [AlertCategory.Violence] =
-        [
-            "amoklauf", "amok laufen", "waffe kaufen", "pistole kaufen", "bombe bauen", "school shooting", "ich bring dich um",
-            "abstechen", "erschießen", "messer mitnehmen",
-        ],
-        [AlertCategory.Sexual] =
-        [
-            "porno*", "porn*", "nacktbilder", "nacktfotos", "nudes", "onlyfans", "sexcam", "sex cam", "hentai", "xxx", "nsfw",
-        ],
-        [AlertCategory.Bullying] =
-        [
-            "du opfer", "keiner mag dich", "niemand mag dich", "bring dich um", "töte dich", "fett und hässlich", "hurensohn", "missgeburt",
-            "spast", "behindert bist", "alle hassen dich",
-        ],
-        [AlertCategory.Grooming] =
-        [
-            "sag es niemandem", "sag niemandem", "sags niemandem", "unser geheimnis", "unser kleines geheimnis", "schick mir ein bild",
-            "schick mir ein foto", "schick mal ein foto", "schick mal ein bild", "bist du allein", "bist du alleine", "sind deine eltern da",
-            "wo wohnst du", "treffen wir uns", "lass uns treffen", "lösch den chat", "lösch die nachricht", "zeig mal dich",
-            "don't tell anyone", "dont tell anyone", "send me a pic", "are you alone", "our secret",
-        ],
-        [AlertCategory.Extremism] =
-        [
-            "heil hitler", "sieg heil", "88 heil", "white power", "rassenkrieg", "ungläubige töten",
-        ],
-    };
+        using var s = typeof(AlertKeywords).Assembly.GetManifestResourceStream($"PaCo.Shared.I18n.keywords.{lang}.json");
+        if (s is null) return new Dictionary<AlertCategory, string[]>();
+        var raw = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string[]>>(s) ?? [];
+        return raw.Where(kv => Enum.TryParse<AlertCategory>(kv.Key, out _))
+            .ToDictionary(kv => Enum.Parse<AlertCategory>(kv.Key), kv => kv.Value);
+    });
+
+    /// <summary>German + English lists (compatibility / tests).</summary>
+    public static IReadOnlyDictionary<AlertCategory, string[]> BuiltIn =>
+        ForLanguage("de").Concat(ForLanguage("en")).GroupBy(kv => kv.Key).ToDictionary(g => g.Key, g => g.SelectMany(kv => kv.Value).ToArray());
+
+    /// <summary>Scripts without spaces between words: keywords are matched as substrings there.</summary>
+    internal static bool IsCjk(char c) =>
+        c is >= '぀' and <= 'ヿ'      // Hiragana, Katakana
+            or >= '㐀' and <= '鿿'    // CJK ideographs (+ ext. A)
+            or >= '가' and <= '힯'    // Hangul syllables
+            or >= 'ᄀ' and <= 'ᇿ'    // Hangul Jamo
+            or >= '豈' and <= '﫿';   // CJK compatibility
 
     public sealed class Matcher
     {
         private readonly List<(AlertCategory Cat, string Display, string[] Words, bool Prefix)> _rules = [];
+        private readonly List<(AlertCategory Cat, string Display, string Compact)> _cjkRules = [];
 
         public Matcher(AlertSettings settings)
         {
             if (!settings.Enabled) return;
-            foreach (var cat in settings.Categories.Distinct())
-                if (BuiltIn.TryGetValue(cat, out var list))
-                    foreach (var k in list) Add(cat, k);
+            var languages = settings.Languages.Count > 0 ? settings.Languages : ["de", "en"];
+            foreach (var lang in languages.Distinct())
+            {
+                var lists = ForLanguage(lang);
+                foreach (var cat in settings.Categories.Distinct())
+                    if (lists.TryGetValue(cat, out var list))
+                        foreach (var k in list) Add(cat, k);
+            }
             foreach (var k in settings.CustomKeywords) Add(AlertCategory.Custom, k);
         }
 
-        public bool IsEmpty => _rules.Count == 0;
+        public bool IsEmpty => _rules.Count == 0 && _cjkRules.Count == 0;
 
-        public int Count => _rules.Count;
+        public int Count => _rules.Count + _cjkRules.Count;
 
         private void Add(AlertCategory cat, string keyword)
         {
             var k = keyword.Trim();
-            if (k.Length < 2) return;
+            if (k.Length < 2 && !k.Any(IsCjk)) return;
             var prefix = k.EndsWith('*');
             var norm = Normalize(k.TrimEnd('*'), out _);
+            if (norm.Any(IsCjk))
+            {
+                // Chinese/Japanese/Korean: no word boundaries – match the keyword (without spaces) as substring.
+                var compact = norm.Replace(" ", "");
+                if (compact.Length > 0) _cjkRules.Add((cat, k.TrimEnd('*'), compact));
+                return;
+            }
             var words = norm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (words.Length == 0) return;
             _rules.Add((cat, k.TrimEnd('*'), words, prefix));
@@ -147,8 +147,32 @@ public static class AlertKeywords
         public List<AlertMatch> Find(string text, int snippetRadius = 60)
         {
             var result = new List<AlertMatch>();
-            if (_rules.Count == 0 || string.IsNullOrWhiteSpace(text)) return result;
+            if (IsEmpty || string.IsNullOrWhiteSpace(text)) return result;
             var norm = Normalize(text, out var map);
+            if (_cjkRules.Count > 0 && norm.Any(IsCjk))
+            {
+                // Compact text (spaces removed) with a map back to the original positions.
+                var compact = new StringBuilder(norm.Length);
+                var cmap = new List<int>(norm.Length);
+                for (var i = 0; i < norm.Length; i++)
+                {
+                    if (norm[i] == ' ') continue;
+                    compact.Append(norm[i]);
+                    cmap.Add(map[i]);
+                }
+                var c = compact.ToString();
+                var taken = new List<(AlertCategory Cat, int From, int To)>();
+                foreach (var rule in _cjkRules.OrderByDescending(r => r.Compact.Length))
+                {
+                    var at = c.IndexOf(rule.Compact, StringComparison.Ordinal);
+                    if (at < 0) continue;
+                    var to = at + rule.Compact.Length - 1;
+                    if (taken.Any(t => t.Cat == rule.Cat && at <= t.To && to >= t.From)) continue;
+                    taken.Add((rule.Cat, at, to));
+                    result.Add(new AlertMatch(rule.Cat, rule.Display, Snippet(text, cmap[at], snippetRadius / 2)));
+                }
+            }
+            if (_rules.Count == 0) return result;
             var tokens = Tokenize(norm);
             // Longest phrases first, so "will nicht mehr leben" wins over the overlapping "nicht mehr leben".
             var covered = new List<(AlertCategory Cat, int From, int To)>();

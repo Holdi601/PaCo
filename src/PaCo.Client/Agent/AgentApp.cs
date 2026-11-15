@@ -2,6 +2,7 @@ using System.IO.Pipes;
 using PaCo.Client.Config;
 using PaCo.Client.Native;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Agent;
 
@@ -47,7 +48,7 @@ internal sealed class AgentApp : ApplicationContext
         _tray = new NotifyIcon
         {
             Icon = SystemIcons.Shield,
-            Text = "PaCo Kinderschutz",
+            Text = L.T("PaCo Kinderschutz"),
             Visible = true,
         };
         _tray.Click += (_, _) => _tray.ShowBalloonTip(5000, "PaCo", _tray.Text, ToolTipIcon.Info);
@@ -94,15 +95,17 @@ internal sealed class AgentApp : ApplicationContext
             {
                 case IpcMessage.Status:
                     _childName = msg.ChildName ?? "";
-                    _tray.Text = Truncate(msg.Paused ? "PaCo: pausiert"
-                        : !msg.Allowed ? "PaCo: keine Zeit mehr"
-                        : msg.RemainingSeconds is { } r ? $"PaCo: noch {FormatMinutes(r)}" : "PaCo: ohne Zeitlimit", 63);
+                    if (msg.Lang is { } statusLang && Languages.IsSupported(statusLang)) L.Lang = statusLang;
+                    _tray.Text = Truncate(msg.Paused ? L.T("PaCo: pausiert")
+                        : !msg.Allowed ? L.T("PaCo: keine Zeit mehr")
+                        : msg.RemainingSeconds is { } r ? L.F("PaCo: noch {0}", FormatMinutes(r)) : L.T("PaCo: ohne Zeitlimit"), 63);
                     break;
                 case IpcMessage.Notify:
                     _tray.ShowBalloonTip(10_000, msg.Title ?? "PaCo", msg.Text ?? "", ToolTipIcon.Warning);
                     break;
                 case IpcMessage.ShowLock:
-                    _lock.Show(msg.Title ?? "Bildschirmzeit vorbei", msg.Text ?? "", msg.Seconds);
+                    if (msg.Lang is { } lang && Languages.IsSupported(lang)) L.Lang = lang;
+                    _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds);
                     Send(new IpcMessage { Type = IpcMessage.LockState, Flag = true });
                     break;
                 case IpcMessage.HideLock:
@@ -135,7 +138,7 @@ internal sealed class AgentApp : ApplicationContext
                         Log.Warn($"Bildschirmfoto fehlgeschlagen: {ex.Message}");
                     }
                     Send(new IpcMessage { Type = IpcMessage.ScreenshotData, RequestId = rid, Text = Convert.ToBase64String(jpeg) });
-                    if (msg.Flag) _tray.ShowBalloonTip(6000, "PaCo", "Deine Eltern haben ein Bildschirmfoto angesehen.", ToolTipIcon.Info);
+                    if (msg.Flag) _tray.ShowBalloonTip(6000, "PaCo", L.T("Deine Eltern haben ein Bildschirmfoto angesehen."), ToolTipIcon.Info);
                     break;
             }
         }
@@ -177,7 +180,7 @@ internal sealed class AgentApp : ApplicationContext
     }
 
     private static string FormatMinutes(long seconds) =>
-        seconds >= 3600 ? $"{seconds / 3600} Std {seconds % 3600 / 60} Min" : $"{Math.Max(1, (seconds + 59) / 60)} Min";
+        seconds >= 3600 ? L.F("{0} Std {1} Min", seconds / 3600, seconds % 3600 / 60) : L.F("{0} Min", Math.Max(1, (seconds + 59) / 60));
 
     private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max];
 }

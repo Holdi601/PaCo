@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using PaCo.Client.Config;
 using PaCo.Client.Native;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Service;
 
@@ -177,11 +178,11 @@ internal sealed class Enforcer : BackgroundService
                 var killed = AppBlocker.Enforce(s.SessionId, child.BlockedApps);
                 if (killed.Count > 0)
                 {
-                    lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, $"Gesperrtes Programm beendet: {string.Join(", ", killed)}", child.ChildId);
+                    lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, LocText.Of("Gesperrtes Programm beendet: {0}", string.Join(", ", killed)), child.ChildId);
                     if (Mono.Now - track.LastBlockedNotice > TimeSpan.FromSeconds(30))
                     {
                         track.LastBlockedNotice = Mono.Now;
-                        await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.Notify, Title = "Programm gesperrt", Text = $"{string.Join(", ", killed)} ist von deinen Eltern gesperrt." });
+                        await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.Notify, Title = L.In(child.Language, "Programm gesperrt"), Text = L.In(child.Language, "{0} ist von deinen Eltern gesperrt.", string.Join(", ", killed)) });
                     }
                 }
             }
@@ -262,7 +263,7 @@ internal sealed class Enforcer : BackgroundService
             track.LastAllowed = eval.Allowed;
             await _agents.SendAsync(s.SessionId, new IpcMessage
             {
-                Type = IpcMessage.Status, ChildName = child.Name, Allowed = eval.Allowed, Paused = child.Paused, RemainingSeconds = eval.RemainingSeconds,
+                Type = IpcMessage.Status, ChildName = child.Name, Lang = child.Language, Allowed = eval.Allowed, Paused = child.Paused, RemainingSeconds = eval.RemainingSeconds,
             });
         }
 
@@ -274,7 +275,7 @@ internal sealed class Enforcer : BackgroundService
                 if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.HideLock });
                 track.LockRequested = false;
                 if (agent is not null) agent.LockShown = false;
-                lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Unlocked, $"Freigegeben ({SourceText(eval.Source)})", child.ChildId);
+                lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Unlocked, SourceText(eval.Source), child.ChildId);
             }
             track.BlockedSince = null;
             track.LogoffAt = null;
@@ -305,6 +306,7 @@ internal sealed class Enforcer : BackgroundService
         if (!s.Active || s.Locked) return;
 
         var (title, text) = BlockText(child, eval);
+        var lang = child.Language;
 
         if (connected && !track.Muted)
         {
@@ -317,13 +319,13 @@ internal sealed class Enforcer : BackgroundService
         {
             if (connected && !track.LockRequested)
             {
-                await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Title = title, Text = text });
+                await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text });
                 track.LockRequested = true;
-                lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Locked, $"{title} – Sperrbildschirm", child.ChildId);
+                lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Locked, EventText(eval.Reason, logoff: false), child.ChildId);
             }
             else if (!connected && now - track.BlockedSince > AgentGrace)
             {
-                await ForceLogoffAsync(s, child, track, "Sperrbildschirm konnte nicht angezeigt werden – Kind wurde abgemeldet.", failure: true);
+                await ForceLogoffAsync(s, child, track, LocText.Of("Sperrbildschirm konnte nicht angezeigt werden – Kind wurde abgemeldet."), failure: true);
             }
             return;
         }
@@ -334,32 +336,32 @@ internal sealed class Enforcer : BackgroundService
             if (track.ExpiredDuringUse)
             {
                 track.LogoffAt = now + LogoffDelayAfterExpiry;
-                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Title = title, Text = text, Seconds = (int)LogoffDelayAfterExpiry.TotalSeconds });
+                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Seconds = (int)LogoffDelayAfterExpiry.TotalSeconds });
             }
             else
             {
                 // Logged in although no time is left: short window to type an unlock code, then sign out.
                 track.LogoffAt = now + LogoffCountdownAfterLogin;
-                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Title = title, Text = text, Seconds = (int)LogoffCountdownAfterLogin.TotalSeconds });
+                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Seconds = (int)LogoffCountdownAfterLogin.TotalSeconds });
             }
             track.LockRequested = connected;
         }
         else if (!track.LockRequested && connected)
         {
             var left = (int)Math.Max(1, (track.LogoffAt.Value - now).TotalSeconds);
-            await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Title = title, Text = text, Seconds = left });
+            await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Seconds = left });
             track.LockRequested = true;
         }
 
         var deadline = track.LogoffAt.Value;
         if (!connected) deadline = Max(deadline, track.BlockedSince.Value + AgentGrace);
         if (now >= deadline)
-            await ForceLogoffAsync(s, child, track, $"{title} – abgemeldet.", failure: false);
+            await ForceLogoffAsync(s, child, track, EventText(eval.Reason, logoff: true), failure: false);
     }
 
-    private async Task ForceLogoffAsync(UserSession s, ChildPolicy child, Track track, string message, bool failure)
+    private async Task ForceLogoffAsync(UserSession s, ChildPolicy child, Track track, LocText message, bool failure)
     {
-        Log.Warn($"Melde {s.UserName} (Sitzung {s.SessionId}) ab: {message}");
+        Log.Warn($"Melde {s.UserName} (Sitzung {s.SessionId}) ab: {message.German}");
         lock (_rt.Gate) _rt.State.AddEvent(failure ? DeviceEventKind.AgentFailure : DeviceEventKind.ForcedLogoff, message, child.ChildId);
         if (_agents.Get(s.SessionId)?.Connected == true)
             await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.Mute });
@@ -385,12 +387,14 @@ internal sealed class Enforcer : BackgroundService
             // Mark all larger thresholds too, so a fresh login at 2 min left gives one warning, not three.
             foreach (var u in WarnAt.Where(u => u >= t)) track.Warned.Add(u);
             var minutes = Math.Max(1, (rem + 59) / 60);
-            var what = child.ExpiryAction == ExpiryAction.Logoff ? "wirst du abgemeldet" : "wird der Bildschirm gesperrt";
+            var lang = child.Language;
             await _agents.SendAsync(s.SessionId, new IpcMessage
             {
                 Type = IpcMessage.Notify,
-                Title = $"Noch {minutes} {(minutes == 1 ? "Minute" : "Minuten")}",
-                Text = $"Danach {what}. Speichere jetzt dein Spiel oder deine Arbeit.",
+                Title = minutes == 1 ? L.In(lang, "Noch 1 Minute") : L.In(lang, "Noch {0} Minuten", minutes),
+                Text = child.ExpiryAction == ExpiryAction.Logoff
+                    ? L.In(lang, "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.")
+                    : L.In(lang, "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit."),
             });
             Log.Info($"{child.Name}: Warnung {minutes} Min");
             break;
@@ -514,7 +518,7 @@ internal sealed class Enforcer : BackgroundService
             if (track is not null && Mono.Since(track.LastHelpHint) > TimeSpan.FromMinutes(30))
             {
                 track.LastHelpHint = Mono.Now;
-                await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.Notify, Title = "Du bist nicht allein 💙", Text = AlertKeywords.HelpText });
+                await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.Notify, Title = L.In(child.Language, "Du bist nicht allein 💙"), Text = SharedText.T(child.Language, AlertKeywords.HelpText) });
             }
         }
     }
@@ -529,28 +533,31 @@ internal sealed class Enforcer : BackgroundService
             if (!_rt.State.Throttles.TryGetValue(child.ChildId, out var throttle))
                 _rt.State.Throttles[child.ChildId] = throttle = new UnlockThrottle();
             if (throttle.RemainingWait(now) is { } wait)
-                return (false, $"Zu viele falsche Versuche. Bitte warte {Math.Ceiling(wait.TotalMinutes)} Minute(n).");
+                return (false, L.In(child.Language, "Zu viele falsche Versuche. Bitte warte {0} Minute(n).", Math.Ceiling(wait.TotalMinutes)));
 
             var day = FamilyClock.Day(now, FamilyClock.Resolve(policy.TimeZoneId));
             if (!UnlockCodes.TryValidate(_rt.Device.UnlockKeyBytes, child.ChildId, day, code, out var decoded))
             {
                 throttle.RegisterFailure(now);
-                _rt.State.AddEvent(DeviceEventKind.UnlockFailed, "Falscher Freischaltcode eingegeben", child.ChildId);
+                _rt.State.AddEvent(DeviceEventKind.UnlockFailed, LocText.Of("Falscher Freischaltcode eingegeben"), child.ChildId);
                 _rt.SaveIfNeeded(force: true);
                 var left = UnlockThrottle.FreeAttempts - throttle.FailedAttempts;
-                return (false, left > 0 ? $"Der Code stimmt nicht. Noch {left} Versuch(e)." : "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.");
+                return (false, left > 0 ? L.In(child.Language, "Der Code stimmt nicht. Noch {0} Versuch(e).", left) : L.In(child.Language, "Der Code stimmt nicht. Eingabe vorübergehend gesperrt."));
             }
 
             var usage = _rt.State.UsageFor(child.ChildId, day);
             if (usage.Codes.Any(c => c.Nonce == decoded.Nonce))
-                return (false, "Dieser Code wurde schon benutzt.");
+                return (false, L.In(child.Language, "Dieser Code wurde schon benutzt."));
 
             usage.Codes.Add(new RedeemedCode { Nonce = decoded.Nonce, Minutes = decoded.Minutes, RedeemedUtc = now });
             throttle.RegisterSuccess();
-            var what = decoded.Minutes == 0 ? "für den Rest des Tages" : $"für {decoded.Minutes} Minuten";
-            _rt.State.AddEvent(DeviceEventKind.Unlocked, $"Freischaltcode eingelöst: {what}", child.ChildId);
+            _rt.State.AddEvent(DeviceEventKind.Unlocked, decoded.Minutes == 0
+                ? LocText.Of("Freischaltcode eingelöst: für den Rest des Tages")
+                : LocText.Of("Freischaltcode eingelöst: für {0} Minuten", decoded.Minutes), child.ChildId);
             _rt.SaveIfNeeded(force: true);
-            return (true, $"Freigeschaltet {what}!");
+            return (true, decoded.Minutes == 0
+                ? L.In(child.Language, "Freigeschaltet für den Rest des Tages!")
+                : L.In(child.Language, "Freigeschaltet für {0} Minuten!", decoded.Minutes));
         }
     }
 
@@ -569,23 +576,36 @@ internal sealed class Enforcer : BackgroundService
     private static (string Title, string Text) BlockText(ChildPolicy child, Evaluation eval)
     {
         var rule = child.Days.Count == 7 ? child.Days[(int)eval.Day.DayOfWeek] : DayRule.Unrestricted;
+        var l = child.Language;
+        var culture = Languages.Culture(l);
         return eval.Reason switch
         {
-            BlockReason.LockedByParent => ("Der PC ist gerade gesperrt", $"{child.Name}, deine Eltern haben den PC gesperrt."),
-            BlockReason.OutsideWindow => ("Jetzt ist keine PC-Zeit",
+            BlockReason.LockedByParent => (L.In(l, "Der PC ist gerade gesperrt"), L.In(l, "{0}, deine Eltern haben den PC gesperrt.", child.Name)),
+            BlockReason.OutsideWindow => (L.In(l, "Jetzt ist keine PC-Zeit"),
                 rule.WindowStart is { } a && rule.WindowEnd is { } b
-                    ? $"{child.Name}, heute darfst du von {a:HH\\:mm} bis {b:HH\\:mm} Uhr an den PC."
-                    : $"{child.Name}, jetzt ist keine PC-Zeit."),
-            _ => ("Deine Bildschirmzeit ist aufgebraucht", $"{child.Name}, für heute ist deine Zeit vorbei. Morgen geht es weiter!"),
+                    ? L.In(l, "{0}, heute darfst du von {1} bis {2} Uhr an den PC.", child.Name, a.ToString("t", culture), b.ToString("t", culture))
+                    : L.In(l, "{0}, jetzt ist keine PC-Zeit.", child.Name)),
+            _ => (L.In(l, "Deine Bildschirmzeit ist aufgebraucht"), L.In(l, "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!", child.Name)),
         };
     }
 
-    private static string SourceText(TimeSource s) => s switch
+    /// <summary>Event text for the parents (translated on the website).</summary>
+    private static LocText EventText(BlockReason reason, bool logoff) => (reason, logoff) switch
     {
-        TimeSource.Grant => "Zusatzzeit von den Eltern",
-        TimeSource.Code => "Freischaltcode",
-        TimeSource.Unrestricted => "Überwachung pausiert",
-        _ => "reguläre Zeit",
+        (BlockReason.LockedByParent, false) => LocText.Of("Von den Eltern gesperrt – Sperrbildschirm"),
+        (BlockReason.LockedByParent, true) => LocText.Of("Von den Eltern gesperrt – abgemeldet."),
+        (BlockReason.OutsideWindow, false) => LocText.Of("Außerhalb der PC-Zeit – Sperrbildschirm"),
+        (BlockReason.OutsideWindow, true) => LocText.Of("Außerhalb der PC-Zeit – abgemeldet."),
+        (_, false) => LocText.Of("Bildschirmzeit aufgebraucht – Sperrbildschirm"),
+        (_, true) => LocText.Of("Bildschirmzeit aufgebraucht – abgemeldet."),
+    };
+
+    private static LocText SourceText(TimeSource s) => s switch
+    {
+        TimeSource.Grant => LocText.Of("Freigegeben (Zusatzzeit von den Eltern)"),
+        TimeSource.Code => LocText.Of("Freigegeben (Freischaltcode)"),
+        TimeSource.Unrestricted => LocText.Of("Freigegeben (Überwachung pausiert)"),
+        _ => LocText.Of("Freigegeben (reguläre Zeit)"),
     };
 
     private static DateTimeOffset Max(DateTimeOffset a, DateTimeOffset b) => a > b ? a : b;

@@ -4,4 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Translations (shared.{lang}.json) and alarm keyword lists (keywords.{lang}.json). -->
+    <!-- WithCulture=false: otherwise MSBuild treats ".de"/".fr" in the file name as satellite-assembly cultures. -->
+    <EmbeddedResource Include="I18n\*.json" WithCulture="false" LogicalName="PaCo.Shared.I18n.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.Hosting;
 using PaCo.Client.Config;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Service;
 
@@ -85,7 +86,7 @@ internal sealed class ServerApi : IDisposable
             if (doc.RootElement.TryGetProperty("detail", out var d)) detail = d.GetString();
         }
         catch (System.Text.Json.JsonException) { }
-        throw new ServerException(resp.StatusCode, detail ?? $"Server antwortet mit {(int)resp.StatusCode} {resp.ReasonPhrase}");
+        throw new ServerException(resp.StatusCode, detail ?? L.F("Server antwortet mit {0} {1}", (int)resp.StatusCode, resp.ReasonPhrase));
     }
 
     public void Dispose() => _http.Dispose();
@@ -116,7 +117,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         }
         catch (PolicySignatureException ex)
         {
-            lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, "Update abgelehnt: " + ex.Message);
+            lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, LocText.Of("Update abgelehnt: {0}", ex.Message));
             return;
         }
         if (m.DeviceId != rt.Device.DeviceId || !UpdateManifest.IsNewer(m.Version, ServerApi.Version)) return;
@@ -137,13 +138,13 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         if (sha != m.Sha256 || size != m.Size)
         {
             File.Delete(file);
-            lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, $"Update {m.Version} verworfen: Prüfsumme stimmt nicht.");
+            lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, LocText.Of("Update {0} verworfen: Prüfsumme stimmt nicht.", m.Version));
             return;
         }
 
         lock (rt.Gate)
         {
-            rt.State.AddEvent(DeviceEventKind.Info, $"Update auf Version {m.Version} wird installiert.");
+            rt.State.AddEvent(DeviceEventKind.Info, LocText.Of("Update auf Version {0} wird installiert.", m.Version));
             rt.SaveIfNeeded(force: true);
         }
         Log.Info($"Update {m.Version} geprüft (SHA-256 {sha[..12]}…) – starte Installation");
@@ -223,7 +224,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         var usedMinutes = (int)Math.Max(0, (UsedSecondsToday() - off.Used) / 60);
         if (minutesOffline < 10 || usedMinutes < 5) return;
         lock (rt.Gate)
-            rt.State.AddEvent(DeviceEventKind.OfflineUsage, $"Der PC war {minutesOffline} Min ohne Verbindung zum Server, davon wurde er {usedMinutes} Min von Kindern genutzt.");
+            rt.State.AddEvent(DeviceEventKind.OfflineUsage, LocText.Of("Der PC war {0} Min ohne Verbindung zum Server, davon wurde er {1} Min von Kindern genutzt.", minutesOffline, usedMinutes));
     }
 
     private readonly HashSet<Guid> _handledScreenshots = [];
@@ -300,7 +301,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                 {
                     var child = policy.ChildForSid(acc.Sid);
                     if (child is null) continue;
-                    rt.State.AddEvent(DeviceEventKind.ChildIsAdmin, $"Windows-Konto „{acc.UserName}“ von {child.Name} hat Administratorrechte.", child.ChildId);
+                    rt.State.AddEvent(DeviceEventKind.ChildIsAdmin, LocText.Of("Windows-Konto „{0}“ von {1} hat Administratorrechte.", acc.UserName, child.Name), child.ChildId);
                 }
                 _adminWarnDay = today;
             }

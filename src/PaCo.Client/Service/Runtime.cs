@@ -1,5 +1,6 @@
 using PaCo.Client.Config;
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Service;
 
@@ -14,7 +15,7 @@ internal sealed class Runtime
         Policies = new PolicyStore(device);
         Policies.LoadFromDisk();
         State = ClientState.Load();
-        var notes = new List<string>();
+        var notes = new List<LocText>();
         Clock = new TrustedClock(() => DateTimeOffset.UtcNow, () => _mono.Elapsed, State.LastUtc, State.ServerOffsetSeconds, notes);
         foreach (var n in notes) State.AddEvent(DeviceEventKind.ClockTampering, n);
     }
@@ -105,7 +106,7 @@ internal sealed class Runtime
     /// <summary>Trusted "now" (see <see cref="TrustedClock"/>). Call under <see cref="Gate"/>.</summary>
     public DateTimeOffset Now()
     {
-        var notes = new List<string>();
+        var notes = new List<LocText>();
         var t = Clock.Now(notes);
         foreach (var n in notes)
         {
@@ -129,10 +130,10 @@ internal sealed class Runtime
         if (Math.Abs(diff.TotalMinutes) >= 2)
         {
             var text = diff < TimeSpan.Zero
-                ? $"Die Uhr des PCs ging {FormatSpan(-diff)} vor – korrigiert mit der Serverzeit."
-                : $"Die Uhr des PCs ging {FormatSpan(diff)} nach – korrigiert mit der Serverzeit.";
+                ? LocText.Of("Die Uhr des PCs ging {0} vor – korrigiert mit der Serverzeit.", FormatSpan(-diff))
+                : LocText.Of("Die Uhr des PCs ging {0} nach – korrigiert mit der Serverzeit.", FormatSpan(diff));
             if (diff < -TimeSpan.FromMinutes(10)) State.AddEvent(DeviceEventKind.ClockTampering, text);
-            else Log.Info(text);
+            else Log.Info(text.German);
         }
 
         var tz = FamilyClock.Resolve(Policies.Current?.TimeZoneId ?? "Europe/Berlin");
@@ -140,7 +141,7 @@ internal sealed class Runtime
             key => (Guid.ParseExact(key[..key.IndexOf('|')], "N"), DateOnly.ParseExact(key[(key.IndexOf('|') + 1)..], "yyyy-MM-dd")),
             ClientState.Key);
         if (merged > 0)
-            State.AddEvent(DeviceEventKind.ClockTampering, "Nutzung an einem „zukünftigen“ Tag (vorgestellte Uhr) wurde dem echten Tag angerechnet.");
+            State.AddEvent(DeviceEventKind.ClockTampering, LocText.Of("Nutzung an einem „zukünftigen“ Tag (vorgestellte Uhr) wurde dem echten Tag angerechnet."));
         if (!wasVerified) Log.Info($"Zeit vom Server bestätigt: {serverUtc:u}");
         MarkDirty();
     }

@@ -42,6 +42,9 @@ internal sealed record IpcMessage
 
     public string? ChildName { get; init; }
 
+    /// <summary>The child's UI language (policy), for texts the agent renders itself.</summary>
+    public string? Lang { get; init; }
+
     public long? RemainingSeconds { get; init; }
 
     public bool Allowed { get; init; }

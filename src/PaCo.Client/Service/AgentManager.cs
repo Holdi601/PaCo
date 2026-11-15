@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using PaCo.Client.Config;
 using PaCo.Client.Native;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Service;
 
@@ -32,7 +33,7 @@ internal sealed class AgentConnection : IDisposable
 }
 
 /// <summary>Starts, watches and restarts session agents.</summary>
-internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action<int, string>? onCrash = null) : IDisposable
+internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action<int, LocText>? onCrash = null) : IDisposable
 {
     private readonly Dictionary<int, AgentConnection> _agents = [];
     private readonly Dictionary<int, (int Failures, TimeSpan NextTry)> _backoff = [];
@@ -61,7 +62,7 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action
                 {
                     int code;
                     try { code = a.Process.ExitCode; } catch { code = -1; }
-                    onCrash?.Invoke(sessionId, $"Sitzungsprogramm wurde unerwartet beendet (Code {code}) und neu gestartet.");
+                    onCrash?.Invoke(sessionId, LocText.Of("Sitzungsprogramm wurde unerwartet beendet (Code {0}) und neu gestartet.", code));
                 }
                 a.Dispose();
                 _agents.Remove(sessionId);

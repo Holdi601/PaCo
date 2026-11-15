@@ -45,7 +45,7 @@ internal static class LocalAccounts
         using var admins = GroupPrincipal.FindByIdentity(ctx, IdentityType.Sid, AdminsGroup.Value)
             ?? throw new InvalidOperationException("Gruppe Administratoren nicht gefunden.");
         using var user = UserPrincipal.FindByIdentity(ctx, IdentityType.Sid, sid)
-            ?? throw new InvalidOperationException("Benutzer nicht gefunden.");
+            ?? throw new InvalidOperationException(L.T("Benutzer nicht gefunden."));
         if (admins.Members.Remove(user)) admins.Save();
 
         using var users = GroupPrincipal.FindByIdentity(ctx, IdentityType.Sid, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null).Value);

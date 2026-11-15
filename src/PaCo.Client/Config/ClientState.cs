@@ -1,4 +1,5 @@
 using PaCo.Shared;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Client.Config;
 
@@ -39,9 +40,16 @@ internal sealed class ClientState
         return u;
     }
 
-    public void AddEvent(DeviceEventKind kind, string message, Guid? child = null)
+    public void AddEvent(DeviceEventKind kind, LocText text, Guid? child = null) => AddEvent(kind, text.German, child, text);
+
+    /// <summary>Untranslatable text (e.g. an exception message) – shown as is.</summary>
+    public void AddEvent(DeviceEventKind kind, string message, Guid? child = null, LocText? text = null)
     {
-        PendingEvents.Add(new DeviceEvent { TimeUtc = DateTimeOffset.UtcNow, Kind = kind, Message = message, ChildId = child });
+        PendingEvents.Add(new DeviceEvent
+        {
+            TimeUtc = DateTimeOffset.UtcNow, Kind = kind, Message = message, ChildId = child,
+            Template = text?.Template, Args = text?.Args ?? [],
+        });
         if (PendingEvents.Count > 500) PendingEvents.RemoveRange(0, PendingEvents.Count - 500);
         Log.Info($"Ereignis {kind}: {message}");
     }

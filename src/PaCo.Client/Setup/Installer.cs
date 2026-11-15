@@ -33,7 +33,7 @@ internal static class Installer
     public static async Task InstallAsync(string serverUrl, PairResponse pair, IReadOnlyList<AccountAssignment> assignments,
         IReadOnlyList<string> makeStandardSids, IProgress<string> progress, CancellationToken ct = default)
     {
-        progress.Report("Daten-Ordner wird geschützt …");
+        progress.Report(L.T("Daten-Ordner wird geschützt …"));
         SecureStore.EnsureDataDir();
         Log.Info($"Installation {ServerApi.Version} gestartet, Server {serverUrl}, Gerät {pair.DeviceId}");
 
@@ -50,23 +50,23 @@ internal static class Installer
 
         foreach (var sid in makeStandardSids)
         {
-            progress.Report("Kinderkonto wird in ein Standardkonto umgewandelt …");
+            progress.Report(L.T("Kinderkonto wird in ein Standardkonto umgewandelt …"));
             LocalAccounts.MakeStandardUser(sid);
             Log.Info($"Konto {sid} ist jetzt Standardbenutzer");
         }
 
-        progress.Report("Kinderkonten werden zugeordnet …");
+        progress.Report(L.T("Kinderkonten werden zugeordnet …"));
         using (var api = new ServerApi(serverUrl, device))
         {
             await api.AssignAsync(new AssignRequest { Assignments = assignments }, ct);
-            progress.Report("Regeln werden geladen …");
+            progress.Report(L.T("Regeln werden geladen …"));
             var rt = new Runtime(device);
             await new SyncWorker(rt, installUpdates: false).SyncOnceAsync(api, ct);
-            if (rt.Policies.Current is null) throw new InvalidOperationException("Es konnten keine Regeln vom Server geladen werden.");
+            if (rt.Policies.Current is null) throw new InvalidOperationException(L.T("Es konnten keine Regeln vom Server geladen werden."));
         }
 
         await InstallBinariesAndServiceAsync(progress);
-        progress.Report("Fertig.");
+        progress.Report(L.T("Fertig."));
         Log.Info("Installation abgeschlossen");
     }
 
@@ -75,11 +75,11 @@ internal static class Installer
     {
         if (IsInstalled)
         {
-            progress.Report("Laufender Dienst wird angehalten …");
+            progress.Report(L.T("Laufender Dienst wird angehalten …"));
             await StopServiceAsync();
         }
 
-        progress.Report("Programm wird installiert …");
+        progress.Report(L.T("Programm wird installiert …"));
         Directory.CreateDirectory(Paths.InstallDir);
         var self = Environment.ProcessPath!;
         var backup = Paths.InstalledExe + ".bak";
@@ -112,7 +112,7 @@ internal static class Installer
             }
         }
 
-        progress.Report("Dienst wird eingerichtet …");
+        progress.Report(L.T("Dienst wird eingerichtet …"));
         if (!IsInstalled)
         {
             Sc($"create {Paths.ServiceName} binPath= \"\\\"{Paths.InstalledExe}\\\" --service\" start= auto obj= LocalSystem DisplayName= \"{Paths.DisplayName}\"");
@@ -145,7 +145,7 @@ internal static class Installer
             u.SetValue("NoRepair", 1, RegistryValueKind.DWord);
         }
 
-        progress.Report("Dienst wird gestartet …");
+        progress.Report(L.T("Dienst wird gestartet …"));
         try
         {
             await StartAndVerifyAsync();
@@ -172,7 +172,7 @@ internal static class Installer
         await Task.Delay(TimeSpan.FromSeconds(5));
         sc.Refresh();
         if (sc.Status != ServiceControllerStatus.Running)
-            throw new InvalidOperationException($"Dienst läuft nach dem Start nicht mehr (Status {sc.Status}).");
+            throw new InvalidOperationException(L.F("Dienst läuft nach dem Start nicht mehr (Status {0}).", sc.Status));
     }
 
     public static async Task UninstallAsync(IProgress<string> progress)
@@ -184,7 +184,7 @@ internal static class Installer
 
         if (device is not null)
         {
-            progress.Report("Server wird informiert …");
+            progress.Report(L.T("Server wird informiert …"));
             try
             {
                 using var api = new ServerApi(device.ServerUrl, device);
@@ -202,7 +202,7 @@ internal static class Installer
             }
         }
 
-        progress.Report("Dienst wird entfernt …");
+        progress.Report(L.T("Dienst wird entfernt …"));
         if (IsInstalled)
         {
             await StopServiceAsync();
@@ -211,7 +211,7 @@ internal static class Installer
         foreach (var mode in new[] { "Minimal", "Network" })
             Registry.LocalMachine.DeleteSubKeyTree($@"SYSTEM\CurrentControlSet\Control\SafeBoot\{mode}\{Paths.ServiceName}", throwOnMissingSubKey: false);
 
-        progress.Report("Browser-Regeln werden entfernt …");
+        progress.Report(L.T("Browser-Regeln werden entfernt …"));
         foreach (var sid in policy.Current?.Accounts.Select(a => a.Sid) ?? [])
             RemoveBrowserPolicies(sid);
 
@@ -232,7 +232,7 @@ internal static class Installer
             UseShellExecute = false,
             WorkingDirectory = Path.GetTempPath(),
         });
-        progress.Report("PaCo wurde entfernt.");
+        progress.Report(L.T("PaCo wurde entfernt."));
     }
 
     private static void RemoveBrowserPolicies(string sid)

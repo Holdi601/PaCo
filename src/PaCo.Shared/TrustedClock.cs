@@ -28,7 +28,7 @@ public sealed class TrustedClock
     /// <param name="mono">Monotonic elapsed time (e.g. Stopwatch).</param>
     /// <param name="lastTrusted">Highest trusted time persisted before (default on first start).</param>
     /// <param name="offsetSeconds">Server minus Windows clock at the last confirmation.</param>
-    public TrustedClock(Func<DateTimeOffset> raw, Func<TimeSpan> mono, DateTimeOffset lastTrusted, double offsetSeconds, ICollection<string>? notices = null)
+    public TrustedClock(Func<DateTimeOffset> raw, Func<TimeSpan> mono, DateTimeOffset lastTrusted, double offsetSeconds, ICollection<I18n.LocText>? notices = null)
     {
         _raw = raw;
         _mono = mono;
@@ -40,7 +40,7 @@ public sealed class TrustedClock
         if (lastTrusted != default && candidate < lastTrusted)
         {
             if (lastTrusted - candidate > JumpTolerance)
-                notices?.Add($"Die Uhr steht vor dem letzten bekannten Zeitpunkt (Uhr zurückgestellt?) – PaCo rechnet ab {lastTrusted:u} weiter.");
+                notices?.Add(I18n.LocText.Of("Die Uhr steht vor dem letzten bekannten Zeitpunkt (Uhr zurückgestellt?) – PaCo rechnet ab {0} weiter.", lastTrusted.ToString("u", System.Globalization.CultureInfo.InvariantCulture)));
             start = lastTrusted;
         }
         _anchor = start;
@@ -58,7 +58,7 @@ public sealed class TrustedClock
 
     public double OffsetSeconds { get; private set; }
 
-    public DateTimeOffset Now(ICollection<string>? notices = null)
+    public DateTimeOffset Now(ICollection<I18n.LocText>? notices = null)
     {
         var r = _raw();
         var m = _mono();
@@ -84,7 +84,7 @@ public sealed class TrustedClock
                 undone = true;
             }
             if (back - undo > JumpTolerance)
-                notices?.Add($"Windows-Uhr wurde um {(int)(back - undo).TotalMinutes} Minuten zurückgestellt – wird ignoriert.");
+                notices?.Add(I18n.LocText.Of("Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.", (int)(back - undo).TotalMinutes));
         }
         _lastRaw = r;
         _lastMono = m;

@@ -1,0 +1,9 @@
+{
+  "SelfHarm": ["suizid*", "selbstmord*", "umbringen", "mich umbringen", "bring mich um", "will sterben", "will nicht mehr leben", "nicht mehr leben", "lebensmüde", "das leben nehmen", "ritzen", "ritze mich", "selbstverletz*", "überdosis", "schmerzlos sterben", "wie bringe ich mich"],
+  "Drugs": ["drogen kaufen", "gras kaufen", "weed kaufen", "kokain", "koks", "crystal meth", "meth", "ecstasy", "mdma", "lsd", "heroin", "ketamin", "tilidin", "xanax", "lean trinken", "dealer"],
+  "Violence": ["amoklauf", "amok laufen", "waffe kaufen", "pistole kaufen", "bombe bauen", "ich bring dich um", "abstechen", "erschießen", "messer mitnehmen"],
+  "Sexual": ["porno*", "nacktbilder", "nacktfotos", "sexcam", "sex cam", "xxx"],
+  "Bullying": ["du opfer", "keiner mag dich", "niemand mag dich", "bring dich um", "töte dich", "fett und hässlich", "hurensohn", "missgeburt", "spast", "behindert bist", "alle hassen dich"],
+  "Grooming": ["sag es niemandem", "sag niemandem", "sags niemandem", "unser geheimnis", "unser kleines geheimnis", "schick mir ein bild", "schick mir ein foto", "schick mal ein foto", "schick mal ein bild", "bist du allein", "bist du alleine", "sind deine eltern da", "wo wohnst du", "treffen wir uns", "lass uns treffen", "lösch den chat", "lösch die nachricht", "zeig mal dich"],
+  "Extremism": ["heil hitler", "sieg heil", "88 heil", "rassenkrieg", "ungläubige töten"]
+}

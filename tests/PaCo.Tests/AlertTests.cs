@@ -29,6 +29,26 @@ public class AlertTests
     [InlineData("Thema: Methoden der Datenanalyse")] // "meth" must not match inside "methoden"
     public void NoFalsePositives(string text) => Assert.Empty(All.Find(text));
 
+    [Theory]
+    [InlineData("我真的想自杀了，怎么办", "自杀")]          // Chinese, no spaces
+    [InlineData("もう死にたいと思っている", "死にたい")]      // Japanese
+    [InlineData("요즘 정말 죽고싶어", "죽고 싶어")]          // Korean, keyword with space, text without
+    public void CjkKeywordsMatchWithoutWordBoundaries(string text, string keyword)
+    {
+        var m = new AlertKeywords.Matcher(new AlertSettings { Categories = [], CustomKeywords = [keyword], Languages = [] });
+        var hit = Assert.Single(m.Find(text));
+        Assert.Equal(keyword, hit.Keyword);
+        Assert.Contains(keyword.Replace(" ", "")[..1], hit.Snippet);
+    }
+
+    [Fact]
+    public void LanguagesSelectKeywordLists()
+    {
+        var onlyEn = new AlertKeywords.Matcher(new AlertSettings { Languages = ["en"] });
+        Assert.Empty(onlyEn.Find("ich will nicht mehr leben"));
+        Assert.NotEmpty(onlyEn.Find("i want to die"));
+    }
+
     [Fact]
     public void OverlappingPhrasesOfSameCategoryReportedOnce()
     {

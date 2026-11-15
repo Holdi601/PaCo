@@ -12,14 +12,14 @@ public class TrustedClockTests
         public void Run(TimeSpan d) { Raw += d; Mono += d; }
     }
 
-    private static TrustedClock Create(Fake f, DateTimeOffset last = default, double offset = 0, List<string>? notes = null) =>
+    private static TrustedClock Create(Fake f, DateTimeOffset last = default, double offset = 0, List<PaCo.Shared.I18n.LocText>? notes = null) =>
         new(() => f.Raw, () => f.Mono, last, offset, notes);
 
     [Fact]
     public void WindowsClockChangesWhileRunningAreIgnoredBackwards()
     {
         var f = new Fake();
-        var notes = new List<string>();
+        var notes = new List<PaCo.Shared.I18n.LocText>();
         var c = Create(f);
         var t0 = c.Now();
         f.Run(TimeSpan.FromMinutes(10));
@@ -49,7 +49,7 @@ public class TrustedClockTests
     public void ForwardThenBackIsUndoneEvenOffline()
     {
         var f = new Fake();
-        var notes = new List<string>();
+        var notes = new List<PaCo.Shared.I18n.LocText>();
         var c = Create(f);
         c.Confirm(f.Raw);
         var real = f.Raw;
@@ -70,7 +70,7 @@ public class TrustedClockTests
     public void BiosClockSetBackWhileOffCannotGoBeforeLastTrusted()
     {
         var f = new Fake();
-        var notes = new List<string>();
+        var notes = new List<PaCo.Shared.I18n.LocText>();
         var last = f.Raw + TimeSpan.FromHours(3);
         var c = Create(f, last, 0, notes);
         Assert.Equal(last, c.Now());
