@@ -48,7 +48,7 @@
   "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Lasten tilien on oltava vakiotilejä – järjestelmänvalvojan oikeuksilla lapsi voisi poistaa PaCon.",
   "Kinderkonten werden zugeordnet …": "Lasten tilejä liitetään …",
   "Kinderkonto wird in ein Standardkonto umgewandelt …": "Lapsen tiliä muutetaan vakiotiliksi …",
-  "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Yhdistämiskoodi (sivustolta, ”Laitteet → Lisää uusi laite”)",
+  "Kopplungscode (steht auf der Website unter „Geräte“)": "Yhdistämiskoodi (löytyy sivustolta kohdasta ”Laitteet”)",
   "Laufender Dienst wird angehalten …": "Käynnissä oleva palvelu pysäytetään …",
   "Neues Kind: {0}": "Uusi lapsi: {0}",
   "Noch 1 Minute": "1 minuutti jäljellä",

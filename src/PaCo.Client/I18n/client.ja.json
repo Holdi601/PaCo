@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "子どものアカウントは標準ユーザーにする必要があります。管理者権限があると、子どもが PaCo を削除できてしまいます。",
  "Kinderkonten werden zugeordnet …": "子どものアカウントを割り当てています…",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "子どものアカウントを標準ユーザーに変更しています…",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "ペアリング コード（Web サイトの「デバイス → 新しいデバイスを追加」で表示されます）",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "ペアリング コード（Web サイトの「デバイス」に表示されます）",
  "Laufender Dienst wird angehalten …": "実行中のサービスを停止しています…",
  "Neues Kind: {0}": "新しい子ども：{0}",
  "Noch 1 Minute": "あと 1 分",

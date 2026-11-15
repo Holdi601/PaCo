@@ -48,7 +48,7 @@
   "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Barnkonton måste vara standardkonton – med administratörsbehörighet skulle ett barn kunna ta bort PaCo.",
   "Kinderkonten werden zugeordnet …": "Barnkonton kopplas …",
   "Kinderkonto wird in ein Standardkonto umgewandelt …": "Barnkontot görs om till ett standardkonto …",
-  "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Kopplingskod (från webbplatsen, ”Enheter → Lägg till ny enhet”)",
+  "Kopplungscode (steht auf der Website unter „Geräte“)": "Kopplingskod (finns på webbplatsen under ”Enheter”)",
   "Laufender Dienst wird angehalten …": "Tjänsten som körs stoppas …",
   "Neues Kind: {0}": "Nytt barn: {0}",
   "Noch 1 Minute": "1 minut kvar",

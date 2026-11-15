@@ -48,7 +48,7 @@
   "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Vaikų paskyros turi būti standartinės – turėdamas administratoriaus teises vaikas galėtų pašalinti PaCo.",
   "Kinderkonten werden zugeordnet …": "Priskiriamos vaikų paskyros …",
   "Kinderkonto wird in ein Standardkonto umgewandelt …": "Vaiko paskyra keičiama į standartinę …",
-  "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Susiejimo kodas (iš svetainės, „Įrenginiai → Pridėti naują įrenginį“)",
+  "Kopplungscode (steht auf der Website unter „Geräte“)": "Susiejimo kodas (rasi svetainės skiltyje „Įrenginiai“)",
   "Laufender Dienst wird angehalten …": "Stabdoma veikianti tarnyba …",
   "Neues Kind: {0}": "Naujas vaikas: {0}",
   "Noch 1 Minute": "Liko 1 minutė",

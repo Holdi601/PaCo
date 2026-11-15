@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Les comptes enfants doivent être des comptes standard – avec des droits d'administrateur, un enfant pourrait supprimer PaCo.",
  "Kinderkonten werden zugeordnet …": "Attribution des comptes enfants …",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "Conversion du compte enfant en compte standard …",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Code d'association (sur le site web, « Appareils → Ajouter un nouvel appareil »)",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "Code d'association (sur le site web, sous « Appareils »)",
  "Laufender Dienst wird angehalten …": "Arrêt du service en cours d'exécution …",
  "Neues Kind: {0}": "Nouvel enfant : {0}",
  "Noch 1 Minute": "Encore 1 minute",

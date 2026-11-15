@@ -48,7 +48,7 @@
   "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Laste kontod peavad olema standardkontod – administraatoriõigustega võiks laps PaCo eemaldada.",
   "Kinderkonten werden zugeordnet …": "Laste kontosid seotakse …",
   "Kinderkonto wird in ein Standardkonto umgewandelt …": "Lapse konto muudetakse standardkontoks …",
-  "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Sidumiskood (veebilehelt, „Seadmed → Lisa uus seade“)",
+  "Kopplungscode (steht auf der Website unter „Geräte“)": "Sidumiskood (leiad veebilehel jaotises „Seadmed“)",
   "Laufender Dienst wird angehalten …": "Töötav teenus peatatakse …",
   "Neues Kind: {0}": "Uus laps: {0}",
   "Noch 1 Minute": "Jäänud 1 minut",

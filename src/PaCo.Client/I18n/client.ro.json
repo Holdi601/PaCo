@@ -48,7 +48,7 @@
   "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Conturile de copii trebuie să fie conturi standard – cu drepturi de administrator, un copil ar putea elimina PaCo.",
   "Kinderkonten werden zugeordnet …": "Se asociază conturile de copii …",
   "Kinderkonto wird in ein Standardkonto umgewandelt …": "Contul copilului este transformat în cont standard …",
-  "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Cod de asociere (de pe site, „Dispozitive → Adaugă un dispozitiv nou”)",
+  "Kopplungscode (steht auf der Website unter „Geräte“)": "Cod de asociere (îl găsești pe site, la „Dispozitive”)",
   "Laufender Dienst wird angehalten …": "Se oprește serviciul care rulează …",
   "Neues Kind: {0}": "Copil nou: {0}",
   "Noch 1 Minute": "Mai ai 1 minut",

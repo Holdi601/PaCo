@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Детские учётные записи должны быть стандартными – с правами администратора ребёнок мог бы удалить PaCo.",
  "Kinderkonten werden zugeordnet …": "Назначение детских учётных записей …",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "Преобразование детской учётной записи в стандартную …",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Код привязки (с сайта, «Устройства → Добавить новое устройство»)",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "Код привязки (есть на сайте в разделе «Устройства»)",
  "Laufender Dienst wird angehalten …": "Остановка работающей службы …",
  "Neues Kind: {0}": "Новый ребёнок: {0}",
  "Noch 1 Minute": "Осталась 1 минута",

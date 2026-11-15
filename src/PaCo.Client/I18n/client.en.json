@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Child accounts must be standard accounts – with administrator rights, a child could remove PaCo.",
  "Kinderkonten werden zugeordnet …": "Assigning child accounts …",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "Changing child account to a standard account …",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Pairing code (from the website, “Devices → Add new device”)",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "Pairing code (shown on the website under “Devices”)",
  "Laufender Dienst wird angehalten …": "Stopping the running service …",
  "Neues Kind: {0}": "New child: {0}",
  "Noch 1 Minute": "1 minute left",

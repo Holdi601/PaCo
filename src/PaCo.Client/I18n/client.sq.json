@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Llogaritë e fëmijëve duhet të jenë llogari standarde – me të drejta administratori një fëmijë mund ta hiqte PaCo-n.",
  "Kinderkonten werden zugeordnet …": "Po caktohen llogaritë e fëmijëve …",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "Llogaria e fëmijës po shndërrohet në llogari standarde …",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Kodi i çiftimit (nga faqja e internetit, „Pajisjet → Shto pajisje të re“)",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "Kodi i çiftimit (gjendet në faqen e internetit te „Pajisjet“)",
  "Laufender Dienst wird angehalten …": "Po ndalohet shërbimi që po ekzekutohet …",
  "Neues Kind: {0}": "Fëmijë i ri: {0}",
  "Noch 1 Minute": "Edhe 1 minutë",

@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Çocuk hesapları standart hesap olmalıdır – yönetici haklarıyla bir çocuk PaCo'yu kaldırabilir.",
  "Kinderkonten werden zugeordnet …": "Çocuk hesapları atanıyor …",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "Çocuk hesabı standart hesaba dönüştürülüyor …",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Eşleştirme kodu (web sitesinden, “Cihazlar → Yeni cihaz ekle”)",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "Eşleştirme kodu (web sitesinde “Cihazlar” bölümünde bulunur)",
  "Laufender Dienst wird angehalten …": "Çalışan hizmet durduruluyor …",
  "Neues Kind: {0}": "Yeni çocuk: {0}",
  "Noch 1 Minute": "1 dakika kaldı",

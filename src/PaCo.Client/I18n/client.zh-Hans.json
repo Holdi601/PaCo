@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "儿童账户必须是标准账户——如果有管理员权限，孩子就可能删除 PaCo。",
  "Kinderkonten werden zugeordnet …": "正在分配儿童账户…",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "正在将儿童账户转换为标准账户…",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "配对码（来自网站上的“设备 → 添加新设备”）",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "配对码（显示在网站的“设备”中）",
  "Laufender Dienst wird angehalten …": "正在停止运行中的服务…",
  "Neues Kind: {0}": "新孩子：{0}",
  "Noch 1 Minute": "还剩 1 分钟",

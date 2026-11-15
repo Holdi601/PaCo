@@ -48,7 +48,7 @@
  "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "자녀 계정은 표준 계정이어야 합니다. 관리자 권한이 있으면 자녀가 PaCo를 제거할 수 있습니다.",
  "Kinderkonten werden zugeordnet …": "자녀 계정을 지정하는 중…",
  "Kinderkonto wird in ein Standardkonto umgewandelt …": "자녀 계정을 표준 계정으로 변경하는 중…",
- "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "페어링 코드(웹사이트의 '기기 → 새 기기 추가'에서 확인)",
+ "Kopplungscode (steht auf der Website unter „Geräte“)": "페어링 코드(웹사이트의 ‘기기’에서 확인)",
  "Laufender Dienst wird angehalten …": "실행 중인 서비스를 중지하는 중…",
  "Neues Kind: {0}": "새 자녀: {0}",
  "Noch 1 Minute": "1분 남았어요",

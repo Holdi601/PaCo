@@ -48,7 +48,7 @@
   "Kinderkonten müssen Standardkonten sein – mit Administratorrechten könnte ein Kind PaCo entfernen.": "Οι παιδικοί λογαριασμοί πρέπει να είναι τυπικοί λογαριασμοί – με δικαιώματα διαχειριστή ένα παιδί θα μπορούσε να αφαιρέσει το PaCo.",
   "Kinderkonten werden zugeordnet …": "Αντιστοίχιση παιδικών λογαριασμών …",
   "Kinderkonto wird in ein Standardkonto umgewandelt …": "Μετατροπή του παιδικού λογαριασμού σε τυπικό λογαριασμό …",
-  "Kopplungscode (von der Website, „Geräte → Neues Gerät hinzufügen“)": "Κωδικός σύζευξης (από τον ιστότοπο, «Συσκευές → Προσθήκη νέας συσκευής»)",
+  "Kopplungscode (steht auf der Website unter „Geräte“)": "Κωδικός σύζευξης (εμφανίζεται στον ιστότοπο, στις «Συσκευές»)",
   "Laufender Dienst wird angehalten …": "Διακοπή της υπηρεσίας που εκτελείται …",
   "Neues Kind: {0}": "Νέο παιδί: {0}",
   "Noch 1 Minute": "Απομένει 1 λεπτό",
