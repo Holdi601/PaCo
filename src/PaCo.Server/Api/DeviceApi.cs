@@ -208,7 +208,8 @@ public static class DeviceApi
         }
 
         // Public IP history (one row per change) and location fixes.
-        var ip = http.Connection.RemoteIpAddress?.ToString();
+        var remote = http.Connection.RemoteIpAddress;
+        var ip = (remote is { IsIPv4MappedToIPv6: true } ? remote.MapToIPv4() : remote)?.ToString();
         if (ip is not null && !device.Revoked)
         {
             if (device.LastPublicIp != ip)

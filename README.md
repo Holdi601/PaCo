@@ -31,6 +31,8 @@ kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.
 - **Sicherheits-Check** des Kinder-PCs (beim Einrichten und täglich): Standardkonto, Admin-Passwort, UAC,
   Virenschutz, Firewall, SmartScreen, Gastkonto, Auto-Login. Wo möglich mit automatischer Korrektur.
 - **Auto-Update** der PCs auf Knopfdruck. Updates kommen nur über den eigenen Server und nur signiert.
+- **Standort** pro Gerät (aus / auf Anforderung / alle 15 Minuten) über den Windows-Ortungsdienst, mit Karte
+  (OpenStreetMap) und IP-Verlauf. Funktioniert auch am Anmeldebildschirm, z. B. bei Diebstahl. Speicherung 30 Tage.
 
 **Für den Server-Betreiber (Super-Admin)**
 - Familien anlegen, Eltern per **Einladungslink** einladen (7 Tage gültig, einmalig). Es gibt keine offene Registrierung.

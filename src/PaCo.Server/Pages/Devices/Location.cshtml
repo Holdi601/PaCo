@@ -71,7 +71,10 @@
                         {
                             <span class="text-muted">keine Ortung möglich (@p.Error)</span>
                         }
-                        <span class="text-muted">@(p.Ssid is null ? "" : $"WLAN „{p.Ssid}“") @(p.PublicIp is null ? "" : $"· IP {p.PublicIp}")</span>
+                        <span class="text-muted">
+                            @if (p.Ssid is not null) { <span>WLAN „@p.Ssid“</span> }
+                            @if (p.PublicIp is not null) { <span> · IP @p.PublicIp</span> }
+                        </span>
                     </div>
                 }
                 @if (Model.Points.Count == 0)
