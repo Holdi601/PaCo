@@ -23,7 +23,12 @@ public sealed class PaCoFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Development");
     }
 
-    public HttpClient Https() => CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
+    public HttpClient Https()
+    {
+        var c = CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
+        c.DefaultRequestHeaders.AcceptLanguage.ParseAdd("de");
+        return c;
+    }
 
     protected override void Dispose(bool disposing)
     {

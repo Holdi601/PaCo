@@ -41,6 +41,16 @@ public class AlertTests
         Assert.Contains(keyword.Replace(" ", "")[..1], hit.Snippet);
     }
 
+    [Theory]
+    [InlineData("samobojstwo", "samobójstwo")]      // Polish without accents
+    [InlineData("αυτοκτονία", "αυτοκτονια")] // Greek with/without tonos
+    [InlineData("SUICIDIO", "suicidio")]
+    public void AccentsAreIgnored(string text, string keyword)
+    {
+        var m = new AlertKeywords.Matcher(new AlertSettings { Categories = [], CustomKeywords = [keyword], Languages = [] });
+        Assert.Single(m.Find(text));
+    }
+
     [Fact]
     public void LanguagesSelectKeywordLists()
     {

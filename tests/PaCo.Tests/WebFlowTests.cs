@@ -20,12 +20,18 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
 
     public WebFlowTests(PaCoFactory f) => _f = f;
 
-    private HttpClient Browser() => _f.CreateClient(new WebApplicationFactoryClientOptions
+    /// <summary>A German-speaking parent's browser (the assertions check German page texts).</summary>
+    private HttpClient Browser(string lang = "de")
     {
-        BaseAddress = new Uri("https://localhost"),
-        AllowAutoRedirect = false,
-        HandleCookies = true,
-    });
+        var c = _f.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost"),
+            AllowAutoRedirect = false,
+            HandleCookies = true,
+        });
+        c.DefaultRequestHeaders.AcceptLanguage.ParseAdd(lang);
+        return c;
+    }
 
     [Fact]
     public async Task AdminInvitesParentWhoManagesChild()

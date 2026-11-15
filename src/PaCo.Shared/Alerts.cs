@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace PaCo.Shared;
@@ -66,6 +67,7 @@ public readonly record struct AlertMatch(AlertCategory Category, string Keyword,
 /// </summary>
 public static class AlertKeywords
 {
+    // i18n-keys:start shared
     public static string Label(AlertCategory c) => c switch
     {
         AlertCategory.SelfHarm => "Suizid & Selbstverletzung",
@@ -77,6 +79,7 @@ public static class AlertKeywords
         AlertCategory.Extremism => "Extremismus",
         _ => "Eigene Stichwörter",
     };
+    // i18n-keys:end
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, IReadOnlyDictionary<AlertCategory, string[]>> Lists = new();
 
@@ -219,6 +222,32 @@ public static class AlertKeywords
         return list;
     }
 
+    /// <summary>
+    /// Strips accents from Latin, Greek and Cyrillic letters (é→e, ą→a, ł→l, ά→α), because children often type
+    /// without them. CJK and Hangul are left untouched (decomposing Hangul would break matching).
+    /// </summary>
+    private static string Fold(char c)
+    {
+        switch (c)
+        {
+            case 'ł': return "l";
+            case 'đ': return "d";
+            case 'ð': return "d";
+            case 'ø': return "o";
+            case 'ħ': return "h";
+            case 'ı': return "i";
+            case 'æ': return "ae";
+            case 'œ': return "oe";
+            case 'þ': return "th";
+        }
+        if (c < '\u00C0' || !(c <= '\u052F' || c is >= '\u1E00' and <= '\u1FFF')) return c.ToString();
+        var d = c.ToString().Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder(d.Length);
+        foreach (var ch in d)
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark) sb.Append(ch);
+        return sb.Length == 0 ? c.ToString() : sb.ToString();
+    }
+
     /// <summary>Lower-case, umlauts/ß folded, leetspeak mapped, everything else non-alphanumeric → space.
     /// <paramref name="map"/>[i] = index in the original text for normalized position i.</summary>
     public static string Normalize(string text, out int[] map)
@@ -253,7 +282,7 @@ public static class AlertKeywords
                 case '$': Put("s", i); break;
                 case '\'': break; // "don't" → "dont"
                 default:
-                    if (char.IsLetterOrDigit(c)) Put(c.ToString(), i);
+                    if (char.IsLetterOrDigit(c)) Put(Fold(c), i);
                     else Put(" ", i);
                     break;
             }
@@ -271,7 +300,9 @@ public static class AlertKeywords
         return (s > 0 ? "…" : "") + snip.Trim() + (e < text.Length ? "…" : "");
     }
 
+    // i18n-keys:start shared
     public const string HelpText =
         "Wenn es dir gerade nicht gut geht: Du bist nicht allein. Nummer gegen Kummer 116 111 (kostenlos, anonym) " +
         "oder TelefonSeelsorge 0800 111 0 111 – rund um die Uhr. Im Notfall: 112.";
+    // i18n-keys:end
 }
