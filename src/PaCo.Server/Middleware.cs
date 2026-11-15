@@ -39,7 +39,7 @@ public static class Middleware
         {
             var path = ctx.Request.Path;
             var allowed = path.StartsWithSegments("/Account/Logout") || path.StartsWithSegments("/lib") ||
-                          path.StartsWithSegments("/css") || path.StartsWithSegments("/js") || path.StartsWithSegments("/favicon.ico");
+                          path.StartsWithSegments("/css") || path.StartsWithSegments("/js") || path.StartsWithSegments("/favicon.ico") || path.StartsWithSegments("/favicon.svg") || path.StartsWithSegments("/Language");
             if (!allowed)
             {
                 if (user.FindFirstValue(PaCoClaims.MustChangePassword) == "1" && !path.StartsWithSegments("/Account/ChangePassword"))
