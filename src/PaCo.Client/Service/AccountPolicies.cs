@@ -11,8 +11,8 @@ namespace PaCo.Client.Service;
 /// <list type="bullet">
 /// <item>Blocked programs as "Don't run specified Windows applications" (DisallowRun) – Windows refuses to start them;
 ///   <see cref="AppBlocker"/> stays as second line for programs started any other way.</item>
-/// <item>With <see cref="ChildPolicy.HardenAccount"/>: no Registry editor, no command prompt (batch files still run),
-///   no PowerShell scripts, no Windows Script Host.</item>
+/// <item>Per blocked tool: no Registry editor ("regedit"), no command prompt ("cmd", batch files still run),
+///   no PowerShell scripts ("powershell"), no Windows Script Host ("wscript"/"cscript").</item>
 /// </list>
 /// Deliberately NOT restricted, so the PC stays usable: Task Manager, Control Panel/Settings, Run dialog, installing
 /// games into the user folder. All keys are read-only for the child; every value PaCo sets is recorded and removed
@@ -29,13 +29,16 @@ internal static class AccountPolicies
     private static List<Value> Desired(ChildPolicy child)
     {
         var v = new List<Value>();
-        if (child.HardenAccount)
-        {
+        // Each Windows policy follows its tool: parents can block or allow every tool on its own.
+        var blocked = child.BlockedApps.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (blocked.Contains("regedit"))
             v.Add(new(@"Software\Microsoft\Windows\CurrentVersion\Policies\System", "DisableRegistryTools", 1, RegistryValueKind.DWord));
+        if (blocked.Contains("cmd"))
             v.Add(new(@"Software\Policies\Microsoft\Windows\System", "DisableCMD", 2, RegistryValueKind.DWord)); // 2 = prompt off, .bat still runs
+        if (blocked.Contains("powershell"))
             v.Add(new(@"Software\Policies\Microsoft\Windows\PowerShell", "EnableScripts", 0, RegistryValueKind.DWord));
+        if (blocked.Contains("wscript") || blocked.Contains("cscript"))
             v.Add(new(@"Software\Microsoft\Windows Script Host\Settings", "Enabled", 0, RegistryValueKind.DWord));
-        }
         var apps = child.BlockedApps
             .Select(a => a.Trim()).Where(a => a.Length > 0 && a.IndexOfAny(['\\', '/']) < 0)
             .Select(a => a.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? a : a + ".exe")

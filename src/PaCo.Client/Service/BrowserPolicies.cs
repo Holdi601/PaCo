@@ -75,7 +75,7 @@ internal static class BrowserPolicies
         }
         if (web.YouTubeRestricted) key.SetValue("ForceYouTubeRestrict", 2, RegistryValueKind.DWord); // 2 = strict
         // Settings that would otherwise allow escaping the rules.
-        key.SetValue("DeveloperToolsAvailability", 2, RegistryValueKind.DWord);
+        if (web.BlockDevTools) key.SetValue("DeveloperToolsAvailability", 2, RegistryValueKind.DWord);
 
         if (sites.Count > 0)
         {
@@ -90,7 +90,7 @@ internal static class BrowserPolicies
         using var key = CreateProtected(hive, root, sid);
         key.SetValue(Marker, 1, RegistryValueKind.DWord);
         if (web.BlockPrivateBrowsing) key.SetValue("DisablePrivateBrowsing", 1, RegistryValueKind.DWord);
-        key.SetValue("DisableDeveloperTools", 1, RegistryValueKind.DWord);
+        if (web.BlockDevTools) key.SetValue("DisableDeveloperTools", 1, RegistryValueKind.DWord);
         if (sites.Count > 0)
         {
             using var filter = CreateProtected(key, @"WebsiteFilter\Block", sid);

@@ -44,10 +44,10 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                 ExpiryAction = c.ExpiryAction,
                 Days = c.GetDays(),
                 BlockedApps = c.GetBlockedApps()
-                    .Concat(c.BlockSystemTools ? Child.SystemTools : [])
+                    .Concat(c.BlockedToolProcesses())
                     .Concat(c.BlockStore ? [Child.StoreApp] : [])
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
-                HardenAccount = c.BlockSystemTools,
+                HardenAccount = c.BlockedToolIds().Count > 0,
                 Web = c.GetWeb(),
                 Language = Languages.IsSupported(c.Language) ? c.Language : Languages.Source,
                 Alerts = WithLanguages(c.GetAlerts(), c.Language),

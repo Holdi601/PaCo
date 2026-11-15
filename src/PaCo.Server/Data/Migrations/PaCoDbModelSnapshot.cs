@@ -252,6 +252,10 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<bool>("Paused")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("UnblockedToolsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("WebJson")
                         .IsRequired()
                         .HasColumnType("TEXT");

@@ -90,7 +90,37 @@ public sealed class Child : IFamilyScoped
     /// <summary>Block typical malware/bypass tools in the child's account (PowerShell, cmd, regedit, script hosts).</summary>
     public bool BlockSystemTools { get; set; } = true;
 
-    public static readonly string[] SystemTools = ["powershell", "powershell_ise", "pwsh", "cmd", "regedit", "wscript", "cscript", "mshta", "winget"];
+    /// <summary>Windows tools parents can block or allow one by one (id → process names). The PC derives the matching
+    /// Windows user policies from the blocked process names (e.g. "regedit" → DisableRegistryTools).</summary>
+    public static readonly IReadOnlyList<(string Id, string[] Processes)> Tools =
+    [
+        ("powershell", ["powershell", "powershell_ise", "pwsh"]),
+        ("cmd", ["cmd"]),
+        ("regedit", ["regedit"]),
+        ("scripts", ["wscript", "cscript", "mshta"]),
+        ("winget", ["winget"]),
+    ];
+
+    public static readonly string[] SystemTools = Tools.SelectMany(t => t.Processes).ToArray();
+
+    /// <summary>JSON array of tool ids from <see cref="Tools"/> the parents allowed again.</summary>
+    public string UnblockedToolsJson { get; set; } = "[]";
+
+    public IReadOnlyList<string> GetUnblockedTools() => PaCoJson.Deserialize<string[]>(string.IsNullOrEmpty(UnblockedToolsJson) ? "[]" : UnblockedToolsJson);
+
+    public void SetUnblockedTools(IEnumerable<string> ids) =>
+        UnblockedToolsJson = PaCoJson.Serialize(ids.Where(id => Tools.Any(t => t.Id == id)).Distinct().ToArray());
+
+    /// <summary>Tool ids that are currently blocked.</summary>
+    public IReadOnlyList<string> BlockedToolIds()
+    {
+        if (!BlockSystemTools) return [];
+        var allowed = GetUnblockedTools();
+        return Tools.Where(t => !allowed.Contains(t.Id)).Select(t => t.Id).ToList();
+    }
+
+    public IEnumerable<string> BlockedToolProcesses() =>
+        Tools.Where(t => BlockedToolIds().Contains(t.Id)).SelectMany(t => t.Processes);
 
     /// <summary>Block the Microsoft Store app, so the child cannot install apps (games, other browsers) on their own.</summary>
     public bool BlockStore { get; set; } = true;

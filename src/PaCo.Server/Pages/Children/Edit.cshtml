@@ -109,6 +109,10 @@
                 <input asp-for="BlockPrivateBrowsing" class="form-check-input" role="switch" />
                 <label asp-for="BlockPrivateBrowsing" class="form-check-label">@T("Privates Surfen (InPrivate/Inkognito) und Gastmodus sperren")</label>
             </div>
+            <div class="form-check form-switch mb-2">
+                <input asp-for="BlockDevTools" class="form-check-input" role="switch" />
+                <label asp-for="BlockDevTools" class="form-check-label">@T("Entwicklertools im Browser (F12) sperren – damit lassen sich Sperren umgehen")</label>
+            </div>
             <div class="form-check form-switch mb-3">
                 <input asp-for="BlockOtherBrowsers" class="form-check-input" role="switch" />
                 <label asp-for="BlockOtherBrowsers" class="form-check-label">@T("Andere Browser sperren (Opera, Brave, Tor, …) – sonst könnten die Regeln umgangen werden")</label>
@@ -139,17 +143,56 @@
     <section class="card mb-3" aria-labelledby="sec-apps">
         <div class="card-header" id="sec-apps"><span class="head-ico" aria-hidden="true"><span class="ico ico-app" aria-hidden="true"></span></span>@T("Programme")</div>
         <div class="card-body">
-            <div class="form-check form-switch mb-3">
-                <input asp-for="BlockSystemTools" class="form-check-input" role="switch" />
-                <label asp-for="BlockSystemTools" class="form-check-label">@T("Systemwerkzeuge sperren (PowerShell, Eingabeaufforderung, Registry-Editor, Skript-Hosts) – schützt vor Umgehungsversuchen und typischer Schadsoftware (empfohlen)")</label>
-            </div>
-            <div class="form-check form-switch mb-3">
-                <input asp-for="BlockStore" class="form-check-input" role="switch" />
-                <label asp-for="BlockStore" class="form-check-label">@T("Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)")</label>
-            </div>
-            <label asp-for="BlockedApps" class="form-label">@T("Gesperrte Programme")</label>
-            <textarea asp-for="BlockedApps" class="form-control font-monospace" rows="4" placeholder="discord" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="apps-help"></textarea>
-            <div id="apps-help" class="form-text">@T("Ein Programmname pro Zeile – das Programm wird sofort wieder geschlossen, wenn es gestartet wird.") @Html.Raw(F("Den Namen findest du unter <a href=\"{0}\">Statistik</a> in Klammern (z. B. {1}).", Url.Page("./Stats", new { id = Model.Id }), "<code>robloxplayerbeta</code>, <code>steam</code>, <code>discord</code>"))</div>
+            <fieldset class="mb-4">
+                <legend class="form-label fw-semibold fs-6">@T("Windows-Werkzeuge")</legend>
+                <p class="form-text mt-0">@T("Eingeschaltet = gesperrt. Gesperrte Werkzeuge kann dein Kind nicht öffnen – Windows zeigt dann einen Hinweis. Zum Erlauben einfach ausschalten und speichern.")</p>
+                <input type="hidden" name="ToolsForm" value="true" />
+                @{
+                    var toolLabels = new (string Id, string Label)[]
+                    {
+                        ("powershell", T("PowerShell")),
+                        ("cmd", T("Eingabeaufforderung (cmd)")),
+                        ("regedit", T("Registry-Editor")),
+                        ("scripts", T("Skript-Programme (VBScript, JScript, HTA) – werden oft von Schadsoftware genutzt")),
+                        ("winget", T("Paketverwaltung winget (installiert Programme)")),
+                    };
+                }
+                @foreach (var (toolId, toolLabel) in toolLabels)
+                {
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" name="BlockedTools" value="@toolId" id="tool-@toolId" checked="@Model.BlockedTools.Contains(toolId)" />
+                        <label class="form-check-label" for="tool-@toolId">@toolLabel</label>
+                    </div>
+                }
+                <div class="form-check form-switch mb-2">
+                    <input asp-for="BlockStore" class="form-check-input" role="switch" />
+                    <label asp-for="BlockStore" class="form-check-label">@T("Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)")</label>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend class="form-label fw-semibold fs-6">@T("Programme deines Kindes")</legend>
+                <input type="hidden" name="KnownAppsForm" value="true" />
+                @if (Model.KnownApps.Count == 0)
+                {
+                    <p class="form-text mt-0">@T("Hier erscheinen die Programme, die dein Kind benutzt hat – jeweils mit einem Schalter zum Sperren oder Erlauben.")</p>
+                }
+                else
+                {
+                    <p class="form-text mt-0">@T("Programme der letzten 30 Tage. Eingeschaltet = gesperrt.")</p>
+                    @foreach (var (process, appName) in Model.KnownApps)
+                    {
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" role="switch" name="BlockedKnownApps" value="@process" id="app-@process.GetHashCode()" checked="@Model.BlockedKnownApps.Contains(process, StringComparer.OrdinalIgnoreCase)" />
+                            <label class="form-check-label" for="app-@process.GetHashCode()">@appName <span class="text-muted small">(@process)</span></label>
+                        </div>
+                    }
+                }
+            </fieldset>
+
+            <label asp-for="BlockedApps" class="form-label">@T("Weitere Programme sperren")</label>
+            <textarea asp-for="BlockedApps" class="form-control font-monospace" rows="3" placeholder="discord" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="apps-help"></textarea>
+            <div id="apps-help" class="form-text">@T("Ein Programmname pro Zeile – das Programm wird sofort wieder geschlossen, wenn es gestartet wird.") @T("Zum Erlauben die Zeile löschen.")</div>
         </div>
     </section>
 

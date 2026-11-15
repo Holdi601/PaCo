@@ -35,6 +35,9 @@ public sealed record WebFilterPolicy
     public bool YouTubeRestricted { get; init; } = true;
 
     public bool BlockPrivateBrowsing { get; init; } = true;
+
+    /// <summary>Browser developer tools (F12) off – they can be used to get around page blocks.</summary>
+    public bool BlockDevTools { get; init; } = true;
 }
 
 /// <summary>Extra minutes granted from the website for a given day.</summary>

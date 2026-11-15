@@ -338,6 +338,75 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
     }
 
     [Fact]
+    public async Task ParentsCanBlockAndAllowProgramsAndWindowsToolsAgain()
+    {
+        var (b, fam) = await ParentOfNewFamilyAsync("toggle-parent@test.local");
+        Guid child;
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var c = new Child { FamilyId = fam, Name = "Tom" };
+            db.Children.Add(c);
+            var d = new Device { FamilyId = fam, Name = "PC", TokenHash = Secrets.Sha256Hex(Secrets.DeviceToken()) };
+            db.Devices.Add(d);
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = fam, DeviceId = d.Id, Sid = "S-1-5-21-5-5-5-1001", UserName = "tom", ChildId = c.Id });
+            db.UsageDays.Add(new UsageDay
+            {
+                FamilyId = fam, DeviceId = d.Id, ChildId = c.Id, Day = DateOnly.FromDateTime(DateTime.Today), RegularSeconds = 600,
+                AppsJson = PaCoJson.Serialize(new Dictionary<string, AppUsage> { ["roblox"] = new() { DisplayName = "Roblox", Seconds = 600 } }),
+            });
+            await db.SaveChangesAsync();
+            child = c.Id;
+        }
+        PolicyDocument Policy()
+        {
+            using var scope = _f.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var dev = db.Devices.IgnoreQueryFilters().Single(x => x.FamilyId == fam);
+            return scope.ServiceProvider.GetRequiredService<PolicyBuilder>().BuildAsync(dev, default).GetAwaiter().GetResult();
+        }
+
+        // Default: all Windows tools + Store blocked.
+        var p = Policy().Children.Single();
+        Assert.Contains("regedit", p.BlockedApps);
+        Assert.Contains(Child.StoreApp, p.BlockedApps);
+
+        // One tap on the statistics page blocks a program, a second tap allows it again.
+        var stats = await b.GetStringAsync($"/Children/Stats/{child}");
+        Assert.Contains("roblox", stats);
+        await PostFormAsync(b, $"/Children/Stats/{child}?handler=ToggleApp", stats, new() { ["app"] = "roblox" });
+        Assert.Contains("roblox", Policy().Children.Single().BlockedApps);
+        stats = await b.GetStringAsync($"/Children/Stats/{child}");
+        await PostFormAsync(b, $"/Children/Stats/{child}?handler=ToggleApp", stats, new() { ["app"] = "roblox" });
+        Assert.DoesNotContain("roblox", Policy().Children.Single().BlockedApps);
+
+        // Rules page: the used program appears as a switch; tools can be allowed one by one, the Store too.
+        var edit = await b.GetStringAsync($"/Children/Edit/{child}");
+        Assert.Contains("name=\"BlockedKnownApps\" value=\"roblox\"", edit);
+        var token = TokenRegex().Match(edit).Groups[1].Value;
+        var form = new List<KeyValuePair<string, string>>
+        {
+            new("__RequestVerificationToken", token), new("Name", "Tom"), new("ExpiryAction", "LockScreen"),
+            new("ToolsForm", "true"), new("BlockedTools", "powershell"), new("BlockedTools", "regedit"),
+            new("KnownAppsForm", "true"), new("BlockedKnownApps", "roblox"), new("BlockStore", "false"),
+        };
+        for (var i = 0; i < 7; i++)
+        {
+            form.Add(new($"Days[{i}].LimitMinutes", "120"));
+            form.Add(new($"Days[{i}].AllDay", "true"));
+        }
+        var r = await b.PostAsync($"/Children/Edit/{child}", new FormUrlEncodedContent(form));
+        Assert.Equal(HttpStatusCode.Redirect, r.StatusCode);
+        p = Policy().Children.Single();
+        Assert.Contains("powershell", p.BlockedApps);
+        Assert.Contains("regedit", p.BlockedApps);
+        Assert.Contains("roblox", p.BlockedApps);
+        Assert.DoesNotContain("cmd", p.BlockedApps);       // allowed again
+        Assert.DoesNotContain("winget", p.BlockedApps);    // allowed again
+        Assert.DoesNotContain(Child.StoreApp, p.BlockedApps);
+    }
+
+    [Fact]
     public async Task EveryPageRendersInEveryLanguage()
     {
         var (b, fam) = await ParentOfNewFamilyAsync("lang-parent@test.local");

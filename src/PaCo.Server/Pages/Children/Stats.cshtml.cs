@@ -36,6 +36,7 @@ public sealed class StatsModel(PaCoDb db, ParentActions actions) : PageModel
         var child = await db.Children.FirstOrDefaultAsync(c => c.Id == id);
         if (child is null) return NotFound();
         Child = child;
+        Blocked = new HashSet<string>(child.GetBlockedApps().Concat(child.BlockedToolProcesses()).Concat(child.BlockStore ? [Child.StoreApp] : []), StringComparer.OrdinalIgnoreCase);
         var (tz, today, _) = await actions.FamilyNowAsync();
         Tz = tz;
         Today = today;
@@ -63,4 +64,35 @@ public sealed class StatsModel(PaCoDb db, ParentActions actions) : PageModel
     }
 
     public static string EventText(DeviceEventKind k) => Format.Event(k);
+
+    /// <summary>Programs currently blocked for this child (own list, other browsers, Windows tools, Store).</summary>
+    public HashSet<string> Blocked { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Windows tools, Store and other browsers are switched on the rules page, not per program.</summary>
+    public static bool IsManagedOnRulesPage(string process) =>
+        EditModel.OtherBrowsers.Contains(process, StringComparer.OrdinalIgnoreCase) || Child.SystemTools.Contains(process, StringComparer.OrdinalIgnoreCase)
+        || process.Equals(Child.StoreApp, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Block or allow one program with a single tap (picked up by the PC within 30 seconds).</summary>
+    public async Task<IActionResult> OnPostToggleAppAsync(Guid id, string app, DateOnly? day)
+    {
+        var child = await db.Children.FirstOrDefaultAsync(c => c.Id == id);
+        if (child is null) return NotFound();
+        var process = EditModel.NormalizeApp(app ?? "");
+        if (process.Length == 0 || IsManagedOnRulesPage(process)) return RedirectToPage(new { id, day });
+        var apps = child.GetBlockedApps().ToList();
+        var name = process;
+        if (apps.RemoveAll(a => a.Equals(process, StringComparison.OrdinalIgnoreCase)) > 0)
+        {
+            TempData["Message"] = Ui.F("„{0}“ ist wieder erlaubt.", name);
+        }
+        else
+        {
+            apps.Add(process);
+            TempData["Message"] = Ui.F("„{0}“ ist jetzt gesperrt.", name);
+        }
+        child.SetBlockedApps(apps.Distinct(StringComparer.OrdinalIgnoreCase).Take(200));
+        await db.SaveChangesAsync();
+        return RedirectToPage(new { id, day });
+    }
 }

@@ -63,10 +63,32 @@
                             {
                                 <tr>
                                     <td class="app-row">
-                                        <div>@a.Name <span class="text-muted small">(@a.Process)</span></div>
+                                        <div>@a.Name <span class="text-muted small">(@a.Process)</span>
+                                            @if (Model.Blocked.Contains(a.Process)) { <span class="badge text-bg-danger ms-1">@T("Programm gesperrt")</span> }
+                                        </div>
                                         <progress class="w-100" max="@appMax" value="@a.Seconds" aria-hidden="true"></progress>
                                     </td>
-                                    <td class="text-end text-nowrap">@Format.Duration(a.Seconds)</td>
+                                    <td class="text-end text-nowrap">
+                                        <div>@Format.Duration(a.Seconds)</div>
+                                        @if (PaCo.Server.Pages.Children.StatsModel.IsManagedOnRulesPage(a.Process))
+                                        {
+                                            <a class="small" asp-page="./Edit" asp-route-id="@Model.Child.Id" asp-fragment="sec-apps">@T("Regeln")</a>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-page-handler="ToggleApp" asp-route-id="@Model.Child.Id" asp-route-day="@Model.Day.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)" class="d-inline">
+                                                <input type="hidden" name="app" value="@a.Process" />
+                                                @if (Model.Blocked.Contains(a.Process))
+                                                {
+                                                    <button class="btn btn-sm btn-outline-success mt-1" data-confirm="@F("„{0}“ wieder erlauben?", a.Name)">@T("Programm erlauben")</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger mt-1" data-confirm="@F("„{0}“ sperren? Das Programm wird auf dem PC sofort geschlossen.", a.Name)">@T("Programm sperren")</button>
+                                                }
+                                            </form>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>
