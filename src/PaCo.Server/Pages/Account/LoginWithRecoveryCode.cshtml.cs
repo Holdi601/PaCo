@@ -28,10 +28,10 @@ public sealed class LoginWithRecoveryCodeModel(SignInManager<ParentUser> signIn,
         if (result.Succeeded)
         {
             log.LogWarning("Anmeldung mit Notfall-Code: {User}", user.Email);
-            TempData["Message"] = "Mit Notfall-Code angemeldet. Dieser Code ist jetzt verbraucht – richte die Authenticator-App bei Bedarf neu ein (Konto → 2FA neu einrichten).";
+            TempData["Message"] = Ui.T("Mit Notfall-Code angemeldet. Dieser Code ist jetzt verbraucht – richte die Authenticator-App bei Bedarf neu ein (Konto → 2FA neu einrichten).");
             return RedirectToPage("/Index");
         }
-        Error = result.IsLockedOut ? "Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt." : "Der Notfall-Code ist ungültig.";
+        Error = result.IsLockedOut ? Ui.T("Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.") : Ui.T("Der Notfall-Code ist ungültig.");
         return Page();
     }
 }

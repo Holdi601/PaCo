@@ -44,11 +44,11 @@ public sealed class LoginWith2faModel(SignInManager<ParentUser> signIn, ILogger<
         }
         if (result.IsLockedOut)
         {
-            Error = "Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.";
+            Error = Ui.T("Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.");
             return Page();
         }
         log.LogWarning("Falscher 2FA-Code für {User}", user.Email);
-        Error = "Der Code ist falsch. Bitte prüfe, ob die Uhrzeit am Handy stimmt.";
+        Error = Ui.T("Der Code ist falsch. Bitte prüfe, ob die Uhrzeit am Handy stimmt.");
         return Page();
     }
 }

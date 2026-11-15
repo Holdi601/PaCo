@@ -23,11 +23,15 @@
     var el = document.getElementById("paco-map");
     if (!el || !window.L) return;
     var points = JSON.parse(el.getAttribute("data-points") || "[]");
+    // Texts in the user's language come from data-txt-* attributes on the map element ("{0}" = the value).
+    function txt(name, fallback) { return el.getAttribute("data-txt-" + name) || fallback; }
+    function fill(name, fallback, value) { return txt(name, fallback).replace("{0}", function () { return value; }); }
+    function wifi(p) { return p.ssid ? "<br>" + escapeHtml(fill("wifi", "{0}", p.ssid)) : ""; }
     L.Icon.Default.imagePath = "/lib/leaflet/images/";
     var map = L.map(el, { scrollWheelZoom: false });
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
-        attribution: "© OpenStreetMap-Mitwirkende",
+        attribution: escapeHtml(txt("attribution", "© OpenStreetMap")),
         // The site sends no referrer; OSM's tile policy needs at least the origin.
         referrerPolicy: "strict-origin-when-cross-origin"
     }).addTo(map);
@@ -41,13 +45,13 @@
         L.polyline(latlngs, { color: "#5b6cff", weight: 3, opacity: 0.6 }).addTo(map);
         points.slice(0, -1).forEach(function (p) {
             L.circleMarker([p.lat, p.lon], { radius: 4, color: "#8b5cf6", weight: 1, fillOpacity: 0.7 })
-                .bindPopup(p.time + (p.ssid ? "<br>WLAN: " + escapeHtml(p.ssid) : "")).addTo(map);
+                .bindPopup(escapeHtml(p.time) + wifi(p)).addTo(map);
         });
     }
     var last = points[points.length - 1];
     if (last.acc) L.circle([last.lat, last.lon], { radius: last.acc, color: "#22b35e", weight: 1, fillOpacity: 0.12 }).addTo(map);
-    L.marker([last.lat, last.lon]).bindPopup("<b>Zuletzt: " + last.time + "</b><br>Genauigkeit ±" + Math.round(last.acc || 0) + " m" +
-        (last.ssid ? "<br>WLAN: " + escapeHtml(last.ssid) : "")).addTo(map).openPopup();
+    L.marker([last.lat, last.lon]).bindPopup("<b>" + escapeHtml(fill("last", "{0}", last.time)) + "</b><br>" +
+        escapeHtml(fill("accuracy", "±{0} m", String(Math.round(last.acc || 0)))) + wifi(last)).addTo(map).openPopup();
     if (latlngs.length > 1) map.fitBounds(latlngs, { padding: [30, 30], maxZoom: 16 });
     else map.setView([last.lat, last.lon], 16);
     }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PaCo.Server.Data;
+using PaCo.Shared.I18n;
 
 namespace PaCo.Server.Pages.Account;
 
@@ -15,6 +16,9 @@ public sealed class ManageModel(UserManager<ParentUser> users, SignInManager<Par
 
     public int RecoveryCodesLeft { get; set; }
 
+    /// <summary>Language saved in the account (falls back to the current request language).</summary>
+    public string AccountLanguage { get; set; } = Languages.Source;
+
     public async Task<IActionResult> OnGetAsync()
     {
         var user = await users.GetUserAsync(User);
@@ -22,6 +26,7 @@ public sealed class ManageModel(UserManager<ParentUser> users, SignInManager<Par
         DisplayName = user.DisplayName;
         Email = user.Email ?? "";
         RecoveryCodesLeft = await users.CountRecoveryCodesAsync(user);
+        AccountLanguage = Languages.IsSupported(user.Language) ? user.Language! : Ui.Lang;
         return Page();
     }
 
@@ -33,12 +38,13 @@ public sealed class ManageModel(UserManager<ParentUser> users, SignInManager<Par
         {
             Email = user.Email ?? "";
             RecoveryCodesLeft = await users.CountRecoveryCodesAsync(user);
+            AccountLanguage = Languages.IsSupported(user.Language) ? user.Language! : Ui.Lang;
             return Page();
         }
         user.DisplayName = DisplayName.Trim();
         await users.UpdateAsync(user);
         await signIn.RefreshSignInAsync(user);
-        TempData["Message"] = "Dein Name wurde gespeichert.";
+        TempData["Message"] = Ui.T("Dein Name wurde gespeichert.");
         return RedirectToPage();
     }
 

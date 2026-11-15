@@ -1,6 +1,6 @@
 @page
 @model PaCo.Server.Pages.Account.LoginModel
-@{ ViewData["Title"] = "Anmelden"; }
+@{ ViewData["Title"] = T("Anmelden"); }
 
 <div class="auth-shell">
     <div class="auth-art" aria-hidden="true">
@@ -9,29 +9,29 @@
     </div>
     <div class="card auth-card">
         <div class="card-body p-4">
-            <h1 class="h4 mb-3">Anmelden</h1>
+            <h1 class="h4 mb-3">@T("Anmelden")</h1>
             @if (Model.Error is not null)
             {
                 <div class="alert alert-danger" role="alert">@Model.Error</div>
             }
             <form method="post">
                 <div class="mb-3">
-                    <label asp-for="Email" class="form-label">E-Mail</label>
+                    <label asp-for="Email" class="form-label">@T("E-Mail")</label>
                     <input asp-for="Email" class="form-control" autocomplete="username" autocapitalize="off" spellcheck="false" autofocus />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Password" class="form-label">Passwort</label>
+                    <label asp-for="Password" class="form-label">@T("Passwort")</label>
                     <input asp-for="Password" class="form-control" autocomplete="current-password" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
                 <div class="form-check mb-3">
                     <input asp-for="RememberMe" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label">Angemeldet bleiben (7 Tage)</label>
+                    <label asp-for="RememberMe" class="form-check-label">@T("Angemeldet bleiben (7 Tage)")</label>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Weiter</button>
+                <button type="submit" class="btn btn-primary w-100">@T("Weiter")</button>
             </form>
-            <p class="small text-muted mt-3 mb-0">Passwort vergessen oder Handy verloren? Frag die Person, die PaCo für euch betreibt – sie kann deinen Zugang zurücksetzen und dir einen neuen Link schicken.</p>
+            <p class="small text-muted mt-3 mb-0">@T("Passwort vergessen oder Handy verloren? Frag die Person, die PaCo für euch betreibt – sie kann deinen Zugang zurücksetzen und dir einen neuen Link schicken.")</p>
         </div>
     </div>
 </div>

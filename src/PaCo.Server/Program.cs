@@ -133,6 +133,9 @@ builder.Services.AddRazorPages(o =>
     m.SetValueMustBeANumberAccessor(f => Ui.T("Bitte eine Zahl eingeben."));
     m.SetNonPropertyValueMustBeANumberAccessor(() => Ui.T("Bitte eine Zahl eingeben."));
 });
+// Pages are rendered in 39 languages: emit letters as they are instead of &#x…; entities (<, >, &, quotes stay encoded).
+builder.Services.Configure<Microsoft.Extensions.WebEncoders.WebEncoderOptions>(o =>
+    o.TextEncoderSettings = new System.Text.Encodings.Web.TextEncoderSettings(System.Text.Unicode.UnicodeRanges.All));
 builder.Services.AddAntiforgery(o =>
 {
     o.Cookie.Name = "__Host-paco-af";

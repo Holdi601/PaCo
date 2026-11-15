@@ -38,12 +38,12 @@ public sealed class LoginModel(SignInManager<ParentUser> signIn, ILogger<LoginMo
         if (result.IsLockedOut)
         {
             log.LogWarning("Konto gesperrt nach Fehlversuchen: {Email}", Email);
-            Error = "Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.";
+            Error = Ui.T("Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.");
             return Page();
         }
 
         log.LogWarning("Fehlgeschlagener Login für {Email} von {Ip}", Email, HttpContext.Connection.RemoteIpAddress);
-        Error = "E-Mail oder Passwort ist falsch.";
+        Error = Ui.T("E-Mail oder Passwort ist falsch.");
         return Page();
     }
 }

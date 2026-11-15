@@ -37,7 +37,7 @@ public sealed class ChangePasswordModel(UserManager<ParentUser> users, SignInMan
         if (!ModelState.IsValid) return Page();
         if (NewPassword == CurrentPassword)
         {
-            ModelState.AddModelError(nameof(NewPassword), "Das neue Passwort muss sich vom alten unterscheiden.");
+            ModelState.AddModelError(nameof(NewPassword), Ui.T("Das neue Passwort muss sich vom alten unterscheiden."));
             return Page();
         }
 
@@ -50,7 +50,7 @@ public sealed class ChangePasswordModel(UserManager<ParentUser> users, SignInMan
         user.MustChangePassword = false;
         await users.UpdateAsync(user);
         await signIn.RefreshSignInAsync(user);
-        TempData["Message"] = "Passwort geändert.";
+        TempData["Message"] = Ui.T("Passwort geändert.");
         return RedirectToPage(user.TwoFactorEnabled ? "/Index" : "./SetupAuthenticator");
     }
 }
