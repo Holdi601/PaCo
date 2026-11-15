@@ -2,8 +2,15 @@
 @model PaCo.Server.Pages.Admin.IndexModel
 @{ ViewData["Title"] = "Verwaltung"; }
 
-<h1 class="h3 page-title mb-1">Verwaltung</h1>
-<p class="text-muted">Eltern-Konten und Familien verwalten. Kinderdaten sind hier bewusst nicht sichtbar.</p>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-shield" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <h1 class="h3 page-title mb-1">Verwaltung</h1>
+            <p class="text-muted mb-0">Eltern-Konten und Familien verwalten. Kinderdaten sind hier bewusst nicht sichtbar.</p>
+        </div>
+    </div>
+</div>
 
 @if (Model.InviteLink is not null)
 {
@@ -12,14 +19,14 @@
         <div class="small mb-2">7 Tage gültig, nur einmal benutzbar. Schick ihn z. B. per WhatsApp oder Signal. Damit legt die Person ihr Passwort fest und richtet die Authenticator-App ein.</div>
         <div class="input-group">
             <input id="invite-link" class="form-control font-monospace small" value="@Model.InviteLink" readonly aria-label="Zugangslink" />
-            <button class="btn btn-primary" data-copy="#invite-link" type="button">Kopieren</button>
+            <button class="btn btn-primary" data-copy="#invite-link" type="button"><span class="ico ico-copy" aria-hidden="true"></span>Kopieren</button>
             <button class="btn btn-outline-primary" data-share="#invite-link" data-share-title="Zugang zu PaCo" type="button" hidden>Teilen</button>
         </div>
     </div>
 }
 
 <div class="card mb-4">
-    <div class="card-header">Eltern einladen</div>
+    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-user-plus" aria-hidden="true"></span></span>Eltern einladen</div>
     <div class="card-body">
         <div asp-validation-summary="All" class="alert alert-danger"></div>
         <form method="post" asp-page-handler="Invite" class="row g-3">
@@ -47,14 +54,14 @@
                 <div class="form-text">Nur nötig bei „Neue Familie“. Jede Familie sieht ausschließlich ihre eigenen Kinder und Geräte.</div>
             </div>
             <div class="col-12">
-                <button class="btn btn-primary">Einladungslink erstellen</button>
+                <button class="btn btn-primary"><span class="ico ico-link" aria-hidden="true"></span>Einladungslink erstellen</button>
             </div>
         </form>
     </div>
 </div>
 
 <div class="card mb-4">
-    <div class="card-header">Eltern-Konten</div>
+    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-users" aria-hidden="true"></span></span>Eltern-Konten</div>
     <div class="list-group list-group-flush">
         @foreach (var u in Model.Parents)
         {
@@ -99,7 +106,7 @@
                         </form>
                         <form method="post" asp-page-handler="DeleteUser" class="ms-auto">
                             <input type="hidden" name="userId" value="@u.Id" />
-                            <button class="btn btn-sm btn-outline-danger" data-confirm="Konto @u.Email wirklich löschen?">Konto löschen</button>
+                            <button class="btn btn-sm btn-outline-danger" data-confirm="Konto @u.Email wirklich löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Konto löschen</button>
                         </form>
                     </div>
                     <div class="small text-muted mt-1">„Zugang zurücksetzen“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.</div>
@@ -114,7 +121,7 @@
 </div>
 
 <div class="card mb-4">
-    <div class="card-header">Familien</div>
+    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-heart" aria-hidden="true"></span></span>Familien</div>
     <div class="list-group list-group-flush">
         @foreach (var f in Model.Families)
         {
@@ -137,7 +144,7 @@
                             <form method="post" asp-page-handler="DeleteFamily" class="d-flex gap-1">
                                 <input type="hidden" name="familyId" value="@f.Family.Id" />
                                 <input name="confirm" class="form-control form-control-sm" placeholder="Zum Löschen Namen eintippen" aria-label="Familienname zur Bestätigung" />
-                                <button class="btn btn-sm btn-outline-danger" data-confirm="Familie @f.Family.Name mit ALLEN Daten löschen? Das kann nicht rückgängig gemacht werden.">Löschen</button>
+                                <button class="btn btn-sm btn-outline-danger" data-confirm="Familie @f.Family.Name mit ALLEN Daten löschen? Das kann nicht rückgängig gemacht werden."><span class="ico ico-trash" aria-hidden="true"></span>Löschen</button>
                             </form>
                         </div>
                     </div>
@@ -147,7 +154,7 @@
     </div>
 </div>
 <div class="card mb-4">
-    <div class="card-header">PaCo-Client (Windows)</div>
+    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-laptop" aria-hidden="true"></span></span>PaCo-Client (Windows)</div>
     <div class="card-body">
         <p class="mb-2">
             Angebotene Version: <strong>@(Model.ClientBuild?.Version ?? "keine")</strong>
@@ -156,22 +163,22 @@
         </p>
         <div class="d-flex flex-wrap gap-2">
             <form method="post" asp-page-handler="CheckUpdates">
-                <button class="btn btn-outline-primary">Auf GitHub nach Updates suchen</button>
+                <button class="btn btn-outline-primary"><span class="ico ico-refresh" aria-hidden="true"></span>Auf GitHub nach Updates suchen</button>
             </form>
             @if (Model.DevicesOutdated > 0)
             {
                 <form method="post" asp-page-handler="UpdateAll">
-                    <button class="btn btn-primary" data-confirm="Alle veralteten Geräte (alle Familien) auf Version @Model.ClientBuild?.Version aktualisieren?">Alle Geräte aktualisieren</button>
+                    <button class="btn btn-primary" data-confirm="Alle veralteten Geräte (alle Familien) auf Version @Model.ClientBuild?.Version aktualisieren?"><span class="ico ico-download" aria-hidden="true"></span>Alle Geräte aktualisieren</button>
                 </form>
             }
         </div>
         <div class="form-text">Updates werden von GitHub geladen, per Prüfsumme kontrolliert und vom Server signiert. Die PCs installieren nur signierte Updates dieses Servers.</div>
-        <a asp-page="./Health" class="btn btn-sm btn-outline-secondary mt-2">🩺 Geräte-Zustand & Fehler</a>
+        <a asp-page="./Health" class="btn btn-sm btn-outline-secondary mt-2"><span class="ico ico-activity" aria-hidden="true"></span>Geräte-Zustand & Fehler</a>
     </div>
 </div>
 
 <div class="card">
-    <div class="card-header">Super-Admins</div>
+    <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-shield" aria-hidden="true"></span></span>Super-Admins</div>
     <ul class="list-group list-group-flush">
         @foreach (var a in Model.Admins)
         {

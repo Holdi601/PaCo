@@ -2,25 +2,30 @@
 @model PaCo.Server.Pages.Devices.LogModel
 @{ ViewData["Title"] = $"Protokoll {Model.Device.Name}"; }
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-        <div class="stat-label">Protokoll</div>
-        <h1 class="h3 mb-0 page-title"><span aria-hidden="true">💻</span> @Model.Device.Name</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <div class="stat-label">Protokoll</div>
+            <h1 class="h3 mb-0 page-title">@Model.Device.Name</h1>
+        </div>
     </div>
-    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">← Geräte</a>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm back-link"><span class="ico ico-back" aria-hidden="true"></span>Geräte</a>
 </div>
 
-<nav class="d-flex flex-wrap gap-3 mb-3 small" aria-label="Filter">
+<nav class="seg-row mb-3 small" aria-label="Filter">
     Anzeigen:
+    <div class="seg">
     <a asp-route-id="@Model.Device.Id" asp-route-filter="all" class="@(Model.Filter == "all" ? "fw-bold" : "")" aria-current="@(Model.Filter == "all" ? "true" : null)">alles</a>
     <a asp-route-id="@Model.Device.Id" asp-route-filter="suspicious" class="@(Model.Filter == "suspicious" ? "fw-bold" : "")" aria-current="@(Model.Filter == "suspicious" ? "true" : null)">mögliche Umgehungsversuche</a>
     <a asp-route-id="@Model.Device.Id" asp-route-filter="errors" class="@(Model.Filter == "errors" ? "fw-bold" : "")" aria-current="@(Model.Filter == "errors" ? "true" : null)">technische Fehler</a>
+    </div>
 </nav>
 
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header">Ereignisse</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-list" aria-hidden="true"></span></span>Ereignisse</div>
             <div class="list-group list-group-flush small">
                 @foreach (var e in Model.Events)
                 {
@@ -41,11 +46,11 @@
     </div>
     <div class="col-lg-5">
         <div class="card mb-4">
-            <div class="card-header">Diagnose-Log des PCs</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-activity" aria-hidden="true"></span></span>Diagnose-Log des PCs</div>
             <div class="card-body">
                 <p class="small text-muted">Für die Fehlersuche: Der PC lädt die letzten Einträge seines Protokolls hoch (verschlüsselt gespeichert, die letzten 3 bleiben erhalten).</p>
                 <form method="post" asp-page-handler="Request" asp-route-id="@Model.Device.Id" asp-route-filter="@Model.Filter" class="d-flex align-items-center gap-2 mb-3">
-                    <button class="btn btn-outline-primary btn-sm" disabled="@Model.Waiting">Diagnose-Log abrufen</button>
+                    <button class="btn btn-outline-primary btn-sm" disabled="@Model.Waiting"><span class="ico ico-download" aria-hidden="true"></span>Diagnose-Log abrufen</button>
                     @if (Model.Waiting)
                     {
                         <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span><span class="small" role="status">warte auf den PC …</span>

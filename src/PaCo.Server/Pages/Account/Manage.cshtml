@@ -2,11 +2,18 @@
 @model PaCo.Server.Pages.Account.ManageModel
 @{ ViewData["Title"] = "Mein Konto"; }
 
-<h1 class="h3 page-title mb-3">Mein Konto</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-user" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <h1 class="h3 mb-0 page-title">Mein Konto</h1>
+        </div>
+    </div>
+</div>
 <div class="row g-3">
     <div class="col-lg-6">
         <div class="card h-100">
-            <div class="card-header">Profil</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-user" aria-hidden="true"></span></span>Profil</div>
             <div class="card-body">
                 <form method="post">
                     <div class="mb-3">
@@ -20,8 +27,8 @@
                         <span asp-validation-for="DisplayName" class="text-danger small"></span>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="submit" class="btn btn-primary">Speichern</button>
-                        <a asp-page="./ChangePassword" class="btn btn-outline-secondary">Passwort ändern</a>
+                        <button type="submit" class="btn btn-primary"><span class="ico ico-check" aria-hidden="true"></span>Speichern</button>
+                        <a asp-page="./ChangePassword" class="btn btn-outline-secondary"><span class="ico ico-lock" aria-hidden="true"></span>Passwort ändern</a>
                     </div>
                 </form>
             </div>
@@ -29,21 +36,21 @@
     </div>
     <div class="col-lg-6">
         <div class="card h-100">
-            <div class="card-header">Sicherheit</div>
+            <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-shield-check" aria-hidden="true"></span></span>Sicherheit</div>
             <div class="card-body">
-                <p>Zwei-Faktor-Anmeldung: <strong class="status-ok">aktiv</strong><br />
+                <p>Zwei-Faktor-Anmeldung: <span class="pill pill-ok">aktiv</span><br />
                    Übrige Notfall-Codes: <strong class="@(Model.RecoveryCodesLeft <= 2 ? "status-warn" : "")">@Model.RecoveryCodesLeft</strong></p>
                 @if (Model.RecoveryCodesLeft <= 2)
                 {
                     <p class="small status-warn">Nur noch wenige Notfall-Codes übrig – erstelle am besten neue und schreib sie auf.</p>
                 }
                 <div class="d-flex flex-wrap gap-2">
-                    <a asp-page="./SetupAuthenticator" class="btn btn-outline-secondary">Neues Handy einrichten</a>
+                    <a asp-page="./SetupAuthenticator" class="btn btn-outline-secondary"><span class="ico ico-phone" aria-hidden="true"></span>Neues Handy einrichten</a>
                     <form method="post" asp-page-handler="RecoveryCodes">
-                        <button type="submit" class="btn btn-outline-secondary" data-confirm="Neue Notfall-Codes erstellen? Die alten Codes funktionieren danach nicht mehr.">Neue Notfall-Codes</button>
+                        <button type="submit" class="btn btn-outline-secondary" data-confirm="Neue Notfall-Codes erstellen? Die alten Codes funktionieren danach nicht mehr."><span class="ico ico-key" aria-hidden="true"></span>Neue Notfall-Codes</button>
                     </form>
                     <form method="post" asp-page-handler="LogoutEverywhere">
-                        <button type="submit" class="btn btn-outline-danger" data-confirm="Auf allen Geräten abmelden – auch hier? Danach musst du dich überall neu anmelden.">Überall abmelden</button>
+                        <button type="submit" class="btn btn-outline-danger" data-confirm="Auf allen Geräten abmelden – auch hier? Danach musst du dich überall neu anmelden."><span class="ico ico-logout" aria-hidden="true"></span>Überall abmelden</button>
                     </form>
                 </div>
             </div>
@@ -53,15 +60,23 @@
     {
         <div class="col-12">
             <div class="card">
-                <div class="card-header">Weitere Einstellungen</div>
+                <div class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-sliders" aria-hidden="true"></span></span>Weitere Einstellungen</div>
                 <div class="list-group list-group-flush">
-                    <a asp-page="/Notifications" class="list-group-item list-group-item-action py-3">
-                        <div class="fw-semibold">📱 Handy-Benachrichtigungen</div>
+                    <a asp-page="/Notifications" class="list-group-item list-group-item-action py-3 link-row">
+                        <span class="device-ico" aria-hidden="true"><span class="ico ico-phone" aria-hidden="true"></span></span>
+                        <div class="min-w-0 flex-grow-1">
+                        <div class="fw-semibold">Handy-Benachrichtigungen</div>
                         <div class="small text-muted">Alarme sofort aufs Handy bekommen (App ntfy einrichten)</div>
+                        </div>
+                        <span class="ico ico-chevron-right text-muted" aria-hidden="true"></span>
                     </a>
-                    <a asp-page="/Family" class="list-group-item list-group-item-action py-3">
-                        <div class="fw-semibold">👪 Familie &amp; Eltern einladen</div>
+                    <a asp-page="/Family" class="list-group-item list-group-item-action py-3 link-row">
+                        <span class="device-ico" aria-hidden="true"><span class="ico ico-heart" aria-hidden="true"></span></span>
+                        <div class="min-w-0 flex-grow-1">
+                        <div class="fw-semibold">Familie &amp; Eltern einladen</div>
                         <div class="small text-muted">Wer außer dir noch Zugriff hat – und weitere Eltern einladen</div>
+                        </div>
+                        <span class="ico ico-chevron-right text-muted" aria-hidden="true"></span>
                     </a>
                 </div>
             </div>

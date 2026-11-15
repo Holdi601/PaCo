@@ -5,10 +5,13 @@
     var filteredName = Model.Child is { } fc ? Model.ChildNames.GetValueOrDefault(fc) : null;
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-    <div>
-        <div class="stat-label">Jugendschutz</div>
-        <h1 class="h3 mb-0 page-title">Alarme</h1>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon is-warm" aria-hidden="true"><span class="ico ico-bell" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <div class="stat-label">Jugendschutz</div>
+            <h1 class="h3 mb-0 page-title">Alarme</h1>
+        </div>
     </div>
     <div class="d-flex flex-wrap gap-2">
         @if (Model.ChildNames.Count > 1)
@@ -22,13 +25,13 @@
                         <option value="@id" selected="@(Model.Child == id)">@name</option>
                     }
                 </select>
-                <noscript><button class="btn btn-sm btn-outline-secondary">Anzeigen</button></noscript>
+                <noscript><button class="btn btn-sm btn-outline-secondary"><span class="ico ico-filter" aria-hidden="true"></span>Anzeigen</button></noscript>
             </form>
         }
         @if (Model.UnreadTotal > 0)
         {
             <form method="post" asp-page-handler="ReadAll" asp-route-child="@Model.Child">
-                <button class="btn btn-sm btn-outline-primary">Alle als gelesen markieren</button>
+                <button class="btn btn-sm btn-outline-primary"><span class="ico ico-check" aria-hidden="true"></span>Alle als gelesen markieren</button>
             </form>
         }
     </div>
@@ -37,8 +40,8 @@
 <div class="alert alert-info small">
     <p class="mb-2">Ein Treffer kann auch harmlos sein (Hausaufgaben, Nachrichten). Bitte sprich in Ruhe mit deinem Kind, bevor du Schlüsse ziehst.</p>
     <div class="d-flex flex-wrap gap-2">
-        <a href="tel:112" class="btn btn-sm btn-danger">Akute Gefahr: 112 anrufen</a>
-        <a href="tel:08001110550" class="btn btn-sm btn-outline-primary">Elterntelefon 0800 111 0 550 (kostenlos)</a>
+        <a href="tel:112" class="btn btn-sm btn-danger"><span class="ico ico-phone" aria-hidden="true"></span>Akute Gefahr: 112 anrufen</a>
+        <a href="tel:08001110550" class="btn btn-sm btn-outline-primary"><span class="ico ico-lifebuoy" aria-hidden="true"></span>Elterntelefon 0800 111 0 550 (kostenlos)</a>
     </div>
     <details class="mt-2">
         <summary>Wie entstehen Alarme?</summary>
@@ -51,8 +54,9 @@
 @if (Model.Alerts.Count == 0)
 {
     <div class="card">
-        <div class="card-body">
-            <div class="fw-semibold mb-1">@(filteredName is null ? "Keine Alarme – alles ruhig. 👍" : $"Keine Alarme für {filteredName}. 👍")</div>
+        <div class="card-body empty-state">
+            <partial name="_ArtAllClear" />
+            <div class="fw-semibold mb-1 empty-title">@(filteredName is null ? "Keine Alarme – alles ruhig." : $"Keine Alarme für {filteredName}.")</div>
             <div class="text-muted small">
                 Damit du einen Alarm sofort mitbekommst, richte die <a asp-page="/Notifications">Handy-Benachrichtigungen</a> ein.
                 @if (filteredName is not null) { <a asp-page="/Alerts">Alarme aller Kinder anzeigen</a> }
@@ -65,7 +69,7 @@
 @foreach (var a in Model.Alerts)
 {
     var urgent = a.Category is AlertCategory.SelfHarm or AlertCategory.Grooming;
-    <article class="card @(a.ReadUtc is null ? "border-danger" : "")">
+    <article class="card alert-card @(a.ReadUtc is null ? "is-new" : "")">
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                 <div>
@@ -80,9 +84,9 @@
             {
                 <div class="small text-muted mb-2">Fenster: @a.WindowTitle</div>
             }
-            <blockquote class="device-list small mb-2">@a.Snippet</blockquote>
+            <blockquote class="snippet small mb-2">@a.Snippet</blockquote>
             <form method="post" asp-page-handler="Delete" asp-route-id="@a.Id" asp-route-child="@Model.Child" class="text-end">
-                <button class="btn btn-sm btn-link text-muted" data-confirm="Diesen Alarm löschen?">Alarm löschen</button>
+                <button class="btn btn-sm btn-link text-muted" data-confirm="Diesen Alarm löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Alarm löschen</button>
             </form>
         </div>
     </article>

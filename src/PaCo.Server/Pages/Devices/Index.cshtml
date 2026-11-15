@@ -5,16 +5,27 @@
     var hasDevices = Model.Devices.Any(d => !d.Revoked);
 }
 
-<div class="mb-3">
-    <h1 class="h3 page-title mb-1">Geräte</h1>
-    <p class="text-muted mb-0">Die PCs, auf denen PaCo läuft – und welches Windows-Konto zu welchem Kind gehört.</p>
+<div class="page-head">
+    <div class="page-head-main">
+        <span class="page-icon" aria-hidden="true"><span class="ico ico-laptop" aria-hidden="true"></span></span>
+        <div class="min-w-0">
+            <h1 class="h3 page-title mb-1">Geräte</h1>
+            <p class="text-muted mb-0">Die PCs, auf denen PaCo läuft – und welches Windows-Konto zu welchem Kind gehört.</p>
+        </div>
+    </div>
 </div>
 
 <div class="d-flex flex-column">
 <details class="card mb-4 @(hasDevices ? "order-last" : "order-first")" open="@(!hasDevices || Model.ManualCode is not null)">
-    <summary class="card-header">@(hasDevices ? "➕ Weiteren PC hinzufügen" : "PC des Kindes hinzufügen")</summary>
+    <summary class="card-header"><span class="head-ico" aria-hidden="true"><span class="ico ico-plus" aria-hidden="true"></span></span>
+        @if (hasDevices) { <span>Weiteren PC hinzufügen</span> } else { <span>PC des Kindes hinzufügen</span> }
+    </summary>
     <div class="card-body">
-        <ol class="mb-3">
+        @if (!hasDevices)
+        {
+            <div class="add-device-art"><partial name="_ArtNoDevices" /></div>
+        }
+        <ol class="steps mb-4">
             <li>Auf dem PC des Kindes mit dem <strong>Administrator-Konto</strong> (nicht dem Kinderkonto) anmelden.</li>
             <li>Diese Seite <strong>dort</strong> im Browser öffnen (<code>@Model.ServerUrl</code>) und das Installationsprogramm herunterladen – oder die Datei per USB-Stick übertragen.</li>
             <li><strong>PaCo-Setup.exe</strong> starten. Falls Windows „Der Computer wurde durch Windows geschützt“ meldet: <em>Weitere Informationen → Trotzdem ausführen</em>.</li>
@@ -25,10 +36,10 @@
         {
             <div class="d-flex flex-wrap gap-2 align-items-center">
                 <form method="post" asp-page-handler="Download">
-                    <button class="btn btn-primary btn-lg">Installationsprogramm herunterladen</button>
+                    <button class="btn btn-primary btn-lg"><span class="ico ico-download" aria-hidden="true"></span>Installationsprogramm herunterladen</button>
                 </form>
                 <form method="post" asp-page-handler="Code">
-                    <button class="btn btn-link">Download klappt nicht? Code zum Abtippen anzeigen</button>
+                    <button class="btn btn-link"><span class="ico ico-key" aria-hidden="true"></span>Download klappt nicht? Code zum Abtippen anzeigen</button>
                 </form>
             </div>
             <div class="form-text">Version @(Model.ClientVersion ?? "unbekannt"). Jeder Download enthält einen eigenen Kopplungscode, gültig 24 Stunden und nur für ein Gerät.</div>
@@ -51,21 +62,24 @@
 @foreach (var d in Model.Devices)
 {
     var online = d.IsOnline(Model.Now);
-    <div class="card mb-3 @(d.Revoked ? "opacity-75" : "")">
+    <div class="card device-card mb-3 @(d.Revoked ? "opacity-75" : "")">
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div>
-                <h2 class="fs-5 d-inline mb-0"><span aria-hidden="true">💻</span> @d.Name</h2>
-                @if (d.Revoked) { <span class="pill pill-muted ms-2">entfernt</span> }
-                else if (online) { <span class="pill pill-ok ms-2"><span class="dot" aria-hidden="true"></span> online</span> }
-                else { <span class="pill pill-muted ms-2">offline</span> }
+            <div class="device-title">
+                <span class="device-ico @(online && !d.Revoked ? "is-online" : "")" aria-hidden="true"><span class="ico ico-laptop" aria-hidden="true"></span></span>
+                <div class="min-w-0">
+                    <h2 class="fs-5 mb-1 text-truncate">@d.Name</h2>
+                    @if (d.Revoked) { <span class="pill pill-muted">entfernt</span> }
+                    else if (online) { <span class="pill pill-ok pill-live">online</span> }
+                    else { <span class="pill pill-muted">offline</span> }
+                </div>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <span class="small text-muted fw-normal">Zuletzt gemeldet: @Format.Ago(d.LastSeenUtc, Model.Now) · PaCo @d.ClientVersion · @d.OsVersion</span>
+                <span class="small text-muted fw-normal device-meta">Zuletzt gemeldet: @Format.Ago(d.LastSeenUtc, Model.Now) · PaCo @d.ClientVersion · @d.OsVersion</span>
                 @if (!d.Revoked)
                 {
-                    <a asp-page="./Log" asp-route-id="@d.Id" class="btn btn-sm btn-outline-secondary">📋 Protokoll</a>
+                    <a asp-page="./Log" asp-route-id="@d.Id" class="btn btn-sm btn-outline-secondary"><span class="ico ico-list" aria-hidden="true"></span>Protokoll</a>
                     <a asp-page="./Location" asp-route-id="@d.Id" class="btn btn-sm btn-outline-primary">
-                        📍 Standort @(d.LocationMode switch { LocationMode.Continuous => "(aufgezeichnet)", LocationMode.OnRequest => "(auf Anforderung)", _ => "(aus)" })
+                        <span class="ico ico-pin" aria-hidden="true"></span>Standort @(d.LocationMode switch { LocationMode.Continuous => "(aufgezeichnet)", LocationMode.OnRequest => "(auf Anforderung)", _ => "(aus)" })
                     </a>
                 }
             </div>
@@ -76,14 +90,14 @@
                 <div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2 py-2">
                     @if (d.UpdateRequested)
                     {
-                        <span>⏳ Update auf Version @Model.ClientVersion wird beim nächsten Kontakt installiert …</span>
+                        <span><span class="ico ico-hourglass me-1" aria-hidden="true"></span>Update auf Version @Model.ClientVersion wird beim nächsten Kontakt installiert …</span>
                     }
                     else
                     {
                         <span>Neue PaCo-Version @Model.ClientVersion verfügbar (installiert: @(d.ClientVersion ?? "?")).</span>
                         <form method="post" asp-page-handler="Update">
                             <input type="hidden" name="deviceId" value="@d.Id" />
-                            <button class="btn btn-sm btn-primary">Update installieren</button>
+                            <button class="btn btn-sm btn-primary"><span class="ico ico-download" aria-hidden="true"></span>Update installieren</button>
                         </form>
                     }
                 </div>
@@ -92,28 +106,28 @@
             {
                 var sec = d.GetSecurity();
                 var worst = sec.Count == 0 ? SecuritySeverity.Ok : sec.Max(x => x.Severity);
-                <details class="mb-3" open="@(worst >= SecuritySeverity.Warning)">
+                <details class="mb-3 sec-check" open="@(worst >= SecuritySeverity.Warning)">
                     <summary class="fw-semibold">
-                        Sicherheits-Check:
+                        <span class="ico ico-shield-check text-muted" aria-hidden="true"></span>Sicherheits-Check:
                         @switch (worst)
                         {
-                            case SecuritySeverity.Critical: <span class="status-blocked">✖ Handlungsbedarf</span> break;
-                            case SecuritySeverity.Warning: <span class="status-warn">▲ Hinweise</span> break;
-                            default: <span class="status-ok">✔ alles in Ordnung</span> break;
+                            case SecuritySeverity.Critical: <span class="status-blocked d-inline-flex align-items-center gap-1"><span class="ico ico-x-circle" aria-hidden="true"></span>Handlungsbedarf</span> break;
+                            case SecuritySeverity.Warning: <span class="status-warn d-inline-flex align-items-center gap-1"><span class="ico ico-alert" aria-hidden="true"></span>Hinweise</span> break;
+                            default: <span class="status-ok d-inline-flex align-items-center gap-1"><span class="ico ico-check-circle" aria-hidden="true"></span>alles in Ordnung</span> break;
                         }
                         <span class="small text-muted fw-normal">(geprüft @Format.Ago(d.SecurityCheckedUtc, Model.Now))</span>
                     </summary>
-                    <ul class="list-unstyled small mt-2 mb-0">
+                    <ul class="list-unstyled small mt-2 mb-0 sec-list">
                         @foreach (var x in sec.OrderByDescending(x => x.Severity))
                         {
                             var (icon, cls) = x.Severity switch
                             {
-                                SecuritySeverity.Critical => ("✖", "status-blocked"),
-                                SecuritySeverity.Warning => ("▲", "status-warn"),
-                                SecuritySeverity.Info => ("ℹ", "text-muted"),
-                                _ => ("✔", "status-ok"),
+                                SecuritySeverity.Critical => ("x-circle", "status-blocked"),
+                                SecuritySeverity.Warning => ("alert", "status-warn"),
+                                SecuritySeverity.Info => ("info", "text-muted"),
+                                _ => ("check-circle", "status-ok"),
                             };
-                            <li class="mb-1"><span class="@cls">@icon</span> @x.Text</li>
+                            <li class="mb-1"><span class="ico ico-@icon @cls" aria-hidden="true"></span><span>@x.Text</span></li>
                         }
                     </ul>
                     @if (sec.Any(x => x.Fixable && x.Severity >= SecuritySeverity.Info))
@@ -124,7 +138,7 @@
             }
             @if (!d.Revoked)
             {
-                <h3 class="h6 mb-1">Windows-Konten auf diesem PC</h3>
+                <h3 class="section-title mb-1"><span class="ico ico-users" aria-hidden="true"></span>Windows-Konten auf diesem PC</h3>
                 <p class="small text-muted mb-2">Wähle bei jedem Konto, welches Kind es benutzt. Konten von Erwachsenen bleiben „nicht überwacht“.</p>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
@@ -138,12 +152,13 @@
                                         @if (a.IsAdmin)
                                         {
                                             <div class="small @(a.ChildId is null ? "text-muted" : "text-danger fw-semibold")">
-                                                @(a.ChildId is null ? "Administrator" : "⚠ Administrator – Kinderkonten müssen Standardkonten sein!")
+                                                @if (a.ChildId is not null) { <span class="ico ico-alert ico-sm" aria-hidden="true"></span> }
+                                                @(a.ChildId is null ? "Administrator" : "Administrator – Kinderkonten müssen Standardkonten sein!")
                                             </div>
                                         }
                                     </td>
                                     <td>
-                                        <form method="post" asp-page-handler="Assign" class="d-flex gap-2">
+                                        <form method="post" asp-page-handler="Assign" class="d-flex flex-wrap gap-2">
                                             <input type="hidden" name="accountId" value="@a.Id" />
                                             <select name="childId" class="form-select form-select-sm" aria-label="Konto @a.UserName gehört zu">
                                                 <option value="">— nicht überwacht (Erwachsene) —</option>
@@ -164,11 +179,11 @@
                     <form method="post" asp-page-handler="Rename" class="d-flex gap-2">
                         <input type="hidden" name="deviceId" value="@d.Id" />
                         <input name="name" value="@d.Name" class="form-control form-control-sm" aria-label="Neuer Name für @d.Name" maxlength="100" required autocomplete="off" />
-                        <button class="btn btn-sm btn-outline-secondary text-nowrap">Umbenennen</button>
+                        <button class="btn btn-sm btn-outline-secondary text-nowrap"><span class="ico ico-edit" aria-hidden="true"></span>Umbenennen</button>
                     </form>
                     <form method="post" asp-page-handler="Revoke">
                         <input type="hidden" name="deviceId" value="@d.Id" />
-                        <button class="btn btn-sm btn-outline-danger" data-confirm="@d.Name wirklich entfernen? Alle Sperren auf diesem PC werden aufgehoben.">Gerät entfernen</button>
+                        <button class="btn btn-sm btn-outline-danger" data-confirm="@d.Name wirklich entfernen? Alle Sperren auf diesem PC werden aufgehoben."><span class="ico ico-trash" aria-hidden="true"></span>Gerät entfernen</button>
                     </form>
                 </div>
             }
@@ -176,7 +191,7 @@
             {
                 <form method="post" asp-page-handler="Delete">
                     <input type="hidden" name="deviceId" value="@d.Id" />
-                    <button class="btn btn-sm btn-outline-secondary" data-confirm="Gerät und seine Statistik endgültig löschen?">Endgültig löschen</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-confirm="Gerät und seine Statistik endgültig löschen?"><span class="ico ico-trash" aria-hidden="true"></span>Endgültig löschen</button>
                 </form>
             }
         </div>

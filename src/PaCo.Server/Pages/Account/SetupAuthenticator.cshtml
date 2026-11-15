@@ -3,12 +3,13 @@
 @{ ViewData["Title"] = "Zwei-Faktor-Anmeldung"; }
 
 <div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card mt-4">
+    <div class="col-lg-9 col-xl-8">
+        <div class="card mt-2 setup-card">
             <div class="card-body p-4">
                 @if (Model.RecoveryCodes is not null)
                 {
-                    <h1 class="h4">Fertig – 2FA ist aktiv ✅</h1>
+                    <div class="done-badge mb-3" aria-hidden="true"><span class="ico ico-shield-check" aria-hidden="true"></span></div>
+                    <h1 class="h4">Fertig – 2FA ist aktiv</h1>
                     <p>Schreib dir diese <strong>Notfall-Codes</strong> auf und bewahre sie sicher auf (nicht auf dem Handy!). Falls das Handy verloren geht, kommst du damit noch einmal hinein. Jeder Code funktioniert nur einmal.</p>
                     <div class="recovery-codes alert alert-warning">
                         @foreach (var c in Model.RecoveryCodes.Split('\n'))
@@ -16,28 +17,32 @@
                             <div>@c</div>
                         }
                     </div>
-                    <a asp-page="/Index" class="btn btn-primary" data-confirm="Hast du die Notfall-Codes aufgeschrieben? Sie werden nicht noch einmal angezeigt.">Ich habe die Codes notiert – weiter</a>
+                    <a asp-page="/Index" class="btn btn-primary" data-confirm="Hast du die Notfall-Codes aufgeschrieben? Sie werden nicht noch einmal angezeigt."><span class="ico ico-check" aria-hidden="true"></span>Ich habe die Codes notiert – weiter</a>
                 }
                 else if (Model.AlreadyEnabled)
                 {
+                    <div class="done-badge mb-3" aria-hidden="true"><span class="ico ico-shield-check" aria-hidden="true"></span></div>
                     <h1 class="h4">Zwei-Faktor-Anmeldung ist aktiv</h1>
                     <p>Neues Handy? Dann hier neu einrichten. Der alte Eintrag in der App funktioniert danach nicht mehr.</p>
                     <div class="d-flex flex-wrap gap-2">
                         <form method="post" asp-page-handler="Reset">
-                            <button type="submit" class="btn btn-outline-danger" data-confirm="Authenticator neu einrichten? Der bisherige Eintrag in der App funktioniert danach nicht mehr.">Authenticator neu einrichten</button>
+                            <button type="submit" class="btn btn-outline-danger" data-confirm="Authenticator neu einrichten? Der bisherige Eintrag in der App funktioniert danach nicht mehr."><span class="ico ico-refresh" aria-hidden="true"></span>Authenticator neu einrichten</button>
                         </form>
-                        <a asp-page="./Manage" class="btn btn-link">← Zurück zu Mein Konto</a>
+                        <a asp-page="./Manage" class="btn btn-link"><span class="ico ico-back" aria-hidden="true"></span>Zurück zu Mein Konto</a>
                     </div>
                 }
                 else
                 {
-                    <h1 class="h4">Authenticator-App einrichten</h1>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <span class="page-icon" aria-hidden="true"><span class="ico ico-shield-check" aria-hidden="true"></span></span>
+                        <h1 class="h4 mb-0">Authenticator-App einrichten</h1>
+                    </div>
                     <p class="text-muted">Zum Schutz deines Kontos ist eine zweite Bestätigung per Handy Pflicht.</p>
-                    <ol>
+                    <ol class="steps">
                         <li class="mb-2">Installiere <strong>Google Authenticator</strong> (oder Microsoft Authenticator) auf deinem Handy.</li>
                         <li class="mb-2">
                             <span class="d-md-none"><strong>Du bist gerade am Handy?</strong> Dann tippe hier – die App öffnet sich und übernimmt PaCo:
-                                <a href="@Model.AuthenticatorUri" class="btn btn-primary d-block my-2">In Authenticator-App übernehmen</a>
+                                <a href="@Model.AuthenticatorUri" class="btn btn-primary d-flex my-2"><span class="ico ico-phone" aria-hidden="true"></span>In Authenticator-App übernehmen</a>
                                 Am PC kannst du stattdessen den QR-Code scannen:</span>
                             <span class="d-none d-md-inline">Tippe in der App auf <strong>+</strong> → <strong>QR-Code scannen</strong> und scanne diesen Code:</span>
                             <div class="qr my-3"><img src="@Model.QrDataUri" alt="QR-Code für die Authenticator-App" /></div>
@@ -46,15 +51,15 @@
                                 <button type="button" class="btn btn-sm btn-link p-0 ms-1 align-baseline" data-copy="#totp-key">Kopieren</button>
                             </div>
                         </li>
-                        <li><label for="Code">Gib den 6-stelligen Code ein, den die App jetzt anzeigt:</label></li>
+                        <li class="mb-2"><label for="Code">Gib den 6-stelligen Code ein, den die App jetzt anzeigt:</label></li>
                     </ol>
                     <form method="post" class="row g-2">
                         <div class="col-sm-6">
-                            <input asp-for="Code" class="form-control form-control-lg text-center" inputmode="numeric" maxlength="7" autocomplete="one-time-code" placeholder="123456" />
+                            <input asp-for="Code" class="form-control form-control-lg text-center code-input" inputmode="numeric" maxlength="7" autocomplete="one-time-code" placeholder="123456" />
                             <span asp-validation-for="Code" class="text-danger small"></span>
                         </div>
                         <div class="col-sm-6">
-                            <button type="submit" class="btn btn-primary btn-lg w-100">Bestätigen</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100"><span class="ico ico-check" aria-hidden="true"></span>Bestätigen</button>
                         </div>
                     </form>
                 }

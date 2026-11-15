@@ -19,67 +19,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b101b" media="(prefers-color-scheme: dark)" />
     <title>@ViewData["Title"] – PaCo</title>
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="~/favicon.ico" sizes="any" />
     <script src="~/js/theme.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/icons.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <a class="visually-hidden-focusable skip-link" href="#main">Zum Inhalt springen</a>
-    <nav class="navbar navbar-expand-md paco-nav mb-4" aria-label="Hauptmenü">
+    <nav class="navbar navbar-expand-lg paco-nav mb-4" aria-label="Hauptmenü">
         <div class="container">
-            <a class="navbar-brand" asp-page="/Index"><span class="paco-logo" aria-hidden="true">P</span> PaCo</a>
-            <div class="d-flex align-items-center gap-2 order-md-last">
+            <a class="navbar-brand" asp-page="/Index">
+                <partial name="_Logo" model="@("nav")" />
+                <span class="wordmark">Pa<span class="wordmark-co">Co</span></span>
+            </a>
+            <div class="d-flex align-items-center gap-2 order-lg-last">
                 @if (unreadAlerts > 0)
                 {
                     @* On phones the menu is collapsed – keep new alarms visible next to the menu button. *@
-                    <a asp-page="/Alerts" class="btn btn-sm btn-danger d-md-none text-nowrap" aria-label="@unreadAlerts neue Alarme ansehen">⚠ @unreadAlerts</a>
+                    <a asp-page="/Alerts" class="btn btn-sm btn-danger d-lg-none text-nowrap nav-alarm" aria-label="@unreadAlerts neue Alarme ansehen"><span class="ico ico-bell" aria-hidden="true"></span>@unreadAlerts</a>
                 }
-                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Farbschema wechseln">◐ Auto</button>
+                <button type="button" class="theme-toggle" data-theme-toggle data-mode="auto" aria-label="Farbschema wechseln"><span class="theme-label">Auto</span></button>
                 @if (signedIn && onboarded)
                 {
-                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Menü öffnen">
-                        <span class="navbar-toggler-icon"></span>
+                    <button class="navbar-toggler nav-toggle d-lg-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Menü öffnen">
+                        <span class="ico ico-menu" aria-hidden="true"></span>
                     </button>
                 }
             </div>
             @if (signedIn && onboarded)
             {
                 <div class="collapse navbar-collapse" id="nav">
-                    <ul class="navbar-nav me-auto gap-md-1 mt-2 mt-md-0">
+                    <ul class="navbar-nav me-auto gap-lg-1 mt-2 mt-lg-0">
                         @if (hasFamily)
                         {
-                            <li class="nav-item"><a class="nav-link @Active("/Dashboard")" aria-current="@Current("/Dashboard")" asp-page="/Dashboard">Übersicht</a></li>
-                            <li class="nav-item"><a class="nav-link @Active("/Children")" aria-current="@Current("/Children")" asp-page="/Children/Index">Kinder</a></li>
-                            <li class="nav-item"><a class="nav-link @Active("/Devices")" aria-current="@Current("/Devices")" asp-page="/Devices/Index">Geräte</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Dashboard")" aria-current="@Current("/Dashboard")" asp-page="/Dashboard"><span class="ico ico-home" aria-hidden="true"></span>Übersicht</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Children")" aria-current="@Current("/Children")" asp-page="/Children/Index"><span class="ico ico-users" aria-hidden="true"></span>Kinder</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Devices")" aria-current="@Current("/Devices")" asp-page="/Devices/Index"><span class="ico ico-laptop" aria-hidden="true"></span>Geräte</a></li>
                             <li class="nav-item">
-                                <a class="nav-link @Active("/Alerts")" aria-current="@Current("/Alerts")" asp-page="/Alerts">Alarme
+                                <a class="nav-link @Active("/Alerts")" aria-current="@Current("/Alerts")" asp-page="/Alerts"><span class="ico ico-bell" aria-hidden="true"></span>Alarme
                                     @if (unreadAlerts > 0) { <span class="badge rounded-pill bg-danger ms-1">@unreadAlerts<span class="visually-hidden"> neu</span></span> }
                                 </a>
                             </li>
                         }
                         @if (isAdmin)
                         {
-                            <li class="nav-item"><a class="nav-link @Active("/Admin")" aria-current="@Current("/Admin")" asp-page="/Admin/Index">Verwaltung</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("/Admin")" aria-current="@Current("/Admin")" asp-page="/Admin/Index"><span class="ico ico-shield" aria-hidden="true"></span>Verwaltung</a></li>
                         }
                     </ul>
                     @* Things that are set up once (phone push, family, own account) live together in one menu. *@
-                    <ul class="navbar-nav gap-md-1 me-md-2 mb-2 mb-md-0">
+                    <ul class="navbar-nav gap-lg-1 me-lg-2 mb-1 mb-lg-0">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle @Active(settingsPages)" href="#" id="settings-menu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Einstellungen</a>
+                            <a class="nav-link dropdown-toggle @Active(settingsPages)" href="#" id="settings-menu" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="ico ico-sliders" aria-hidden="true"></span>Einstellungen</a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settings-menu">
                                 <li><span class="dropdown-item-text small text-muted">Angemeldet als <strong>@User.FindFirstValue(PaCoClaims.DisplayName)</strong></span></li>
                                 <li><hr class="dropdown-divider" /></li>
                                 @if (hasFamily)
                                 {
-                                    <li><a class="dropdown-item @Active("/Notifications")" aria-current="@Current("/Notifications")" asp-page="/Notifications">📱 Handy-Benachrichtigungen</a></li>
-                                    <li><a class="dropdown-item @Active("/Family")" aria-current="@Current("/Family")" asp-page="/Family">👪 Familie &amp; Eltern einladen</a></li>
+                                    <li><a class="dropdown-item @Active("/Notifications")" aria-current="@Current("/Notifications")" asp-page="/Notifications"><span class="ico ico-phone" aria-hidden="true"></span>Handy-Benachrichtigungen</a></li>
+                                    <li><a class="dropdown-item @Active("/Family")" aria-current="@Current("/Family")" asp-page="/Family"><span class="ico ico-heart" aria-hidden="true"></span>Familie &amp; Eltern einladen</a></li>
                                 }
-                                <li><a class="dropdown-item @Active("/Account")" aria-current="@Current("/Account")" asp-page="/Account/Manage">👤 Mein Konto &amp; Passwort</a></li>
+                                <li><a class="dropdown-item @Active("/Account")" aria-current="@Current("/Account")" asp-page="/Account/Manage"><span class="ico ico-user" aria-hidden="true"></span>Mein Konto &amp; Passwort</a></li>
                                 <li><hr class="dropdown-divider" /></li>
                                 <li>
                                     <form method="post" asp-page="/Account/Logout">
-                                        <button type="submit" class="dropdown-item">Abmelden</button>
+                                        <button type="submit" class="dropdown-item"><span class="ico ico-logout" aria-hidden="true"></span>Abmelden</button>
                                     </form>
                                 </li>
                             </ul>
@@ -89,8 +97,8 @@
             }
             else if (signedIn)
             {
-                <form method="post" asp-page="/Account/Logout" class="d-inline order-md-last ms-2">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">Abmelden</button>
+                <form method="post" asp-page="/Account/Logout" class="d-inline order-lg-last ms-2">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"><span class="ico ico-logout" aria-hidden="true"></span>Abmelden</button>
                 </form>
             }
         </div>

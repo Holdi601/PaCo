@@ -2,27 +2,29 @@
 @model PaCo.Server.Pages.Account.LoginWithRecoveryCodeModel
 @{ ViewData["Title"] = "Notfall-Code"; }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card mt-4">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-2">Mit Notfall-Code anmelden</h1>
-                <p class="text-muted">Gib einen der Notfall-Codes ein, die du bei der Einrichtung notiert hast. Jeder Code funktioniert nur einmal.</p>
-                @if (Model.Error is not null)
-                {
-                    <div class="alert alert-danger" role="alert">@Model.Error</div>
-                }
-                <form method="post">
-                    <div class="mb-3">
-                        <label asp-for="Code" class="form-label">Notfall-Code</label>
-                        <input asp-for="Code" class="form-control font-monospace" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" autofocus />
-                        <span asp-validation-for="Code" class="text-danger small"></span>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Anmelden</button>
-                </form>
-                <p class="small text-muted mt-3 mb-0">Keine Notfall-Codes mehr? Dann kann die Person, die PaCo für euch betreibt, deinen Zugang zurücksetzen.</p>
-                <p class="small mt-2 mb-0"><a asp-page="./LoginWith2fa">← Doch mit der Authenticator-App anmelden</a></p>
-            </div>
+<div class="auth-shell">
+    <div class="auth-art" aria-hidden="true">
+        <div class="auth-brand"><partial name="_Logo" model="@("auth")" /><span class="wordmark">Pa<span class="wordmark-co">Co</span></span></div>
+        <partial name="_ArtHero" />
+    </div>
+    <div class="card auth-card">
+        <div class="card-body p-4">
+            <h1 class="h4 mb-2">Mit Notfall-Code anmelden</h1>
+            <p class="text-muted">Gib einen der Notfall-Codes ein, die du bei der Einrichtung notiert hast. Jeder Code funktioniert nur einmal.</p>
+            @if (Model.Error is not null)
+            {
+                <div class="alert alert-danger" role="alert">@Model.Error</div>
+            }
+            <form method="post">
+                <div class="mb-3">
+                    <label asp-for="Code" class="form-label">Notfall-Code</label>
+                    <input asp-for="Code" class="form-control font-monospace" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" autofocus />
+                    <span asp-validation-for="Code" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+            </form>
+            <p class="small text-muted mt-3 mb-0">Keine Notfall-Codes mehr? Dann kann die Person, die PaCo für euch betreibt, deinen Zugang zurücksetzen.</p>
+            <p class="small mt-2 mb-0"><a asp-page="./LoginWith2fa" class="auth-foot"><span class="ico ico-back ico-sm" aria-hidden="true"></span>Doch mit der Authenticator-App anmelden</a></p>
         </div>
     </div>
 </div>
