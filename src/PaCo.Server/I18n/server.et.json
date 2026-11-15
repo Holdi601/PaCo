@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— ei jälgita (täiskasvanu) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "„{0}“ = parool ununes või telefon kadus: inimene saab uue lingi ning seadistab parooli ja 2FA uuesti.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…või skanni paremal olev QR-kood telefoni kaameraga.",
- "∞ heute": "∞ täna"
+ "∞ heute": "∞ täna",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Blokeeri Microsoft Store – su laps ei saa ilma sinuta rakendusi installida. Rakenduse installimiseks lülita see korraks välja. (soovitatav)"
 }

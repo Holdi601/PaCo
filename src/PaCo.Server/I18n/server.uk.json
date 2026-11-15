@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— без контролю (дорослі) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "«{0}» = забули пароль або втратили телефон: людина отримає нове посилання й заново налаштує пароль і 2FA.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…або відскануйте QR-код праворуч камерою телефона.",
- "∞ heute": "∞ сьогодні"
+ "∞ heute": "∞ сьогодні",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Заблокувати Microsoft Store – дитина не зможе встановлювати застосунки без вас. Щоб установити застосунок, ненадовго вимкніть це. (рекомендовано)"
 }

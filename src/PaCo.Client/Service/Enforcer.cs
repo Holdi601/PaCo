@@ -93,6 +93,8 @@ internal sealed class Enforcer : BackgroundService
         Log.Info("Enforcer beendet");
     }
 
+    private TimeSpan _lastUnmanagedCheck = Mono.Never;
+
     private async Task TickAsync(double elapsed)
     {
         var policy = _rt.Policies.Current;
@@ -115,6 +117,22 @@ internal sealed class Enforcer : BackgroundService
             .Select(x => (x.Session, Child: x.Child!))
             .ToList();
         _agents.Retain(monitored.Select(m => m.Session.SessionId).ToHashSet());
+
+        // Accounts that are no longer child accounts (re-assigned on the website): take PaCo's policies away again.
+        if (Mono.Now - _lastUnmanagedCheck > TimeSpan.FromMinutes(1))
+        {
+            _lastUnmanagedCheck = Mono.Now;
+            foreach (var s in sessions.Where(s => policy.ChildForSid(s.Sid) is null))
+            {
+                try
+                {
+                    if (!AccountPolicies.IsManaged(s.Sid)) continue;
+                    AccountPolicies.Remove(s.Sid);
+                    BrowserPolicies.Remove(s.Sid);
+                }
+                catch (Exception ex) { Log.Error($"Richtlinien für {s.UserName} entfernen", ex); }
+            }
+        }
 
         DateTimeOffset now;
         lock (_rt.Gate) now = _rt.Now();
@@ -167,6 +185,7 @@ internal sealed class Enforcer : BackgroundService
             try
             {
                 BrowserPolicies.Apply(s.Sid, child.Web, forceBrowser);
+                AccountPolicies.Apply(s.Sid, child, forceBrowser);
             }
             catch (Exception ex)
             {
@@ -570,6 +589,7 @@ internal sealed class Enforcer : BackgroundService
         foreach (var s in Sessions.Enumerate())
         {
             try { BrowserPolicies.Remove(s.Sid); } catch (Exception ex) { Log.Error("Browser-Regeln entfernen", ex); }
+            try { AccountPolicies.Remove(s.Sid); } catch (Exception ex) { Log.Error("Konto-Richtlinien entfernen", ex); }
         }
     }
 

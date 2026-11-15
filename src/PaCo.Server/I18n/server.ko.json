@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— 관리 안 함(어른) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "‘{0}’ = 비밀번호를 잊었거나 휴대폰을 잃어버린 경우: 해당 사용자가 새 링크를 받아 비밀번호와 2단계 인증을 다시 설정합니다.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…또는 오른쪽 QR 코드를 휴대폰 카메라로 스캔하세요.",
- "∞ heute": "∞ 오늘"
+ "∞ heute": "∞ 오늘",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Microsoft Store 차단 – 자녀가 보호자 없이 앱을 설치할 수 없습니다. 앱을 설치하려면 잠시 끄세요. (권장)"
 }

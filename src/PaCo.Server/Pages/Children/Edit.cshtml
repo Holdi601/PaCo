@@ -143,6 +143,10 @@
                 <input asp-for="BlockSystemTools" class="form-check-input" role="switch" />
                 <label asp-for="BlockSystemTools" class="form-check-label">@T("Systemwerkzeuge sperren (PowerShell, Eingabeaufforderung, Registry-Editor, Skript-Hosts) – schützt vor Umgehungsversuchen und typischer Schadsoftware (empfohlen)")</label>
             </div>
+            <div class="form-check form-switch mb-3">
+                <input asp-for="BlockStore" class="form-check-input" role="switch" />
+                <label asp-for="BlockStore" class="form-check-label">@T("Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)")</label>
+            </div>
             <label asp-for="BlockedApps" class="form-label">@T("Gesperrte Programme")</label>
             <textarea asp-for="BlockedApps" class="form-control font-monospace" rows="4" placeholder="discord" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="apps-help"></textarea>
             <div id="apps-help" class="form-text">@T("Ein Programmname pro Zeile – das Programm wird sofort wieder geschlossen, wenn es gestartet wird.") @Html.Raw(F("Den Namen findest du unter <a href=\"{0}\">Statistik</a> in Klammern (z. B. {1}).", Url.Page("./Stats", new { id = Model.Id }), "<code>robloxplayerbeta</code>, <code>steam</code>, <code>discord</code>"))</div>

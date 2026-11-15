@@ -90,7 +90,13 @@ public sealed class Child : IFamilyScoped
     /// <summary>Block typical malware/bypass tools in the child's account (PowerShell, cmd, regedit, script hosts).</summary>
     public bool BlockSystemTools { get; set; } = true;
 
-    public static readonly string[] SystemTools = ["powershell", "powershell_ise", "pwsh", "cmd", "regedit", "wscript", "cscript", "mshta"];
+    public static readonly string[] SystemTools = ["powershell", "powershell_ise", "pwsh", "cmd", "regedit", "wscript", "cscript", "mshta", "winget"];
+
+    /// <summary>Block the Microsoft Store app, so the child cannot install apps (games, other browsers) on their own.</summary>
+    public bool BlockStore { get; set; } = true;
+
+    /// <summary>Process name of the Microsoft Store app.</summary>
+    public const string StoreApp = "winstore.app";
 
     public AlertSettings GetAlerts() => string.IsNullOrEmpty(AlertsJson) ? new AlertSettings() : PaCoJson.Deserialize<AlertSettings>(AlertsJson);
 

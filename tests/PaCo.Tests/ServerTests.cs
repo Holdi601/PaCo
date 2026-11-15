@@ -181,6 +181,11 @@ public class DeviceApiTests : IClassFixture<PaCoFactory>
         Assert.Equal(lena.Id, policy.ChildForSid(sid)!.ChildId);
         Assert.Null(policy.ChildForSid("S-1-5-21-1-2-3-500"));
         Assert.Equal(7, policy.Children[0].Days.Count);
+        // Default hardening: system tools + winget + Microsoft Store blocked, Windows account policies on.
+        Assert.True(policy.Children[0].HardenAccount);
+        Assert.Contains("cmd", policy.Children[0].BlockedApps);
+        Assert.Contains("winget", policy.Children[0].BlockedApps);
+        Assert.Contains(Child.StoreApp, policy.Children[0].BlockedApps);
 
         using var scope = _f.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();

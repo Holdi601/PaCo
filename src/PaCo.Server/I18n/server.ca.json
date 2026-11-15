@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— sense supervisió (adults) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "«{0}» = contrasenya oblidada o mòbil perdut: la persona rep un enllaç nou i torna a configurar la contrasenya i la 2FA.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…o escaneja el codi QR de la dreta amb la càmera del mòbil.",
- "∞ heute": "∞ avui"
+ "∞ heute": "∞ avui",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Bloqueja la Microsoft Store: el teu fill no pot instal·lar aplicacions sense tu. Per instal·lar-ne una, desactiva-ho un moment. (recomanat)"
 }

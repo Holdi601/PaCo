@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— netiek uzraudzīts (pieaugušie) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "„{0}” = aizmirsta parole vai pazaudēts telefons: persona saņem jaunu saiti un no jauna iestata paroli un 2FA.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…vai noskenē QR kodu labajā pusē ar telefona kameru.",
- "∞ heute": "∞ šodien"
+ "∞ heute": "∞ šodien",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Bloķēt Microsoft Store – bērns nevar instalēt lietotnes bez tevis. Lai instalētu lietotni, uz brīdi izslēdz. (ieteicams)"
 }

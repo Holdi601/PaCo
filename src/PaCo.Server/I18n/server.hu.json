@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— nem felügyelt (felnőttek) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "„{0}” = elfelejtett jelszó vagy elveszett telefon: az illető új linket kap, és újra beállítja a jelszót és a 2FA-t.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…vagy olvasd be a jobb oldali QR-kódot a telefon kamerájával.",
- "∞ heute": "∞ ma"
+ "∞ heute": "∞ ma",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Microsoft Store tiltása – a gyereked nem telepíthet appokat nélküled. Egy app telepítéséhez kapcsold ki rövid időre. (ajánlott)"
 }

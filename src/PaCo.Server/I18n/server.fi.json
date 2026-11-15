@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— ei valvota (aikuiset) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "”{0}” = salasana unohtunut tai puhelin kadonnut: henkilö saa uuden linkin ja ottaa salasanan ja 2FA:n uudelleen käyttöön.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…tai skannaa oikealla oleva QR-koodi puhelimen kameralla.",
- "∞ heute": "∞ tänään"
+ "∞ heute": "∞ tänään",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Estä Microsoft Store – lapsesi ei voi asentaa sovelluksia ilman sinua. Kytke hetkeksi pois, kun haluat asentaa sovelluksen. (suositellaan)"
 }

@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— non surveillé (adultes) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "« {0} » = mot de passe oublié ou téléphone perdu : la personne reçoit un nouveau lien et reconfigure son mot de passe et la 2FA.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "… ou scanne le QR code à droite avec l'appareil photo du téléphone.",
- "∞ heute": "∞ aujourd'hui"
+ "∞ heute": "∞ aujourd'hui",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Bloquer le Microsoft Store – ton enfant ne peut pas installer d'applis sans toi. Pour installer une appli, désactive brièvement. (recommandé)"
 }

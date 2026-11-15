@@ -210,6 +210,9 @@ namespace PaCo.Server.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("BlockStore")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("BlockSystemTools")
                         .HasColumnType("INTEGER");
 

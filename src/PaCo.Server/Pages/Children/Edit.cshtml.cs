@@ -114,6 +114,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
     [BindProperty]
     public bool BlockSystemTools { get; set; }
 
+    [BindProperty]
+    public bool BlockStore { get; set; }
+
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var child = await db.Children.FirstOrDefaultAsync(c => c.Id == id);
@@ -178,6 +181,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
         });
         child.NotifyChildOnScreenshot = NotifyChildOnScreenshot;
         child.BlockSystemTools = BlockSystemTools;
+        child.BlockStore = BlockStore;
 
         await db.SaveChangesAsync();
         TempData["Message"] = Ui.F("Regeln für {0} gespeichert. Online-PCs übernehmen sie innerhalb von 30 Sekunden.", child.Name);
@@ -225,6 +229,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
         CustomKeywords = string.Join("\n", alerts.CustomKeywords);
         NotifyChildOnScreenshot = c.NotifyChildOnScreenshot;
         BlockSystemTools = c.BlockSystemTools;
+        BlockStore = c.BlockStore;
     }
 
     private static string CanonicalLanguage(string code) =>

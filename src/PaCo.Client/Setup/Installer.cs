@@ -243,6 +243,7 @@ internal static class Installer
             if (loaded is not null)
             {
                 BrowserPolicies.RemoveFrom(loaded);
+                AccountPolicies.RemoveFrom(loaded);
                 return;
             }
             // User is logged off: open the profile hive file directly.
@@ -253,6 +254,7 @@ internal static class Installer
             if (RegLoadAppKey(hivePath, out var handle, 0xF003F, 0, 0) != 0) return;
             using var hive = RegistryKey.FromHandle(handle);
             BrowserPolicies.RemoveFrom(hive);
+            AccountPolicies.RemoveFrom(hive);
         }
         catch (Exception ex)
         {

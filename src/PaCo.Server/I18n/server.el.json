@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— χωρίς επίβλεψη (ενήλικες) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "«{0}» = ξεχάστηκε ο κωδικός πρόσβασης ή χάθηκε το κινητό: το άτομο λαμβάνει νέο σύνδεσμο και ρυθμίζει ξανά κωδικό πρόσβασης και 2FA.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…ή σάρωσε τον κωδικό QR δεξιά με την κάμερα του κινητού.",
- "∞ heute": "∞ σήμερα"
+ "∞ heute": "∞ σήμερα",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Αποκλεισμός του Microsoft Store – το παιδί σου δεν μπορεί να εγκαταστήσει εφαρμογές χωρίς εσένα. Για να εγκαταστήσεις μια εφαρμογή, απενεργοποίησέ το για λίγο. (συνιστάται)"
 }

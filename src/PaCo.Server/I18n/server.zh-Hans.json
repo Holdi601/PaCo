@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— 不受监控（成年人）—",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "“{0}”= 忘记密码或手机丢失：对方会收到一个新链接，并重新设置密码和双重验证。",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "……或者用手机相机扫描右侧的二维码。",
- "∞ heute": "∞ 今天"
+ "∞ heute": "∞ 今天",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "阻止 Microsoft Store——孩子无法在没有您的情况下安装应用。如需安装应用，请暂时关闭此项。（推荐）"
 }

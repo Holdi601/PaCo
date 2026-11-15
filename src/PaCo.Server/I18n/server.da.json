@@ -659,5 +659,6 @@
  "— nicht überwacht (Erwachsene) —": "— ikke overvåget (voksne) —",
  "„{0}“ = Passwort vergessen oder Handy verloren: Die Person bekommt einen neuen Link und richtet Passwort und 2FA neu ein.": "“{0}” = glemt adgangskode eller mistet mobil: Personen får et nyt link og sætter adgangskode og 2FA op igen.",
  "…oder den QR-Code rechts mit der Handy-Kamera scannen.": "…eller scan QR-koden til højre med mobilkameraet.",
- "∞ heute": "∞ i dag"
+ "∞ heute": "∞ i dag",
+ "Microsoft Store sperren – dein Kind kann keine Apps ohne dich installieren. Zum Installieren einer App kurz ausschalten. (empfohlen)": "Spær Microsoft Store – dit barn kan ikke installere apps uden dig. Slå det kortvarigt fra for at installere en app. (anbefalet)"
 }

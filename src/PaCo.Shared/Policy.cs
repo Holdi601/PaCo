@@ -86,6 +86,9 @@ public sealed record ChildPolicy
     /// <summary>Tell the child (small notification) when the parents take a screenshot.</summary>
     public bool NotifyChildOnScreenshot { get; init; } = true;
 
+    /// <summary>Windows user policies for the child's account: no Registry editor, command prompt, PowerShell scripts, script host.</summary>
+    public bool HardenAccount { get; init; } = true;
+
     public DayRule RuleFor(DayOfWeek day) => Days.Count == 7 ? Days[(int)day] : DayRule.Unrestricted;
 }
 
