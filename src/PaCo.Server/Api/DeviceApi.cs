@@ -207,6 +207,42 @@ public static class DeviceApi
             await StoreAlertsAsync(db, device, req.Alerts, notifier, options.Value.PublicUrl?.TrimEnd('/'), ct);
         }
 
+        // Public IP history (one row per change) and location fixes.
+        var ip = http.Connection.RemoteIpAddress?.ToString();
+        if (ip is not null && !device.Revoked)
+        {
+            if (device.LastPublicIp != ip)
+            {
+                db.DeviceIps.Add(new DeviceIpEntity { FamilyId = device.FamilyId, DeviceId = device.Id, Ip = Trim(ip, 64), FirstSeenUtc = now, LastSeenUtc = now });
+                device.LastPublicIp = ip;
+            }
+            else
+            {
+                var lastIp = await db.DeviceIps.IgnoreQueryFilters().Where(i => i.DeviceId == device.Id).OrderByDescending(i => i.LastSeenUtc).FirstOrDefaultAsync(ct);
+                if (lastIp is not null && now - lastIp.LastSeenUtc > TimeSpan.FromMinutes(10)) lastIp.LastSeenUtc = now;
+            }
+        }
+        if (req.Locations.Count > 0 && device.LocationMode != LocationMode.Off && !device.Revoked)
+        {
+            var ids = req.Locations.Take(200).Select(l => l.Id).ToList();
+            var known = await db.Locations.IgnoreQueryFilters().Where(l => ids.Contains(l.Id)).Select(l => l.Id).ToListAsync(ct);
+            foreach (var l in req.Locations.Take(200).Where(l => !known.Contains(l.Id)))
+            {
+                var valid = l.Latitude is >= -90 and <= 90 && l.Longitude is >= -180 and <= 180;
+                db.Locations.Add(new DeviceLocationEntity
+                {
+                    Id = l.Id, FamilyId = device.FamilyId, DeviceId = device.Id, TimeUtc = l.TimeUtc.ToUniversalTime(),
+                    Latitude = valid ? l.Latitude : null, Longitude = valid ? l.Longitude : null,
+                    AccuracyMeters = l.AccuracyMeters is > 0 and < 1_000_000 ? l.AccuracyMeters : null,
+                    Source = l.Source is null ? null : Trim(l.Source, 40), Ssid = l.Ssid is null ? null : Trim(l.Ssid, 64),
+                    PublicIp = ip is null ? null : Trim(ip, 64), Error = l.Error is null ? null : Trim(l.Error, 200),
+                });
+            }
+            if (device.LocateRequestedUtc is { } asked && req.Locations.Any(l => l.TimeUtc >= asked.AddSeconds(-30)))
+                device.LocateRequestedUtc = null;
+        }
+        var locateNow = device.LocateRequestedUtc is { } req2 && now - req2 < TimeSpan.FromMinutes(2) && device.LocationMode != LocationMode.Off;
+
         // Pending screenshot requests for children that use this device.
         var screenshots = new List<ScreenshotRequest>();
         if (!device.Revoked)
@@ -243,6 +279,8 @@ public static class DeviceApi
             LatestClientVersion = client.Version,
             Update = update,
             Screenshots = screenshots,
+            LocationMode = device.Revoked ? LocationMode.Off : device.LocationMode,
+            LocateNow = locateNow,
         });
     }
 

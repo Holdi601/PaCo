@@ -278,6 +278,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                 Usage = usage,
                 Events = rt.State.PendingEvents.Take(200).ToList(),
                 Alerts = rt.State.PendingAlerts.Take(100).ToList(),
+                Locations = rt.State.PendingLocations.Take(200).ToList(),
                 Security = security,
             };
         }
@@ -323,6 +324,14 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             if (security is not null) _lastAudit = Mono.Now;
             var sentAlerts = req.Alerts.Select(a => a.Id).ToHashSet();
             rt.State.PendingAlerts.RemoveAll(a => sentAlerts.Contains(a.Id));
+            var sentLocations = req.Locations.Select(l => l.Id).ToHashSet();
+            rt.State.PendingLocations.RemoveAll(l => sentLocations.Contains(l.Id));
+            if (rt.State.LocationMode != resp.LocationMode)
+            {
+                Log.Info($"Standort-Modus: {resp.LocationMode}");
+                rt.State.LocationMode = resp.LocationMode;
+            }
+            if (resp.LocateNow) rt.RequestLocate();
             // Server time now ≈ server timestamp + half the round trip.
             rt.ConfirmServerTime(resp.ServerUtcNow + (receivedAt - sentAt) / 2);
             var tz = FamilyClock.Resolve(rt.Policies.Current?.TimeZoneId ?? "Europe/Berlin");

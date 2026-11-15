@@ -50,8 +50,14 @@
                 else if (online) { <span class="badge bg-success ms-2">online</span> }
                 else { <span class="badge bg-light text-dark ms-2">offline</span> }
             </div>
-            <div class="small text-muted fw-normal">
-                Zuletzt gemeldet: @Format.Ago(d.LastSeenUtc, Model.Now) · PaCo @d.ClientVersion · @d.OsVersion
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="small text-muted fw-normal">Zuletzt gemeldet: @Format.Ago(d.LastSeenUtc, Model.Now) · PaCo @d.ClientVersion · @d.OsVersion</span>
+                @if (!d.Revoked)
+                {
+                    <a asp-page="./Location" asp-route-id="@d.Id" class="btn btn-sm btn-outline-primary">
+                        📍 Standort @(d.LocationMode switch { LocationMode.Continuous => "(aufgezeichnet)", LocationMode.OnRequest => "(auf Anforderung)", _ => "(aus)" })
+                    </a>
+                }
             </div>
         </div>
         <div class="card-body">

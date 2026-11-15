@@ -141,6 +141,10 @@ public sealed class Housekeeping(IServiceScopeFactory scopes, TimeProvider clock
 
                 var oldAlerts = now.AddDays(-90);
                 db.Alerts.RemoveRange(await db.Alerts.IgnoreQueryFilters().Where(a => a.TimeUtc < oldAlerts).ToListAsync(ct));
+
+                var oldLocations = now.AddDays(-30);
+                db.Locations.RemoveRange(await db.Locations.IgnoreQueryFilters().Where(l => l.TimeUtc < oldLocations).ToListAsync(ct));
+                db.DeviceIps.RemoveRange(await db.DeviceIps.IgnoreQueryFilters().Where(i => i.LastSeenUtc < oldAlerts).ToListAsync(ct));
                 await db.SaveChangesAsync(ct);
                 if (oldShots.Count > 0) log.LogInformation("{Count} alte Bildschirmfotos gelöscht", oldShots.Count);
             }

@@ -275,12 +275,22 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("LastPublicIp")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("LastSeenUtc")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LiveJson")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<long?>("LocateRequestedUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LocationMode")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LockedChildrenJson")
                         .IsRequired()
@@ -409,6 +419,83 @@ namespace PaCo.Server.Data.Migrations
                     b.HasIndex("FamilyId", "TimeUtc");
 
                     b.ToTable("DeviceEvents");
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.DeviceIpEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("FirstSeenUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("LastSeenUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId", "LastSeenUtc");
+
+                    b.ToTable("DeviceIps");
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.DeviceLocationEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("AccuracyMeters")
+                        .HasColumnType("REAL");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("PublicIp")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ssid")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("TimeUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId", "TimeUtc");
+
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("PaCo.Server.Data.Family", b =>
@@ -812,6 +899,24 @@ namespace PaCo.Server.Data.Migrations
                 });
 
             modelBuilder.Entity("PaCo.Server.Data.DeviceEventEntity", b =>
+                {
+                    b.HasOne("PaCo.Server.Data.Device", null)
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.DeviceIpEntity", b =>
+                {
+                    b.HasOne("PaCo.Server.Data.Device", null)
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PaCo.Server.Data.DeviceLocationEntity", b =>
                 {
                     b.HasOne("PaCo.Server.Data.Device", null)
                         .WithMany()

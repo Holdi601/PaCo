@@ -1,0 +1,121 @@
+@page "{id:guid}"
+@model PaCo.Server.Pages.Devices.LocationModel
+@{ ViewData["Title"] = $"Standort {Model.Device.Name}"; }
+@section Scripts {
+    <script src="~/lib/leaflet/leaflet.js"></script>
+    <script src="~/js/map.js" asp-append-version="true"></script>
+}
+<link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <div class="stat-label">Standort</div>
+        <h1 class="h3 mb-0 page-title">💻 @Model.Device.Name</h1>
+    </div>
+    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">Zurück</a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body d-flex flex-wrap gap-3 align-items-center justify-content-between">
+        <form method="post" asp-page-handler="Mode" asp-route-id="@Model.Device.Id" class="d-flex gap-2 align-items-center">
+            <label for="mode" class="small text-muted text-nowrap">Aufzeichnung</label>
+            <select id="mode" name="mode" class="form-select form-select-sm">
+                <option value="Off" selected="@(Model.Device.LocationMode == LocationMode.Off)">Aus</option>
+                <option value="OnRequest" selected="@(Model.Device.LocationMode == LocationMode.OnRequest)">Nur auf Anforderung</option>
+                <option value="Continuous" selected="@(Model.Device.LocationMode == LocationMode.Continuous)">Dauerhaft (alle 15 Min)</option>
+            </select>
+            <button class="btn btn-sm btn-outline-primary">Speichern</button>
+        </form>
+        <div class="d-flex gap-2 align-items-center">
+            @if (Model.Waiting)
+            {
+                <span class="spinner-border spinner-border-sm text-primary"></span><span class="small">Orte … (PC muss online sein)</span>
+                <div data-autorefresh="4"></div>
+            }
+            <form method="post" asp-page-handler="Locate" asp-route-id="@Model.Device.Id">
+                <button class="btn btn-primary" @(Model.Waiting ? "disabled" : "")>📍 Jetzt orten</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex gap-2 mb-2 small">
+    Zeitraum:
+    @foreach (var d in new[] { 1, 7, 30 })
+    {
+        <a asp-route-id="@Model.Device.Id" asp-route-days="@d" class="@(Model.Days == d ? "fw-bold" : "")">@(d == 1 ? "24 Stunden" : $"{d} Tage")</a>
+    }
+</div>
+
+<div class="card mb-4">
+    <div id="paco-map" class="paco-map" data-points="@Model.MapJson"></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Verlauf</div>
+            <div class="list-group list-group-flush small">
+                @foreach (var p in Model.Points.AsEnumerable().Reverse().Take(60))
+                {
+                    <div class="list-group-item d-flex flex-wrap justify-content-between gap-2">
+                        <span>@TimeZoneInfo.ConvertTime(p.TimeUtc, Model.Tz).ToString("dd.MM. HH:mm")</span>
+                        @if (p.Latitude is { } lat && p.Longitude is { } lon)
+                        {
+                            <a href="https://www.openstreetmap.org/?mlat=@lat.ToString(System.Globalization.CultureInfo.InvariantCulture)&mlon=@lon.ToString(System.Globalization.CultureInfo.InvariantCulture)#map=17/@lat.ToString(System.Globalization.CultureInfo.InvariantCulture)/@lon.ToString(System.Globalization.CultureInfo.InvariantCulture)" target="_blank" rel="noopener noreferrer">
+                                @lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture), @lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
+                            </a>
+                            <span class="text-muted">±@((int)(p.AccuracyMeters ?? 0)) m · @PaCo.Server.Pages.Devices.LocationModel.SourceText(p.Source)</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">keine Ortung möglich (@p.Error)</span>
+                        }
+                        <span class="text-muted">@(p.Ssid is null ? "" : $"WLAN „{p.Ssid}“") @(p.PublicIp is null ? "" : $"· IP {p.PublicIp}")</span>
+                    </div>
+                }
+                @if (Model.Points.Count == 0)
+                {
+                    <div class="list-group-item text-muted">Keine Standorte in diesem Zeitraum. @(Model.Device.LocationMode == LocationMode.Off ? "Die Aufzeichnung ist ausgeschaltet." : "")</div>
+                }
+            </div>
+            @if (Model.Points.Count > 0)
+            {
+                <div class="card-body pt-2">
+                    <form method="post" asp-page-handler="Clear" asp-route-id="@Model.Device.Id" class="text-end">
+                        <button class="btn btn-sm btn-link text-danger" data-confirm="Gesamten Standortverlauf dieses Geräts löschen?">Verlauf löschen</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">Internet-Anschlüsse (IP-Adressen)</div>
+            <div class="list-group list-group-flush small">
+                @foreach (var i in Model.Ips)
+                {
+                    <div class="list-group-item">
+                        <div class="font-monospace">@i.Ip</div>
+                        <div class="text-muted">@TimeZoneInfo.ConvertTime(i.FirstSeenUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm") – @TimeZoneInfo.ConvertTime(i.LastSeenUtc, Model.Tz).ToString("dd.MM.yyyy HH:mm")</div>
+                    </div>
+                }
+                @if (Model.Ips.Count == 0)
+                {
+                    <div class="list-group-item text-muted">Noch keine Daten.</div>
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">Gut zu wissen</div>
+            <div class="card-body small">
+                <ul class="mb-0">
+                    <li>Laptops ohne GPS orten über WLAN-Netze in der Nähe – meist auf 20–100 m genau. Ohne WLAN ist keine genaue Ortung möglich.</li>
+                    <li>PaCo ortet auch, wenn niemand angemeldet ist (z. B. ein gestohlener Laptop am Anmeldebildschirm), sofern er online ist.</li>
+                    <li><strong>Diebstahl:</strong> Die IP-Adressen mit Uhrzeit helfen der Polizei, den Internet-Anschluss zu ermitteln. Bitte nicht selbst hinfahren.</li>
+                    <li>Standorte werden nach 30 Tagen automatisch gelöscht und sind nur für eure Familie sichtbar. Benutzen Erwachsene das Gerät, wird auch ihr Standort erfasst.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

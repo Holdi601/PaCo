@@ -157,6 +157,15 @@ public sealed class Device : IFamilyScoped
     public IReadOnlyList<SecurityFinding> GetSecurity() =>
         PaCoJson.Deserialize<SecurityFinding[]>(string.IsNullOrEmpty(SecurityJson) ? "[]" : SecurityJson);
 
+    /// <summary>Location recording for this device (default off – parents decide).</summary>
+    public LocationMode LocationMode { get; set; } = LocationMode.Off;
+
+    /// <summary>"Jetzt orten" pressed at this time (pending until a newer fix arrives).</summary>
+    public DateTimeOffset? LocateRequestedUtc { get; set; }
+
+    [MaxLength(64)]
+    public string? LastPublicIp { get; set; }
+
     /// <summary>A parent/admin asked this device to install the newest client version.</summary>
     public bool UpdateRequested { get; set; }
 
@@ -329,6 +338,53 @@ public sealed class AlertEntity : IFamilyScoped
     public string Source { get; set; } = "";
 
     public DateTimeOffset? ReadUtc { get; set; }
+}
+
+/// <summary>A location fix of a device (kept 30 days).</summary>
+public sealed class DeviceLocationEntity : IFamilyScoped
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public Guid FamilyId { get; set; }
+
+    public Guid DeviceId { get; set; }
+
+    public DateTimeOffset TimeUtc { get; set; }
+
+    public double? Latitude { get; set; }
+
+    public double? Longitude { get; set; }
+
+    public double? AccuracyMeters { get; set; }
+
+    [MaxLength(40)]
+    public string? Source { get; set; }
+
+    [MaxLength(64)]
+    public string? Ssid { get; set; }
+
+    [MaxLength(64)]
+    public string? PublicIp { get; set; }
+
+    [MaxLength(200)]
+    public string? Error { get; set; }
+}
+
+/// <summary>Public IP addresses a device used (one row per change, kept 90 days) – useful for police after a theft.</summary>
+public sealed class DeviceIpEntity : IFamilyScoped
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public Guid FamilyId { get; set; }
+
+    public Guid DeviceId { get; set; }
+
+    [MaxLength(64)]
+    public string Ip { get; set; } = "";
+
+    public DateTimeOffset FirstSeenUtc { get; set; }
+
+    public DateTimeOffset LastSeenUtc { get; set; }
 }
 
 public enum ScreenshotStatus

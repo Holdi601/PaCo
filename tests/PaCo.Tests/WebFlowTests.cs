@@ -285,6 +285,22 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
 
         // Notifications page renders and creates a secret topic.
         Assert.Contains("paco-", await a.GetStringAsync("/Notifications"));
+
+        // Location: only recorded when the parents enabled it; strictly per family.
+        await devA.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest { Locations = [new LocationPoint { TimeUtc = DateTimeOffset.UtcNow, Latitude = 52.52, Longitude = 13.405, AccuracyMeters = 30 }] }, PaCoJson.Options);
+        using (var scope = _f.Services.CreateScope())
+            Assert.Equal(0, await scope.ServiceProvider.GetRequiredService<PaCoDb>().Locations.IgnoreQueryFilters().CountAsync(l => l.DeviceId == deviceA));
+        var locUrl = $"/Devices/Location/{deviceA}";
+        var locPage = await a.GetStringAsync(locUrl);
+        Assert.Equal(HttpStatusCode.Redirect, (await PostFormAsync(a, $"{locUrl}?handler=Locate", locPage, [])).StatusCode);
+        var resp = await (await devA.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest(), PaCoJson.Options)).Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options);
+        Assert.True(resp!.LocateNow);
+        Assert.Equal(LocationMode.OnRequest, resp.LocationMode);
+        await devA.PostAsJsonAsync(ApiRoutes.Sync, new SyncRequest { Locations = [new LocationPoint { TimeUtc = DateTimeOffset.UtcNow, Latitude = 52.52, Longitude = 13.405, AccuracyMeters = 30, Ssid = "Heimnetz" }] }, PaCoJson.Options);
+        Assert.Contains("52.52000", await a.GetStringAsync(locUrl));
+        Assert.Equal(HttpStatusCode.NotFound, (await b.GetAsync(locUrl)).StatusCode);
+        var bDevices = await b.GetStringAsync("/Devices/Index");
+        Assert.Equal(HttpStatusCode.NotFound, (await PostFormAsync(b, $"{locUrl}?handler=Locate", bDevices, [])).StatusCode);
     }
 
     private async Task LoginAsync(HttpClient b, string mail, string pw, string totpKey)

@@ -45,6 +45,21 @@ internal sealed class Runtime
     public System.Collections.Concurrent.ConcurrentQueue<(Guid RequestId, byte[] Jpeg)> ScreenshotUploads { get; } = new();
 
     private readonly SemaphoreSlim _syncSignal = new(0, 1);
+    private volatile bool _locateRequested;
+
+    public LocationMode LocationMode
+    {
+        get { lock (Gate) return State.LocationMode; }
+    }
+
+    public void RequestLocate() => _locateRequested = true;
+
+    public bool TakeLocateRequest()
+    {
+        var r = _locateRequested;
+        _locateRequested = false;
+        return r;
+    }
 
     /// <summary>Wakes the sync worker immediately (alarms, screenshots).</summary>
     public void RequestSyncNow()

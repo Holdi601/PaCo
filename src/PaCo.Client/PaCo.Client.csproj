@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Windows SDK projection for Windows.Devices.Geolocation (device location). Still runs on Windows 10 1809+. -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <UseWindowsForms>true</UseWindowsForms>
     <!-- UI Automation (System.Windows.Automation) for reading visible window text for alarms. -->
     <UseWPF>true</UseWPF>

@@ -61,6 +61,7 @@ internal static class Program
         builder.Services.AddSingleton(rt);
         builder.Services.AddHostedService<Enforcer>();
         builder.Services.AddHostedService<SyncWorker>();
+        builder.Services.AddHostedService<LocationWorker>();
         builder.Services.Configure<HostOptions>(o =>
         {
             o.ShutdownTimeout = TimeSpan.FromSeconds(10);

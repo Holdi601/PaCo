@@ -9,6 +9,37 @@ public static class ApiRoutes
     public const string Screenshot = "/api/device/screenshot";
 }
 
+public enum LocationMode
+{
+    Off,
+    /// <summary>Only when a parent presses "Jetzt orten".</summary>
+    OnRequest,
+    /// <summary>Every 15 minutes, plus on request.</summary>
+    Continuous,
+}
+
+/// <summary>A location fix of the device (or a failed attempt with whatever is known).</summary>
+public sealed record LocationPoint
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+
+    public DateTimeOffset TimeUtc { get; init; }
+
+    public double? Latitude { get; init; }
+
+    public double? Longitude { get; init; }
+
+    public double? AccuracyMeters { get; init; }
+
+    /// <summary>Windows position source (WiFi, Satellite, IPAddress, …).</summary>
+    public string? Source { get; init; }
+
+    /// <summary>Name of the connected Wi-Fi network.</summary>
+    public string? Ssid { get; init; }
+
+    public string? Error { get; init; }
+}
+
 public enum SecuritySeverity
 {
     Ok,
@@ -148,6 +179,9 @@ public sealed record SyncRequest
     /// <summary>Latest security check of the PC (sent about once a day; null = unchanged).</summary>
     public IReadOnlyList<SecurityFinding>? Security { get; init; }
 
+    /// <summary>Location fixes since the last successful sync.</summary>
+    public IReadOnlyList<LocationPoint> Locations { get; init; } = [];
+
     /// <summary>Alarm hits since the last successful sync.</summary>
     public IReadOnlyList<AlertReport> Alerts { get; init; } = [];
 
@@ -197,6 +231,11 @@ public sealed record SyncResponse
 
     /// <summary>Pending screenshot requests for children on this device.</summary>
     public IReadOnlyList<ScreenshotRequest> Screenshots { get; init; } = [];
+
+    public LocationMode LocationMode { get; init; }
+
+    /// <summary>A parent pressed "Jetzt orten".</summary>
+    public bool LocateNow { get; init; }
 }
 
 /// <summary>Signed description of a client build the device may install.</summary>

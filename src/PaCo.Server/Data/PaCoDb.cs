@@ -39,6 +39,10 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
 
     public DbSet<ScreenshotEntity> Screenshots => Set<ScreenshotEntity>();
 
+    public DbSet<DeviceLocationEntity> Locations => Set<DeviceLocationEntity>();
+
+    public DbSet<DeviceIpEntity> DeviceIps => Set<DeviceIpEntity>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // SQLite cannot compare/order DateTimeOffset; store as sortable binary (all values are UTC).
@@ -80,6 +84,11 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
         b.Entity<AlertEntity>().HasIndex(a => new { a.FamilyId, a.TimeUtc });
         b.Entity<ScreenshotEntity>().HasOne<Child>().WithMany().HasForeignKey(s => s.ChildId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<ScreenshotEntity>().HasIndex(s => new { s.ChildId, s.RequestedUtc });
+
+        b.Entity<DeviceLocationEntity>().HasOne<Device>().WithMany().HasForeignKey(l => l.DeviceId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<DeviceLocationEntity>().HasIndex(l => new { l.DeviceId, l.TimeUtc });
+        b.Entity<DeviceIpEntity>().HasOne<Device>().WithMany().HasForeignKey(i => i.DeviceId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<DeviceIpEntity>().HasIndex(i => new { i.DeviceId, i.LastSeenUtc });
 
         // Tenant isolation for every family-scoped entity.
         foreach (var type in b.Model.GetEntityTypes().Where(t => typeof(IFamilyScoped).IsAssignableFrom(t.ClrType)))

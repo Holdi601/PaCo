@@ -18,6 +18,12 @@ internal sealed class ClientState
 
     public List<DeviceEvent> PendingEvents { get; set; } = [];
 
+    /// <summary>Location fixes not yet delivered (kept offline, e.g. a stolen laptop without known Wi-Fi).</summary>
+    public List<LocationPoint> PendingLocations { get; set; } = [];
+
+    /// <summary>Last location mode received from the server (survives reboots while offline).</summary>
+    public LocationMode LocationMode { get; set; }
+
     /// <summary>Alarm hits not yet delivered to the server (kept across reboots / offline).</summary>
     public List<AlertReport> PendingAlerts { get; set; } = [];
 
