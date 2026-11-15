@@ -21,6 +21,7 @@ internal sealed class ServerApi : IDisposable
             Timeout = TimeSpan.FromSeconds(30),
         };
         _http.DefaultRequestHeaders.UserAgent.ParseAdd($"PaCo-Client/{Version}");
+        _http.DefaultRequestHeaders.AcceptLanguage.ParseAdd(L.Lang);
         if (device is not null) _http.DefaultRequestHeaders.Authorization = new("Device", $"{device.DeviceId}:{device.DeviceToken}");
     }
 
