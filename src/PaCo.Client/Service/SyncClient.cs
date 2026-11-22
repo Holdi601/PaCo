@@ -292,6 +292,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                     GrantSeconds = new Dictionary<Guid, long>(u.GrantSeconds),
                     Codes = u.Codes.Select(c => new RedeemedCode { Nonce = c.Nonce, Minutes = c.Minutes, ConsumedSeconds = c.ConsumedSeconds, RedeemedUtc = c.RedeemedUtc }).ToList(),
                     Apps = u.Apps.ToDictionary(a => a.Key, a => new AppUsage { DisplayName = a.Value.DisplayName, Seconds = a.Value.Seconds }),
+                    Groups = new Dictionary<Guid, long>(u.Groups),
                 });
             }
 

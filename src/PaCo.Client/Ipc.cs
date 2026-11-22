@@ -23,6 +23,7 @@ internal sealed record IpcMessage
     public const string Exit = "exit";
     public const string AlertConfig = "alertConfig";
     public const string TakeScreenshot = "takeScreenshot";
+    public const string CloseTab = "closeTab";
 
     // Agent → service
     public const string Hello = "hello";
@@ -33,6 +34,7 @@ internal sealed record IpcMessage
     public const string RequestLogoff = "requestLogoff";
     public const string AlertHits = "alertHits";
     public const string ScreenshotData = "screenshotData";
+    public const string Focus = "focus";
 
     public string Type { get; init; } = "";
 
@@ -60,6 +62,13 @@ internal sealed record IpcMessage
     public IReadOnlyList<AlertHitDto>? Hits { get; init; }
 
     public Guid? RequestId { get; init; }
+
+    /// <summary>Foreground program (process name), its description and – for browsers – the host of the active tab.</summary>
+    public string? Process { get; init; }
+
+    public string? Description { get; init; }
+
+    public string? Host { get; init; }
 }
 
 internal sealed record AlertHitDto(AlertCategory Category, string Keyword, string Snippet, string App, string? Title, string Source);

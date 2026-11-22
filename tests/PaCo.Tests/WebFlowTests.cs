@@ -465,6 +465,100 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
     }
 
     [Fact]
+    public async Task AppAndSiteGroupsWithLimitsAndLearningTime()
+    {
+        var (b, fam) = await ParentOfNewFamilyAsync("groups-parent@test.local");
+        Guid child, pc, other;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var c = new Child { FamilyId = fam, Name = "Max" };
+            var d1 = new Device { FamilyId = fam, Name = "PC", TokenHash = Secrets.Sha256Hex(Secrets.DeviceToken()) };
+            var d2 = new Device { FamilyId = fam, Name = "Laptop", TokenHash = Secrets.Sha256Hex(Secrets.DeviceToken()) };
+            db.Children.Add(c);
+            db.Devices.AddRange(d1, d2);
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = fam, DeviceId = d1.Id, Sid = "S-1-5-21-6-6-6-1001", UserName = "max", ChildId = c.Id });
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = fam, DeviceId = d2.Id, Sid = "S-1-5-21-6-6-7-1001", UserName = "max", ChildId = c.Id });
+            db.UsageDays.Add(new UsageDay
+            {
+                FamilyId = fam, DeviceId = d1.Id, ChildId = c.Id, Day = today, RegularSeconds = 60,
+                AppsJson = PaCoJson.Serialize(new Dictionary<string, AppUsage> { ["anton"] = new() { DisplayName = "ANTON", Seconds = 60 } }),
+            });
+            await db.SaveChangesAsync();
+            (child, pc, other) = (c.Id, d1.Id, d2.Id);
+        }
+        ChildPolicy PolicyOn(Guid deviceId)
+        {
+            using var scope = _f.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var dev = db.Devices.IgnoreQueryFilters().Single(x => x.Id == deviceId);
+            return scope.ServiceProvider.GetRequiredService<PolicyBuilder>().BuildAsync(dev, default).GetAwaiter().GetResult().Children.Single();
+        }
+        List<KeyValuePair<string, string>> BaseForm(string page)
+        {
+            var form = new List<KeyValuePair<string, string>>
+            {
+                new("__RequestVerificationToken", TokenRegex().Match(page).Groups[1].Value), new("Name", "Max"), new("ExpiryAction", "LockScreen"),
+                new("GroupsForm", "true"),
+            };
+            for (var i = 0; i < 7; i++) { form.Add(new($"Days[{i}].LimitMinutes", "120")); form.Add(new($"Days[{i}].AllDay", "true")); }
+            return form;
+        }
+
+        // Add the "videos" and "learning" presets with one click each.
+        var edit = await b.GetStringAsync($"/Children/Edit/{child}");
+        var form = BaseForm(edit);
+        form.Add(new("AddGroupPreset", "videos"));
+        var r = await b.PostAsync($"/Children/Edit/{child}", new FormUrlEncodedContent(form));
+        Assert.Equal(HttpStatusCode.Redirect, r.StatusCode);
+        Assert.EndsWith("#sec-groups", r.Headers.Location!.ToString());
+        var videos = Assert.Single(PolicyOn(pc).Groups);
+        Assert.Equal(TimeGroupKind.Limit, videos.Kind);
+        Assert.Contains("youtube.com", videos.Sites);
+
+        // Change it to 20 minutes, add the learning app "anton" (description taken from the statistics) as learning time.
+        edit = await b.GetStringAsync($"/Children/Edit/{child}");
+        form = BaseForm(edit);
+        form.AddRange([
+            new("Groups[0].Id", videos.Id.ToString()), new("Groups[0].Name", "YouTube & Co"), new("Groups[0].Kind", "Limit"),
+            new("Groups[0].Minutes", "20"), new("Groups[0].Sites", "youtube.com\ntwitch.tv"),
+            new("Groups[1].Name", "Lernen"), new("Groups[1].Kind", "Free"), new("Groups[1].Apps", "anton"), new("Groups[1].Sites", "anton.app"),
+        ]);
+        Assert.Equal(HttpStatusCode.Redirect, (await b.PostAsync($"/Children/Edit/{child}", new FormUrlEncodedContent(form))).StatusCode);
+        var groups = PolicyOn(pc).Groups;
+        Assert.Equal(2, groups.Count);
+        Assert.Equal(20, groups[0].MinutesPerDay);
+        Assert.Equal("ANTON", groups[1].AppDescriptions["anton"]);
+        Assert.Equal(TimeGroupKind.Free, groups[1].Kind);
+
+        // Group time from the other PC counts here (shared daily time).
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            db.UsageDays.Add(new UsageDay
+            {
+                FamilyId = fam, DeviceId = other, ChildId = child, Day = today, RegularSeconds = 300,
+                GroupsJson = PaCoJson.Serialize(new Dictionary<Guid, long> { [groups[0].Id] = 300 }),
+            });
+            await db.SaveChangesAsync();
+        }
+        Assert.Equal(300, PolicyOn(pc).GroupSecondsElsewhere[groups[0].Id][today]);
+
+        // Statistics show the groups.
+        var stats = await b.GetStringAsync($"/Children/Stats/{child}?day={today:yyyy-MM-dd}");
+        Assert.Contains("YouTube &amp; Co", stats);
+
+        // Removing a group.
+        edit = await b.GetStringAsync($"/Children/Edit/{child}");
+        form = BaseForm(edit);
+        form.AddRange([new("Groups[0].Id", groups[0].Id.ToString()), new("Groups[0].Name", "x"), new("Groups[0].Remove", "true"),
+            new("Groups[1].Id", groups[1].Id.ToString()), new("Groups[1].Name", "Lernen"), new("Groups[1].Kind", "Free"), new("Groups[1].Apps", "anton")]);
+        await b.PostAsync($"/Children/Edit/{child}", new FormUrlEncodedContent(form));
+        Assert.Single(PolicyOn(pc).Groups);
+    }
+
+    [Fact]
     public async Task EveryPageRendersInEveryLanguage()
     {
         var (b, fam) = await ParentOfNewFamilyAsync("lang-parent@test.local");

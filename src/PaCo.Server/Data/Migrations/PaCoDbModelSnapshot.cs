@@ -256,6 +256,10 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<bool>("Paused")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("TimeGroupsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("TimePerDevice")
                         .HasColumnType("INTEGER");
 
@@ -847,6 +851,10 @@ namespace PaCo.Server.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("GrantSecondsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GroupsJson")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

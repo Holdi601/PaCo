@@ -150,6 +150,9 @@ public sealed record UsageReport
     public IReadOnlyList<RedeemedCode> Codes { get; init; } = [];
 
     public IReadOnlyDictionary<string, AppUsage> Apps { get; init; } = new Dictionary<string, AppUsage>();
+
+    /// <summary>Foreground seconds per time group.</summary>
+    public IReadOnlyDictionary<Guid, long> Groups { get; init; } = new Dictionary<Guid, long>();
 }
 
 public enum DeviceEventKind

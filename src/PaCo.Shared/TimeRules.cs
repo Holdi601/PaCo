@@ -34,6 +34,9 @@ public sealed class DayUsage
     /// <summary>Foreground time per process name (lower case, without .exe).</summary>
     public Dictionary<string, AppUsage> Apps { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Foreground seconds per time group (limits and learning time).</summary>
+    public Dictionary<Guid, long> Groups { get; set; } = [];
+
     public long TotalSeconds => RegularSeconds + GrantSeconds.Values.Sum() + Codes.Sum(c => c.ConsumedSeconds);
 }
 

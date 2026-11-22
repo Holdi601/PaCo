@@ -52,6 +52,10 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                     .Concat(c.BlockStore ? [Child.StoreApp] : [])
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
                 HardenAccount = c.BlockedToolIds().Count > 0,
+                Groups = c.GetTimeGroups(),
+                GroupSecondsElsewhere = mine.SelectMany(u => u.GetGroups().Select(g => (Group: g.Key, u.Day, Seconds: g.Value)))
+                    .GroupBy(x => x.Group)
+                    .ToDictionary(g => g.Key, g => g.GroupBy(x => x.Day).ToDictionary(d => d.Key, d => d.Sum(x => x.Seconds))),
                 Web = c.GetWeb(),
                 Language = Languages.IsSupported(c.Language) ? c.Language : Languages.Source,
                 Alerts = WithLanguages(c.GetAlerts(), c.Language),

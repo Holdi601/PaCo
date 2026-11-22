@@ -128,6 +128,14 @@ public sealed class Child : IFamilyScoped
     /// </summary>
     public bool TimePerDevice { get; set; }
 
+    /// <summary>JSON array of <see cref="TimeGroup"/>: per-app/site limits and learning time.</summary>
+    public string TimeGroupsJson { get; set; } = "[]";
+
+    public IReadOnlyList<TimeGroup> GetTimeGroups() =>
+        PaCoJson.Deserialize<TimeGroup[]>(string.IsNullOrEmpty(TimeGroupsJson) ? "[]" : TimeGroupsJson);
+
+    public void SetTimeGroups(IEnumerable<TimeGroup> groups) => TimeGroupsJson = PaCoJson.Serialize(groups.Take(30).ToArray());
+
     /// <summary>JSON array of device ids where the time rules (limit, allowed hours) do not apply, e.g. the school laptop.
     /// App/web blocks and alarms still apply there; time used there does not count towards the other PCs.</summary>
     public string NoTimeLimitDevicesJson { get; set; } = "[]";
@@ -359,6 +367,11 @@ public sealed class UsageDay : IFamilyScoped
     public string CodesJson { get; set; } = "[]";
 
     public string AppsJson { get; set; } = "{}";
+
+    /// <summary>JSON object group id → foreground seconds (per-app/site limits and learning time).</summary>
+    public string GroupsJson { get; set; } = "{}";
+
+    public Dictionary<Guid, long> GetGroups() => PaCoJson.Deserialize<Dictionary<Guid, long>>(string.IsNullOrEmpty(GroupsJson) ? "{}" : GroupsJson);
 
     public DateTimeOffset UpdatedUtc { get; set; } = DateTimeOffset.UtcNow;
 

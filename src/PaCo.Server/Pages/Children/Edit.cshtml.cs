@@ -22,8 +22,37 @@ public sealed class DayInput
     public TimeOnly? To { get; set; }
 }
 
+public sealed class GroupInput
+{
+    public Guid Id { get; set; }
+
+    public string? Name { get; set; }
+
+    public TimeGroupKind Kind { get; set; }
+
+    [Range(1, 1440, ErrorMessage = "1 bis 1440 Minuten.")]
+    public int? Minutes { get; set; }
+
+    public string? Apps { get; set; }
+
+    public string? Sites { get; set; }
+
+    public bool Remove { get; set; }
+}
+
 public sealed class EditModel(PaCoDb db) : PageModel
 {
+    /// <summary>Per-app/site limits and learning time. Only used when <see cref="GroupsForm"/> is posted.</summary>
+    [BindProperty]
+    public List<GroupInput> Groups { get; set; } = [];
+
+    [BindProperty]
+    public bool GroupsForm { get; set; }
+
+    /// <summary>Set by the "add group" buttons (preset id) – saves the form and adds the group.</summary>
+    [BindProperty]
+    public string? AddGroupPreset { get; set; }
+
     // Preset names are form values (German key) and translated for display.
     // i18n-keys:start server
     private const string PresetSocial = "Soziale Netzwerke";
@@ -251,6 +280,33 @@ public sealed class EditModel(PaCoDb db) : PageModel
             child.BlockSystemTools = BlockSystemTools;
         }
         child.BlockStore = BlockStore;
+        if (GroupsForm)
+        {
+            var old = child.GetTimeGroups().ToDictionary(g => g.Id);
+            var names = KnownApps.ToDictionary(k => k.Process, k => k.Name, StringComparer.OrdinalIgnoreCase);
+            var groups = new List<TimeGroup>();
+            foreach (var g in Groups.Where(g => !g.Remove))
+            {
+                var groupApps = SplitLines(g.Apps).Select(NormalizeApp).Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(100).ToList();
+                // Remember the program description for learning apps, so a renamed game does not count as learning time.
+                var previous = old.TryGetValue(g.Id, out var o) ? o.AppDescriptions : new Dictionary<string, string>();
+                var descriptions = groupApps.Select(a => (a, d: previous.GetValueOrDefault(a) ?? names.GetValueOrDefault(a)))
+                    .Where(x => !string.IsNullOrEmpty(x.d))
+                    .ToDictionary(x => x.a, x => x.d!, StringComparer.OrdinalIgnoreCase);
+                groups.Add(new TimeGroup
+                {
+                    Id = g.Id == Guid.Empty ? Guid.NewGuid() : g.Id,
+                    Name = string.IsNullOrWhiteSpace(g.Name) ? Ui.T("Eigene Gruppe") : g.Name.Trim()[..Math.Min(60, g.Name.Trim().Length)],
+                    Kind = g.Kind == TimeGroupKind.Free ? TimeGroupKind.Free : TimeGroupKind.Limit,
+                    MinutesPerDay = g.Kind == TimeGroupKind.Free ? null : g.Minutes,
+                    Apps = groupApps,
+                    Sites = SplitLines(g.Sites).Select(NormalizeSite).Where(x => x.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(200).ToList(),
+                    AppDescriptions = descriptions,
+                });
+            }
+            if (AddGroupPreset is not null && Services.TimeGroupPresets.Create(AddGroupPreset) is { } added) groups.Add(added);
+            child.SetTimeGroups(groups);
+        }
         if (TimeDevicesForm)
         {
             child.TimePerDevice = TimePerDevice;
@@ -259,7 +315,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
 
         await db.SaveChangesAsync();
         TempData["Message"] = Ui.F("Regeln für {0} gespeichert. Online-PCs übernehmen sie innerhalb von 30 Sekunden.", child.Name);
-        return RedirectToPage(new { id });
+        return AddGroupPreset is null ? RedirectToPage(new { id }) : Redirect(Url.Page("./Edit", new { id }) + "#sec-groups");
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(Guid id)
@@ -309,6 +365,11 @@ public sealed class EditModel(PaCoDb db) : PageModel
         BlockStore = c.BlockStore;
         BlockedTools = c.BlockedToolIds().ToList();
         TimePerDevice = c.TimePerDevice;
+        Groups = c.GetTimeGroups().Select(g => new GroupInput
+        {
+            Id = g.Id, Name = g.Name, Kind = g.Kind, Minutes = g.MinutesPerDay,
+            Apps = string.Join("\n", g.Apps), Sites = string.Join("\n", g.Sites),
+        }).ToList();
         TimeLimitDevices = ChildDevices.Select(d => d.Id).Where(c.TimeLimitOn).ToList();
     }
 

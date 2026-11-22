@@ -12,8 +12,12 @@ internal sealed class ForegroundTracker
     private readonly Dictionary<string, (string Display, int Seconds, string? Title)> _pending = new(StringComparer.OrdinalIgnoreCase);
     private readonly int _ownPid = Environment.ProcessId;
 
+    /// <summary>Foreground window of the last sample (process name, description, window handle, title).</summary>
+    public (string Process, string Description, IntPtr Hwnd, string? Title)? Current { get; private set; }
+
     public void Sample()
     {
+        Current = null;
         var hwnd = Win32.GetForegroundWindow();
         if (hwnd == IntPtr.Zero) return;
         Win32.GetWindowThreadProcessId(hwnd, out var pid);
@@ -35,6 +39,7 @@ internal sealed class ForegroundTracker
         }
 
         var title = WindowTitle(hwnd);
+        Current = (info.Name, info.Display, hwnd, title);
         _pending[info.Name] = _pending.TryGetValue(info.Name, out var cur)
             ? (info.Display, cur.Seconds + 1, title)
             : (info.Display, 1, title);

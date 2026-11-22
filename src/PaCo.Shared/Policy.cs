@@ -82,6 +82,12 @@ public sealed record ChildPolicy
     /// <summary>Process names (without .exe, case-insensitive) that are killed in the child's session.</summary>
     public IReadOnlyList<string> BlockedApps { get; init; } = [];
 
+    /// <summary>Per-app/site limits and learning time (see <see cref="TimeGroup"/>).</summary>
+    public IReadOnlyList<TimeGroup> Groups { get; init; } = [];
+
+    /// <summary>Group seconds used on the child's other PCs (shared time only), by group id and day.</summary>
+    public IReadOnlyDictionary<Guid, Dictionary<DateOnly, long>> GroupSecondsElsewhere { get; init; } = new Dictionary<Guid, Dictionary<DateOnly, long>>();
+
     public WebFilterPolicy Web { get; init; } = new();
 
     public AlertSettings Alerts { get; init; } = new();

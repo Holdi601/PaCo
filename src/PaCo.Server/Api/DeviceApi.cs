@@ -384,6 +384,11 @@ public static class DeviceApi
             row.AppsJson = PaCoJson.Serialize(r.Apps
                 .OrderByDescending(a => a.Value.Seconds).Take(MaxAppsPerDay)
                 .ToDictionary(a => Trim(a.Key, 80), a => new AppUsage { DisplayName = Trim(a.Value.DisplayName, 120), Seconds = Clamp(a.Value.Seconds) }));
+            // Group seconds only ever grow within a day as well.
+            var groups = row.GetGroups();
+            foreach (var (gid, sec) in r.Groups.Take(50))
+                groups[gid] = Math.Max(groups.GetValueOrDefault(gid), Clamp(sec));
+            row.GroupsJson = PaCoJson.Serialize(groups.Take(50).ToDictionary(k => k.Key, v => v.Value));
             row.UpdatedUtc = now;
 
             foreach (var c in codes)

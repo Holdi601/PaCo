@@ -127,6 +127,10 @@ internal sealed class AgentApp : ApplicationContext
                 case IpcMessage.AlertConfig when msg.Text is { } json:
                     _scanner.Configure(PaCoJson.Deserialize<AlertSettings>(json));
                     break;
+                case IpcMessage.CloseTab:
+                    CloseTab(msg.Host);
+                    break;
+
                 case IpcMessage.TakeScreenshot when msg.RequestId is { } rid:
                     byte[] jpeg = [];
                     try
@@ -149,9 +153,59 @@ internal sealed class AgentApp : ApplicationContext
         }
     }
 
+    private string? _host;
+    private (IntPtr Hwnd, string? Title) _hostFor;
+    private TimeSpan _hostAt = Mono.Never;
+    private int _hostReading;
+    private string? _sentFocus;
+    private int _focusTick;
+
+    /// <summary>
+    /// Tells the service what is in the foreground (for per-app/site limits and learning time) – on every change and
+    /// every 5 s. The browser address is read in the background (UI Automation can take a moment).
+    /// </summary>
+    private void ReportFocus()
+    {
+        var cur = _lock.IsShown ? null : _tracker.Current;
+        if (cur is { } c && BrowserAddress.IsBrowser(c.Process))
+        {
+            var stale = _hostFor != (c.Hwnd, c.Title) || Mono.Now - _hostAt > TimeSpan.FromSeconds(10);
+            if (stale && Interlocked.CompareExchange(ref _hostReading, 1, 0) == 0)
+            {
+                var (hwnd, title, process) = (c.Hwnd, c.Title, c.Process);
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        _host = BrowserAddress.ReadHost(hwnd, process);
+                        _hostFor = (hwnd, title);
+                        _hostAt = Mono.Now;
+                    }
+                    finally { Interlocked.Exchange(ref _hostReading, 0); }
+                });
+            }
+        }
+        var host = cur is { } b && BrowserAddress.IsBrowser(b.Process) && _hostFor.Hwnd == b.Hwnd ? _host : null;
+        var key = cur is null ? "" : $"{cur.Value.Process}|{cur.Value.Description}|{host}";
+        if (key == _sentFocus && ++_focusTick % 5 != 0) return;
+        _sentFocus = key;
+        Send(new IpcMessage { Type = IpcMessage.Focus, Process = cur?.Process, Description = cur?.Description, Host = host });
+    }
+
+    /// <summary>Closes the active browser tab if it still shows a site whose time is used up (Ctrl+W).</summary>
+    private void CloseTab(string? site)
+    {
+        if (site is null || _tracker.Current is not { } c || !BrowserAddress.IsBrowser(c.Process)) return;
+        var host = BrowserAddress.ReadHost(c.Hwnd, c.Process);
+        if (host is null || !PaCo.Shared.TimeGroups.SiteMatches(host, site)) return;
+        SendKeys.SendWait("^w");
+        Log.Info($"Tab mit {host} geschlossen (Zeit für heute aufgebraucht)");
+    }
+
     private void OnTick()
     {
         if (!_lock.IsShown) _tracker.Sample();
+        ReportFocus();
         if (++_tick % 5 == 0)
         {
             var samples = _tracker.Drain();

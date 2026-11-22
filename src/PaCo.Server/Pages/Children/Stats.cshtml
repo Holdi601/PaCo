@@ -49,6 +49,22 @@
                 {
                     <div class="small text-muted">@F("davon {0} Zusatzzeit", Format.Duration(Model.DayBonus))</div>
                 }
+                @if (Model.GroupUsage.Count > 0)
+                {
+                    <ul class="list-unstyled small mt-3 mb-0">
+                        @foreach (var (grp, sec) in Model.GroupUsage)
+                        {
+                            <li class="d-flex justify-content-between gap-2 py-1">
+                                <span>@grp.Name</span>
+                                <span class="text-muted text-end">
+                                    @if (grp.Kind == TimeGroupKind.Free) { @F("{0} · zählt nicht als PC-Zeit", Format.Duration(sec)) }
+                                    else if (grp.MinutesPerDay is { } lim) { @F("{0} von {1}", Format.Duration(sec), Format.Duration(lim * 60L)) }
+                                    else { @Format.Duration(sec) }
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
                 @if (Model.Apps.Count == 0)
                 {
                     <p class="text-muted mt-3 mb-0">@T("An diesem Tag wurde der PC nicht benutzt.")</p>
