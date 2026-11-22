@@ -72,6 +72,12 @@ public class LearningModeTests
         Assert.Contains("youtube.com/embed/abc123", list);
         Assert.Contains("youtube-nocookie.com/embed/abc123", list);
         Assert.DoesNotContain("youtube.com", list); // the limited "Videos" group is no learning content
+        // EU cookie consent before the first video: allowed, otherwise the allowed video could not be watched.
+        Assert.Contains("consent.youtube.com", list);
+        Assert.True(TimeGroups.IsLearningAddress(Child(), "consent.youtube.com", "https://consent.youtube.com/m?continue=x"));
+        var noVideo = Child() with { Groups = [new TimeGroup { Name = "Lernen", Kind = TimeGroupKind.Free, Sites = ["anton.app"] }] };
+        Assert.DoesNotContain("consent.youtube.com", TimeGroups.LearningAllowList(noVideo));
+        Assert.False(TimeGroups.IsLearningAddress(noVideo, "consent.youtube.com", "https://consent.youtube.com/m"));
         Assert.True(TimeGroups.IsLearningAddress(Child(), "www.youtube.com", "https://www.youtube.com/watch?v=abc123"));
         Assert.False(TimeGroups.IsLearningAddress(Child(), "www.youtube.com", "https://www.youtube.com/watch?v=zzz999"));
         Assert.True(TimeGroups.IsLearningAddress(Child(), "anton.app", "https://anton.app/de/mathe"));

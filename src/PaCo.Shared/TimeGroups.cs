@@ -161,6 +161,7 @@ public static class TimeGroups
     public static IReadOnlyList<string> LearningAllowList(ChildPolicy child)
     {
         var list = new List<string>(LearningSites(child));
+        if (HasYouTubePage(child)) list.AddRange(YouTubeConsentHosts);
         foreach (var page in LearningPages(child))
         {
             list.Add(page);
@@ -177,7 +178,18 @@ public static class TimeGroups
 
     /// <summary>Learning mode: the open browser address is a learning site or page (unknown address = not allowed).</summary>
     public static bool IsLearningAddress(ChildPolicy child, string? host, string? url) =>
-        (host is not null && LearningSites(child).Any(s => SiteMatches(host, s))) || (url is not null && LearningPages(child).Any(p => PageMatches(url, p)));
+        (host is not null && LearningSites(child).Any(s => SiteMatches(host, s)))
+        || (url is not null && LearningPages(child).Any(p => PageMatches(url, p)))
+        || (host is not null && YouTubeConsentHosts.Contains(host, StringComparer.OrdinalIgnoreCase) && HasYouTubePage(child));
+
+    /// <summary>
+    /// YouTube's cookie consent (shown in the EU before the first video) lives on these hosts. Only consent settings,
+    /// no content – allowed whenever the parents allowed a YouTube video, otherwise the video could not be watched.
+    /// </summary>
+    private static readonly string[] YouTubeConsentHosts = ["consent.youtube.com", "consent.google.com"];
+
+    private static bool HasYouTubePage(ChildPolicy child) =>
+        LearningPages(child).Any(p => p.StartsWith("youtube.com/", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>A learning app: in a learning group and – like for learning time – with the known description.</summary>
     public static bool IsLearningApp(ChildPolicy child, string process, string? description) =>
