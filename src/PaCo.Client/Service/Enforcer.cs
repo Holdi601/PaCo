@@ -50,6 +50,8 @@ internal sealed class Enforcer : BackgroundService
         /// <summary>Learning mode: time used up, but learning apps/sites (and the parents' aids) stay usable.</summary>
         public bool Learning;
         public bool BrowsersRestarted;
+        /// <summary>Learning label the shown lock screen was given (to update it when the parents change learning mode).</summary>
+        public string? LockLearning;
         public DateOnly BrowserRestartDay;
         public HashSet<Guid> BrowserRestartedFor = [];
         public TimeSpan LastLearningNotice = Mono.Never;
@@ -409,7 +411,14 @@ internal sealed class Enforcer : BackgroundService
                 await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning });
                 track.LockRequested = true;
                 track.LockRequestedAt = Mono.Now;
+                track.LockLearning = learning;
                 lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Locked, EventText(eval.Reason, logoff: false), child.ChildId);
+            }
+            else if (connected && track.LockRequested && agent?.LockShown == true && track.LockLearning != learning)
+            {
+                // Parents switched learning mode on/off (or changed the learning groups) while the lock screen is up.
+                await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning });
+                track.LockLearning = learning;
             }
             else if (connected && track.LockRequested && agent?.LockShown != true && Mono.Since(track.LockRequestedAt) > LockConfirmTimeout)
             {
