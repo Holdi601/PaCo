@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "ブロックしたプログラムを終了しました：{0}",
  "Gewalt & Waffen": "暴力と武器",
  "Grooming (Erwachsene, die Kinder ködern)": "グルーミング（子どもを誘い出す大人）",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCo の保護フォルダーで、不明なエントリまたは変更されたエントリが {0} 件見つかり、クリーンアップされました。",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "有効なウイルス対策が見つかりません！ Microsoft Defender（Windows セキュリティ）をオンにしてください。",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "子どもが管理者操作の際に管理者パスワードを入力できます。推奨：標準ユーザーに対する確認を完全にオフにしてください。",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "子どものアカウント「{0}」は標準ユーザーです。",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows ファイアウォールはオンです。",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "{1} の Windows アカウント「{0}」に管理者権限があります。",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows の時計が {0} 分戻されました。無視します。",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "「{0}」の時間を使い切りました – {1} を閉じました",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "有効な署名のないサーバー時刻を拒否しました。偽のサーバーの可能性があります。PaCo は自分の時計で計測を続けます。"
 }

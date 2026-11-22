@@ -21,6 +21,13 @@ public static class UnlockCodes
 
     public static IReadOnlyList<int> AllowedMinutes { get; } = [15, 30, 45, 60, 90, 120, 0];
 
+    /// <summary>
+    /// Key for ONE child, derived from the family key. A PC only receives the keys of the children assigned to it, so
+    /// a single PC (or a stolen pairing code) can never mint unlock codes for other children of the family.
+    /// </summary>
+    public static byte[] ChildKey(ReadOnlySpan<byte> familyKey, Guid childId) =>
+        System.Security.Cryptography.HMACSHA256.HashData(familyKey, System.Text.Encoding.UTF8.GetBytes("paco-unlock-child|" + childId.ToString("N")));
+
     public static string Generate(ReadOnlySpan<byte> key, Guid childId, DateOnly day, int minutes, int nonce)
     {
         if (minutes < 0 || minutes > MaxMinutes || minutes % 5 != 0)

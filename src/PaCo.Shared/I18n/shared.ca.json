@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Programa bloquejat tancat: {0}",
  "Gewalt & Waffen": "Violència i armes",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (adults que enganyen infants)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "A la carpeta protegida de PaCo s'han trobat i netejat {0} entrades alienes o modificades.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "No s'ha trobat cap antivirus actiu! Activa el Microsoft Defender (Seguretat del Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Els infants poden escriure una contrasenya d'administrador en accions d'administrador. Recomanació: desactivar del tot la sol·licitud per als comptes estàndard.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "El compte infantil «{0}» és un compte estàndard.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "El Tallafoc del Windows està activat.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "El compte del Windows «{0}» de {1} té drets d'administrador.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "S'ha endarrerit el rellotge del Windows {0} minuts – s'ignora.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Temps per a «{0}» esgotat – {1} tancat",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "S'ha rebutjat l'hora del servidor sense signatura vàlida: potser un servidor fals. PaCo continua comptant amb el seu propi rellotge."
 }

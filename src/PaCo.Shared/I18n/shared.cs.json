@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Ukončen zablokovaný program: {0}",
  "Gewalt & Waffen": "Násilí a zbraně",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (dospělí, kteří lákají děti)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "V chráněné složce PaCo bylo nalezeno a vyčištěno {0} cizích nebo změněných položek.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nenalezena žádná aktivní antivirová ochrana! Zapni prosím Microsoft Defender (Zabezpečení Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Děti můžou při akcích správce zadat heslo správce. Doporučení: dotaz pro standardní účty úplně vypnout.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Dětský účet „{0}“ je standardní účet.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Brána firewall systému Windows je zapnutá.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Účet Windows „{0}“ ({1}) má oprávnění správce.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Hodiny Windows byly vráceny o {0} min – ignoruje se.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Čas pro „{0}“ vyčerpán – zavřeno: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas serveru bez platného podpisu byl odmítnut – možná falešný server. PaCo počítá dál podle vlastních hodin."
 }

@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Quitando las reglas del navegador …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Para que tu hijo o hija no pueda saltarse PaCo y el PC esté bien protegido, se ha comprobado lo siguiente:",
  "Danach gelten hier keine Regeln mehr.": "Después, aquí ya no se aplicará ninguna regla.",
+ "Danach ist „{0}“ für heute vorbei.": "Después, «{0}» se acaba por hoy.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Después se bloqueará la pantalla. Guarda ahora tu partida o tu trabajo.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Después se cerrará tu sesión. Guarda ahora tu partida o tu trabajo.",
  "Daten-Ordner wird geschützt …": "Protegiendo la carpeta de datos …",
  "Deine Bildschirmzeit ist aufgebraucht": "Se te ha acabado el tiempo de pantalla",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Tus padres han visto una captura de pantalla.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Tu tiempo para «{0}» se ha acabado por hoy.",
  "Deinstallieren": "Desinstalar",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "El código no es correcto. No puedes escribir otro código durante un rato.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "El código no es correcto. Te quedan {0} intento(s).",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Deteniendo el servicio en ejecución …",
  "Neues Kind: {0}": "Nuevo niño/a: {0}",
  "Noch 1 Minute": "Te queda 1 minuto",
+ "Noch {0} Min für „{1}“": "Te quedan {0} min para «{1}»",
  "Noch {0} Minuten": "Te quedan {0} minutos",
  "PaCo Kinderschutz": "Control parental PaCo",
  "PaCo Kinderschutz von diesem PC entfernen?": "¿Quitar el control parental PaCo de este PC?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, por hoy se acabó tu tiempo. ¡Mañana más!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, hoy puedes usar el PC de {1} a {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, ahora no es hora de PC.",
- "— kein Kind (nicht überwacht) —": "— ningún niño (sin supervisión) —"
+ "— kein Kind (nicht überwacht) —": "— ningún niño (sin supervisión) —",
+ "„{0}“ ist für heute vorbei": "«{0}» se acabó por hoy"
 }

@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Ir-regoli tal-browser qed jitneħħew …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Biex wildek ma jkunx jista' jevita lil PaCo u l-PC ikun protett sew, ġie ċċekkjat dan li ġej:",
  "Danach gelten hier keine Regeln mehr.": "Wara dan, ma jibqgħux japplikaw regoli hawn.",
+ "Danach ist „{0}“ für heute vorbei.": "Wara dan, “{0}” jispiċċa għal-lum.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Wara dan, l-iskrin se jissakkar. Erfa' l-logħba jew ix-xogħol tiegħek issa.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Wara dan, se tinħareġ mill-kont. Erfa' l-logħba jew ix-xogħol tiegħek issa.",
  "Daten-Ordner wird geschützt …": "Il-folder tad-data qed jiġi protett …",
  "Deine Bildschirmzeit ist aufgebraucht": "Il-ħin tal-iskrin tiegħek spiċċa",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Il-ġenituri tiegħek raw screenshot.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Il-ħin tiegħek għal “{0}” spiċċa għal-lum.",
  "Deinstallieren": "Iddiżinstalla",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Il-kodiċi mhux tajjeb. Għal ftit ħin ma tistax iddaħħal kodiċi.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Il-kodiċi mhux tajjeb. Fadal {0} tentattiv(i).",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Is-servizz li qed jaħdem qed jitwaqqaf …",
  "Neues Kind: {0}": "Wild ġdid: {0}",
  "Noch 1 Minute": "Fadal minuta",
+ "Noch {0} Min für „{1}“": "Fadal {0} min għal “{1}”",
  "Noch {0} Minuten": "Fadal {0} minuti",
  "PaCo Kinderschutz": "PaCo Kontroll tal-Ġenituri",
  "PaCo Kinderschutz von diesem PC entfernen?": "Tneħħi l-Kontroll tal-Ġenituri PaCo minn dan il-PC?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, għal-lum il-ħin tiegħek spiċċa. Narawk għada!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, illum tista' tuża l-PC minn {1} sa {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, issa mhux il-ħin tal-PC.",
- "— kein Kind (nicht überwacht) —": "— mhux wild (mhux sorveljat) —"
+ "— kein Kind (nicht überwacht) —": "— mhux wild (mhux sorveljat) —",
+ "„{0}“ ist für heute vorbei": "“{0}” spiċċa għal-lum"
 }

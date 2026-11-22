@@ -223,6 +223,68 @@
         </div>
     </section>
 
+    <section class="card mb-3" aria-labelledby="sec-groups">
+        <div class="card-header" id="sec-groups"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>@T("Zeitlimits für Apps und Webseiten")</div>
+        <div class="card-body">
+            <p class="form-text mt-0">@T("Eigene Limits für einzelne Programme, Webseiten oder ganze Kategorien – kürzer als die Tageszeit. Gezählt wird nur, solange die App oder Webseite im Vordergrund ist. Ist die Zeit um, werden die Programme geschlossen und die Webseiten bis Mitternacht gesperrt.")</p>
+            <p class="form-text">@T("Lernzeit: Solange eine Lern-App oder Lern-Webseite im Vordergrund ist, wird keine PC-Zeit verbraucht.") @T("Lern-Apps zählen erst als Lernzeit, wenn PaCo sie einmal auf dem PC gesehen hat – so wird ein umbenanntes Spiel nicht zur Lern-App.")</p>
+            <input type="hidden" name="GroupsForm" value="true" />
+            @for (var gi = 0; gi < Model.Groups.Count; gi++)
+            {
+                var gid = Model.Groups[gi].Id;
+                <fieldset class="border rounded-3 p-3 mb-3">
+                    <legend class="visually-hidden">@Model.Groups[gi].Name</legend>
+                    <input type="hidden" name="Groups[@gi].Id" value="@gid" />
+                    <div class="row g-2 align-items-end">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small" for="g-name-@gi">@T("Name")</label>
+                            <input class="form-control" id="g-name-@gi" name="Groups[@gi].Name" value="@Model.Groups[gi].Name" maxlength="60" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small" for="g-kind-@gi">@T("Art")</label>
+                            <select class="form-select" id="g-kind-@gi" name="Groups[@gi].Kind">
+                                <option value="Limit" selected="@(Model.Groups[gi].Kind == TimeGroupKind.Limit)">@T("Eigenes Tageslimit")</option>
+                                <option value="Free" selected="@(Model.Groups[gi].Kind == TimeGroupKind.Free)">@T("Lernzeit – zählt nicht als PC-Zeit")</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label small" for="g-min-@gi">@T("Minuten pro Tag")</label>
+                            <div class="input-group">
+                                <input class="form-control" id="g-min-@gi" name="Groups[@gi].Minutes" type="number" min="1" max="1440" step="5" inputmode="numeric" value="@Model.Groups[gi].Minutes" />
+                                <span class="input-group-text">@T("Min")</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label small" for="g-apps-@gi">@T("Programme (ein Name pro Zeile)")</label>
+                            <textarea class="form-control font-monospace" id="g-apps-@gi" name="Groups[@gi].Apps" rows="3" autocapitalize="off" autocorrect="off" spellcheck="false">@Model.Groups[gi].Apps</textarea>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label small" for="g-sites-@gi">@T("Webseiten (eine pro Zeile)")</label>
+                            <textarea class="form-control font-monospace" id="g-sites-@gi" name="Groups[@gi].Sites" rows="3" autocapitalize="off" autocorrect="off" spellcheck="false">@Model.Groups[gi].Sites</textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="g-del-@gi" name="Groups[@gi].Remove" value="true" />
+                                <label class="form-check-label small" for="g-del-@gi">@T("Diese Gruppe entfernen")</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            }
+            @if (Model.KnownApps.Count > 0)
+            {
+                <p class="form-text">@T("Programmnamen deines Kindes:") @string.Join(", ", Model.KnownApps.Select(k => k.Process))</p>
+            }
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="small text-muted align-self-center">@T("Hinzufügen:")</span>
+                @foreach (var p in PaCo.Server.Services.TimeGroupPresets.All)
+                {
+                    <button type="submit" class="btn btn-sm btn-outline-primary" name="AddGroupPreset" value="@p.Id"><span class="ico ico-plus" aria-hidden="true"></span>@T(p.Name)</button>
+                }
+            </div>
+        </div>
+    </section>
+
     <section class="card mb-3" aria-labelledby="sec-alerts">
         <div class="card-header" id="sec-alerts"><span class="head-ico" aria-hidden="true"><span class="ico ico-bell" aria-hidden="true"></span></span>@T("Alarme bei bedenklichen Stichwörtern")</div>
         <div class="card-body">

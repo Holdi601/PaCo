@@ -23,6 +23,9 @@ public sealed class StatsModel(PaCoDb db, ParentActions actions) : PageModel
 
     public long DayTotal { get; private set; }
 
+    /// <summary>Group usage on the selected day (all PCs): group, seconds.</summary>
+    public IReadOnlyList<(TimeGroup Group, long Seconds)> GroupUsage { get; private set; } = [];
+
     public long DayBonus { get; private set; }
 
     public long WeekAverage { get; private set; }
@@ -52,6 +55,8 @@ public sealed class StatsModel(PaCoDb db, ParentActions actions) : PageModel
 
         var dayRows = Day >= from ? rows.Where(r => r.Day == Day).ToList() : await db.UsageDays.Where(u => u.ChildId == id && u.Day == Day).ToListAsync();
         var agg = PolicyBuilder.Aggregate(dayRows);
+        var perGroup = dayRows.SelectMany(r => r.GetGroups()).GroupBy(kv => kv.Key).ToDictionary(g => g.Key, g => g.Sum(kv => kv.Value));
+        GroupUsage = child.GetTimeGroups().Select(g => (g, perGroup.GetValueOrDefault(g.Id))).ToList();
         DayTotal = agg.TotalSeconds;
         DayBonus = agg.TotalSeconds - agg.RegularSeconds;
         Apps = agg.Apps.OrderByDescending(a => a.Value.Seconds)

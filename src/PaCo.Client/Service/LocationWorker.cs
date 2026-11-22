@@ -115,7 +115,7 @@ internal sealed partial class LocationWorker(Runtime rt) : BackgroundService
     {
         try
         {
-            using var p = Process.Start(new ProcessStartInfo("netsh.exe", "wlan show interfaces")
+            using var p = Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "netsh.exe"), "wlan show interfaces")
             {
                 RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true,
                 StandardOutputEncoding = System.Text.Encoding.UTF8,

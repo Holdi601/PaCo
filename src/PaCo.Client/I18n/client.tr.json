@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Tarayıcı kuralları kaldırılıyor …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Çocuğunuzun PaCo'yu atlatamaması ve bilgisayarın iyi korunması için şunlar kontrol edildi:",
  "Danach gelten hier keine Regeln mehr.": "Bundan sonra burada hiçbir kural geçerli olmaz.",
+ "Danach ist „{0}“ für heute vorbei.": "Sonra “{0}” bugünlük biter.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Sonra ekran kilitlenecek. Oyununu veya çalışmanı şimdi kaydet.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Sonra oturumun kapatılacak. Oyununu veya çalışmanı şimdi kaydet.",
  "Daten-Ordner wird geschützt …": "Veri klasörü korunuyor …",
  "Deine Bildschirmzeit ist aufgebraucht": "Ekran süren doldu",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Ailen bir ekran görüntüsüne baktı.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "“{0}” için bugünkü süren doldu.",
  "Deinstallieren": "Kaldır",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kod yanlış. Kod girişi geçici olarak kilitlendi.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kod yanlış. {0} deneme hakkın kaldı.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Çalışan hizmet durduruluyor …",
  "Neues Kind: {0}": "Yeni çocuk: {0}",
  "Noch 1 Minute": "1 dakika kaldı",
+ "Noch {0} Min für „{1}“": "“{1}” için {0} dk kaldı",
  "Noch {0} Minuten": "{0} dakika kaldı",
  "PaCo Kinderschutz": "PaCo Çocuk Koruma",
  "PaCo Kinderschutz von diesem PC entfernen?": "PaCo Çocuk Koruma bu bilgisayardan kaldırılsın mı?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, bugünlük süren bitti. Yarın devam!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, bugün {1} ile {2} arasında bilgisayarı kullanabilirsin.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, şu an bilgisayar zamanı değil.",
- "— kein Kind (nicht überwacht) —": "— çocuk değil (izlenmiyor) —"
+ "— kein Kind (nicht überwacht) —": "— çocuk değil (izlenmiyor) —",
+ "„{0}“ ist für heute vorbei": "“{0}” bugünlük bitti"
 }

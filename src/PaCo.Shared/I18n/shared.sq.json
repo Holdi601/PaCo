@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Programi i bllokuar u mbyll: {0}",
  "Gewalt & Waffen": "Dhuna dhe armët",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (të rritur që joshin fëmijët)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "Në dosjen e mbrojtur të PaCo u gjetën dhe u pastruan {0} hyrje të huaja ose të ndryshuara.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nuk u gjet asnjë mbrojtje aktive nga viruset! Ju lutemi aktivizoni Microsoft Defender (Siguria e Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Fëmijët mund të fusin fjalëkalimin e administratorit gjatë veprimeve që kërkojnë të drejta administratori. Rekomandim: çaktivizojeni plotësisht kërkesën për llogaritë standarde.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Llogaria e fëmijës „{0}“ është llogari standarde.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Muri mbrojtës i Windows është i aktivizuar.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Llogaria Windows „{0}“ e fëmijës {1} ka të drejta administratori.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Ora e Windows u kthye prapa me {0} minuta – nuk merret parasysh.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Koha për „{0}“ mbaroi – u mbyll: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Ora e serverit pa nënshkrim të vlefshëm u refuzua – ndoshta server i rremë. PaCo vazhdon me orën e vet."
 }

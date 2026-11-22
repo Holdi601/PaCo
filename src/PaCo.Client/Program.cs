@@ -46,7 +46,8 @@ internal static class Program
 
     private static int RunService()
     {
-        SecureStore.EnsureDataDir();
+        var fixedEntries = SecureStore.EnsureDataDir();
+        Installer.RemoveOldBundleExtraction();
         var device = DeviceSecrets.Load();
         if (device is null)
         {
@@ -62,6 +63,8 @@ internal static class Program
         lock (rt.Gate)
         {
             rt.State.AddEvent(DeviceEventKind.ServiceStarted, LocText.Of("PaCo-Dienst gestartet (Version {0})", ServerApi.Version));
+            if (fixedEntries > 0)
+                rt.State.AddEvent(DeviceEventKind.ClockTampering, LocText.Of("Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.", fixedEntries));
             // Safe mode is a classic way to try to get around protection software.
             if (GetSystemMetrics(67 /* SM_CLEANBOOT */) != 0)
                 rt.State.AddEvent(DeviceEventKind.SafeMode, LocText.Of("Der PC wurde im abgesicherten Modus gestartet."));
@@ -79,6 +82,13 @@ internal static class Program
         using var host = builder.Build();
         host.Run();
         lock (rt.Gate) rt.SaveIfNeeded(force: true);
+        if (host.Services.GetServices<IHostedService>().OfType<BackgroundService>().Any(b => b.ExecuteTask?.IsFaulted == true))
+        {
+            // Not stopped by Windows (shutdown / sc stop) → a background task crashed: exit with an error so the
+            // service recovery settings restart PaCo.
+            Log.Error("Dienst unerwartet beendet – Windows startet ihn neu");
+            Environment.Exit(1);
+        }
         Log.Info("Dienst beendet");
         return 0;
     }

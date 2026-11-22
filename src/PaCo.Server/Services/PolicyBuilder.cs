@@ -31,6 +31,30 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
             .Where(u => u.FamilyId == device.FamilyId && u.DeviceId != device.Id && childIds.Contains(u.ChildId) && days.Contains(u.Day))
             .ToListAsync(ct);
 
+        // Learning apps typed in before PaCo ever saw them: take their program description from the statistics.
+        var groupsByChild = new Dictionary<Guid, IReadOnlyList<TimeGroup>>();
+        foreach (var c in children)
+        {
+            var groups = c.GetTimeGroups();
+            var missing = groups.Where(g => g.Kind == TimeGroupKind.Free)
+                .SelectMany(g => g.Apps.Where(a => !g.AppDescriptions.ContainsKey(a))).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (missing.Count > 0)
+            {
+                var since = today.AddDays(-30);
+                var seen = (await db.UsageDays.IgnoreQueryFilters().Where(u => u.FamilyId == device.FamilyId && u.ChildId == c.Id && u.Day >= since)
+                        .Select(u => u.AppsJson).ToListAsync(ct))
+                    .SelectMany(j => PaCoJson.Deserialize<Dictionary<string, AppUsage>>(string.IsNullOrEmpty(j) ? "{}" : j))
+                    .Where(kv => missing.Contains(kv.Key) && !string.IsNullOrWhiteSpace(kv.Value.DisplayName))
+                    .GroupBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g.First().Value.DisplayName, StringComparer.OrdinalIgnoreCase);
+                groups = groups.Select(g => g.Kind != TimeGroupKind.Free ? g : g with
+                {
+                    AppDescriptions = g.AppDescriptions.Concat(seen.Where(s => g.Apps.Contains(s.Key, StringComparer.OrdinalIgnoreCase) && !g.AppDescriptions.ContainsKey(s.Key)))
+                        .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase),
+                }).ToList();
+            }
+            groupsByChild[c.Id] = groups;
+        }
+
         var childPolicies = children.Select(c =>
         {
             // Time used elsewhere only counts with a shared budget, and never from PCs without time limit.
@@ -52,6 +76,11 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                     .Concat(c.BlockStore ? [Child.StoreApp] : [])
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
                 HardenAccount = c.BlockedToolIds().Count > 0,
+                Groups = groupsByChild[c.Id],
+                UnlockKey = Convert.ToBase64String(UnlockCodes.ChildKey(family.UnlockKey, c.Id)),
+                GroupSecondsElsewhere = mine.SelectMany(u => u.GetGroups().Select(g => (Group: g.Key, u.Day, Seconds: g.Value)))
+                    .GroupBy(x => x.Group)
+                    .ToDictionary(g => g.Key, g => g.GroupBy(x => x.Day).ToDictionary(d => d.Key, d => d.Sum(x => x.Seconds))),
                 Web = c.GetWeb(),
                 Language = Languages.IsSupported(c.Language) ? c.Language : Languages.Source,
                 Alerts = WithLanguages(c.GetAlerts(), c.Language),

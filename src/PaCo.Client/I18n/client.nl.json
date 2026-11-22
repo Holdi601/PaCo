@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Browserregels worden verwijderd …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Zodat je kind PaCo niet kan omzeilen en de pc goed beschermd is, is het volgende gecontroleerd:",
  "Danach gelten hier keine Regeln mehr.": "Daarna gelden hier geen regels meer.",
+ "Danach ist „{0}“ für heute vorbei.": "Daarna is ‘{0}’ voor vandaag voorbij.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Daarna wordt het scherm vergrendeld. Sla nu je spel of je werk op.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Daarna word je afgemeld. Sla nu je spel of je werk op.",
  "Daten-Ordner wird geschützt …": "Gegevensmap wordt beveiligd …",
  "Deine Bildschirmzeit ist aufgebraucht": "Je schermtijd is op",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Je ouders hebben een schermafbeelding bekeken.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Je tijd voor ‘{0}’ is voor vandaag op.",
  "Deinstallieren": "Verwijderen",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "De code klopt niet. Je kunt even geen code meer invoeren.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "De code klopt niet. Nog {0} poging(en).",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Actieve service wordt gestopt …",
  "Neues Kind: {0}": "Nieuw kind: {0}",
  "Noch 1 Minute": "Nog 1 minuut",
+ "Noch {0} Min für „{1}“": "Nog {0} min voor ‘{1}’",
  "Noch {0} Minuten": "Nog {0} minuten",
  "PaCo Kinderschutz": "PaCo Ouderlijk toezicht",
  "PaCo Kinderschutz von diesem PC entfernen?": "PaCo Ouderlijk toezicht van deze pc verwijderen?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, je tijd is voor vandaag voorbij. Morgen weer!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, vandaag mag je van {1} tot {2} uur op de pc.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, het is nu geen pc-tijd.",
- "— kein Kind (nicht überwacht) —": "— geen kind (geen toezicht) —"
+ "— kein Kind (nicht überwacht) —": "— geen kind (geen toezicht) —",
+ "„{0}“ ist für heute vorbei": "‘{0}’ is voor vandaag voorbij"
 }

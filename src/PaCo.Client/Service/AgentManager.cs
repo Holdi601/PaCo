@@ -19,7 +19,10 @@ internal sealed class AgentConnection : IDisposable
 
     public TimeSpan StartedUtc { get; } = Mono.Now;
 
-    public bool Connected => Channel is not null && Pipe.IsConnected && !Process.HasExited;
+    /// <summary>Set when the receive loop ended – the agent is replaced on the next check.</summary>
+    public volatile bool Dead;
+
+    public bool Connected => !Dead && Channel is not null && Pipe.IsConnected && !Process.HasExited;
 
     public bool LockShown { get; set; }
 
@@ -56,7 +59,7 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action
         {
             if (_agents.TryGetValue(sessionId, out var a))
             {
-                if (!a.Process.HasExited && (a.Connected || Mono.Now - a.StartedUtc < TimeSpan.FromSeconds(20))) return;
+                if (!a.Dead && !a.Process.HasExited && (a.Connected || Mono.Now - a.StartedUtc < TimeSpan.FromSeconds(20))) return;
                 Log.Warn($"Agent in Sitzung {sessionId} läuft nicht mehr (exited={a.Process.HasExited}) – starte neu");
                 if (a.Process.HasExited)
                 {
@@ -107,7 +110,17 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action
             conn.Channel = new IpcChannel(conn.Pipe);
             lock (_gate) _backoff.Remove(conn.SessionId);
             while (await conn.Channel.ReceiveAsync() is { } msg)
-                await onMessage(conn.SessionId, msg);
+            {
+                try
+                {
+                    await onMessage(conn.SessionId, msg);
+                }
+                catch (Exception ex)
+                {
+                    // A malformed message is dropped – the connection (and the lock/code handling) keeps working.
+                    Log.Error($"Agent-Nachricht {msg.Type} aus Sitzung {conn.SessionId} verworfen", ex);
+                }
+            }
         }
         catch (Exception ex) when (ex is OperationCanceledException or IOException or ObjectDisposedException)
         {
@@ -116,6 +129,11 @@ internal sealed class AgentManager(Func<int, IpcMessage, Task> onMessage, Action
         catch (Exception ex)
         {
             Log.Error($"Agent-Verbindung Sitzung {conn.SessionId}", ex);
+        }
+        finally
+        {
+            // The loop ended: this agent no longer counts as connected and is replaced on the next check.
+            conn.Dead = true;
         }
     }
 

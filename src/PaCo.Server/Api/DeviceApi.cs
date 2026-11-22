@@ -17,13 +17,17 @@ public static class DeviceApi
     public const string RateLimitDevice = "device";
 
     private const int MaxEventsPerSync = 200;
+
+    /// <summary>Events per device and 24 h – far above normal use (a few dozen), stops disk filling.</summary>
+    private const int MaxEventsPerDay = 2000;
     private const int MaxAppsPerDay = 300;
 
     public static void Map(WebApplication app)
     {
         app.MapPost(ApiRoutes.Pair, PairAsync).RequireRateLimiting(RateLimitPair).DisableAntiforgery();
         app.MapPost(ApiRoutes.Assign, AssignAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery();
-        app.MapPost(ApiRoutes.Sync, SyncAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery();
+        app.MapPost(ApiRoutes.Sync, SyncAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
+            .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(512 * 1024));
         app.MapGet(ApiRoutes.ClientDownload, DownloadClientAsync).RequireRateLimiting(RateLimitPair);
         app.MapPost(ApiRoutes.Diagnostics, UploadDiagnosticsAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
             .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(MaxDiagnosticsBytes * 4));
@@ -156,7 +160,7 @@ public static class DeviceApi
             DeviceId = device.Id,
             DeviceToken = token,
             PolicyPublicKeyPem = keys.PublicKeyPem,
-            UnlockKey = Convert.ToBase64String(family.UnlockKey),
+            UnlockKey = "", // per-child keys come with the signed rules – never the family key
             FamilyName = family.Name,
             Children = children,
         });
@@ -218,7 +222,12 @@ public static class DeviceApi
         device.LockedChildrenJson = PaCoJson.Serialize(req.LockedChildren.Take(20).ToArray());
         if (req.Security is { } sec)
         {
-            device.SecurityJson = PaCoJson.Serialize(sec.Take(50).Select(s => s with { Code = Trim(s.Code, 120), Text = Trim(s.Text, 300) }).ToArray());
+            device.SecurityJson = PaCoJson.Serialize(sec.Take(50).Where(s => s is not null).Select(s =>
+            {
+                var args = (s.Args ?? []).Take(10).Select(a => Trim(a ?? "", 120)).ToArray();
+                var template = s.Template is { } t && SharedText.IsSafeTemplate(t, args.Length) ? t : null;
+                return s with { Code = Trim(s.Code ?? "", 120), Text = Trim(s.Text ?? "", 300), Template = template, Args = template is null ? [] : args };
+            }).ToArray());
             device.SecurityCheckedUtc = now;
         }
         device.LiveJson = PaCoJson.Serialize(req.Live.Take(20).Select(l => l with { WindowsUser = l.WindowsUser is { Length: > 100 } u ? u[..100] : l.WindowsUser }).ToArray());
@@ -382,8 +391,16 @@ public static class DeviceApi
             row.GrantSecondsJson = PaCoJson.Serialize(r.GrantSeconds.Take(50).ToDictionary(k => k.Key, v => Clamp(v.Value)));
             row.CodesJson = PaCoJson.Serialize(codes);
             row.AppsJson = PaCoJson.Serialize(r.Apps
-                .OrderByDescending(a => a.Value.Seconds).Take(MaxAppsPerDay)
-                .ToDictionary(a => Trim(a.Key, 80), a => new AppUsage { DisplayName = Trim(a.Value.DisplayName, 120), Seconds = Clamp(a.Value.Seconds) }));
+                .Where(a => !string.IsNullOrEmpty(a.Key) && a.Value is not null)
+                .GroupBy(a => Trim(a.Key, 80).ToLowerInvariant())
+                .Select(g => (Key: g.Key, Display: Trim(g.First().Value.DisplayName ?? "", 120), Seconds: Clamp(g.Sum(a => Clamp(a.Value.Seconds)))))
+                .OrderByDescending(a => a.Seconds).Take(MaxAppsPerDay)
+                .ToDictionary(a => a.Key, a => new AppUsage { DisplayName = a.Display, Seconds = a.Seconds }));
+            // Group seconds only ever grow within a day as well.
+            var groups = row.GetGroups();
+            foreach (var (gid, sec) in r.Groups.Take(50))
+                groups[gid] = Math.Max(groups.GetValueOrDefault(gid), Clamp(sec));
+            row.GroupsJson = PaCoJson.Serialize(groups.Take(50).ToDictionary(k => k.Key, v => v.Value));
             row.UpdatedUtc = now;
 
             foreach (var c in codes)
@@ -408,25 +425,56 @@ public static class DeviceApi
             }
         }
         if (events.Count == 0) return;
-        var ids = events.Take(MaxEventsPerSync).Select(e => e.Id).ToList();
+        var now = DateTimeOffset.UtcNow;
+        // Quota: a PC (or anyone with its token) cannot fill the server's disk.
+        var since = now.AddDays(-1);
+        var recent = await db.DeviceEvents.IgnoreQueryFilters().CountAsync(e => e.DeviceId == device.Id && e.TimeUtc > since, ct);
+        var room = Math.Max(0, Math.Min(MaxEventsPerSync, MaxEventsPerDay - recent));
+        if (room == 0) return;
+        var batch = events.Where(e => e is not null && Enum.IsDefined(e.Kind)).DistinctBy(e => e.Id).Take(room).ToList();
+        var ids = batch.Select(e => e.Id).ToList();
         // Idempotent: the client resends events until a sync succeeds.
         var known = await db.DeviceEvents.IgnoreQueryFilters().Where(e => ids.Contains(e.Id)).Select(e => e.Id).ToListAsync(ct);
-        foreach (var e in events.Take(MaxEventsPerSync).Where(e => !known.Contains(e.Id)))
+        foreach (var e in batch.Where(e => !known.Contains(e.Id)))
         {
+            var args = (e.Args ?? []).Take(10).Select(a => Trim(a ?? "", 120)).ToArray();
+            var template = e.Template is { } t && SharedText.IsSafeTemplate(t, args.Length) ? t : null;
+            var time = e.TimeUtc.ToUniversalTime();
             db.DeviceEvents.Add(new DeviceEventEntity
             {
                 Id = e.Id,
                 FamilyId = device.FamilyId,
                 DeviceId = device.Id,
                 ChildId = e.ChildId,
-                TimeUtc = e.TimeUtc.ToUniversalTime(),
+                // Times far off (wrong clock or forged) are stored as "now".
+                TimeUtc = time < now.AddDays(-14) || time > now.AddMinutes(5) ? now : time,
                 Kind = e.Kind,
-                Message = Trim(e.Message, 500),
-                Template = e.Template is { Length: <= 500 } && e.Args.Count <= 10 && e.Args.All(a => a.Length <= 120) ? e.Template : null,
-                ArgsJson = e.Template is { Length: <= 500 } && e.Args.Count <= 10 && e.Args.All(a => a.Length <= 120) ? PaCoJson.Serialize(e.Args) : null,
+                Message = Trim(e.Message ?? "", 500),
+                Template = template,
+                ArgsJson = template is null ? null : PaCoJson.Serialize(args),
             });
         }
     }
+
+    /// <summary>
+    /// Rejects device API calls without a valid device token before their body is read (no work for strangers).
+    /// Pairing and the installer download are the only anonymous device endpoints.
+    /// </summary>
+    public static IApplicationBuilder UseDeviceAuthFirst(this IApplicationBuilder app) => app.Use(async (http, next) =>
+    {
+        var path = http.Request.Path;
+        if (path.StartsWithSegments("/api/device") && HttpMethods.IsPost(http.Request.Method)
+            && !path.StartsWithSegments(ApiRoutes.Pair))
+        {
+            var db = http.RequestServices.GetRequiredService<PaCoDb>();
+            if (await AuthenticateAsync(http, db, http.RequestAborted) is null)
+            {
+                http.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return;
+            }
+        }
+        await next();
+    });
 
     /// <summary>Header: <c>Authorization: Device {deviceId}:{token}</c>.</summary>
     public static async Task<Device?> AuthenticateAsync(HttpContext http, PaCoDb db, CancellationToken ct)

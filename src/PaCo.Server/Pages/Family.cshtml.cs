@@ -12,7 +12,7 @@ namespace PaCo.Server.Pages;
 
 /// <summary>Parents see the other parents of their family and can invite / remove co-parents (own family only).</summary>
 [EnableRateLimiting(AccountRateLimit.Name)]
-public sealed class FamilyModel(UserManager<ParentUser> users, AccountAdmin admin, IFamilyContext family, IOptions<ServerOptions> options,
+public sealed class FamilyModel(PaCoDb db, UserManager<ParentUser> users, AccountAdmin admin, IFamilyContext family, IOptions<ServerOptions> options,
     TimeProvider clock, ILogger<FamilyModel> log) : PageModel
 {
     public IReadOnlyList<ParentUser> Parents { get; private set; } = [];
@@ -44,7 +44,7 @@ public sealed class FamilyModel(UserManager<ParentUser> users, AccountAdmin admi
     public async Task<IActionResult> OnPostInviteAsync()
     {
         if (await users.FindByEmailAsync(InviteEmail.Trim()) is not null)
-            ModelState.AddModelError(nameof(InviteEmail), Ui.T("Diese E-Mail-Adresse hat bereits ein Konto."));
+            ModelState.AddModelError(nameof(InviteEmail), Ui.T("Mit dieser E-Mail-Adresse ist keine Einladung möglich. Bitte eine andere Adresse verwenden."));
         if (!ModelState.IsValid)
         {
             await OnGetAsync();
@@ -71,6 +71,7 @@ public sealed class FamilyModel(UserManager<ParentUser> users, AccountAdmin admi
         var u = await OtherParentAsync(userId);
         if (u is null) return NotFound();
         await users.DeleteAsync(u);
+        await DbTicketStore.RemoveAllAsync(db, u.Id);
         log.LogWarning("Elternteil {Email} aus Familie {Family} entfernt durch {By}", u.Email, family.FamilyId, ParentActions.UserId(User));
         TempData["Message"] = Ui.F("{0} wurde aus der Familie entfernt.", u.DisplayName);
         return RedirectToPage();

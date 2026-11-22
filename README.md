@@ -19,6 +19,9 @@ kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.
   für dieses Kind, nur heute und nur einmal.
 - Wochenplan: Minuten pro Tag und erlaubter Zeitraum (z. B. 14:00–19:00), mit Kopieren auf andere Tage
 - Mehrere PCs: Tageszeit für alle PCs zusammen oder pro PC; einzelne PCs (z. B. Schul-Laptop) ohne Zeitlimit
+- **Zeitlimits für Apps, Webseiten und Kategorien** (z. B. „Spiele 60 Min“, „Videos 30 Min“) – gezählt wird nur, was im
+  Vordergrund ist; danach werden Programme geschlossen und Webseiten bis Mitternacht gesperrt
+- **Lernzeit**: Lern-Apps und Lern-Webseiten im Vordergrund verbrauchen keine PC-Zeit
 - Bei Zeitablauf wahlweise **Sperrbildschirm** oder **sofortiges Abmelden**, jeweils vorher Ton aus
 - Gesperrte Programme, gesperrte Webseiten (mit Vorlagen), SafeSearch, YouTube-Jugendschutz, kein privates Surfen,
   andere Browser sperren

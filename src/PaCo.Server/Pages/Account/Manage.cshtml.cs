@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PaCo.Server.Data;
+using PaCo.Server.Services;
 using PaCo.Shared.I18n;
 
 namespace PaCo.Server.Pages.Account;
 
-public sealed class ManageModel(UserManager<ParentUser> users, SignInManager<ParentUser> signIn) : PageModel
+public sealed class ManageModel(PaCoDb db, UserManager<ParentUser> users, SignInManager<ParentUser> signIn) : PageModel
 {
     [BindProperty, Required(ErrorMessage = "Bitte einen Namen eingeben."), StringLength(100)]
     public string DisplayName { get; set; } = "";
@@ -62,6 +63,7 @@ public sealed class ManageModel(UserManager<ParentUser> users, SignInManager<Par
         var user = await users.GetUserAsync(User);
         if (user is null) return RedirectToPage("./Login");
         await users.UpdateSecurityStampAsync(user);
+        await DbTicketStore.RemoveAllAsync(db, user.Id);
         await signIn.ForgetTwoFactorClientAsync();
         await signIn.SignOutAsync();
         return RedirectToPage("./Login");

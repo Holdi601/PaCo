@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Rimozione delle regole del browser …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Perché tuo figlio non possa aggirare PaCo e il PC sia ben protetto, è stato controllato quanto segue:",
  "Danach gelten hier keine Regeln mehr.": "Dopo, qui non varrà più nessuna regola.",
+ "Danach ist „{0}“ für heute vorbei.": "Dopo, «{0}» è finito per oggi.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Poi lo schermo verrà bloccato. Salva adesso il tuo gioco o il tuo lavoro.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Poi verrai disconnesso. Salva adesso il tuo gioco o il tuo lavoro.",
  "Daten-Ordner wird geschützt …": "Protezione della cartella dei dati …",
  "Deine Bildschirmzeit ist aufgebraucht": "Il tuo tempo davanti allo schermo è finito",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "I tuoi genitori hanno guardato uno screenshot.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Il tuo tempo per «{0}» è finito per oggi.",
  "Deinstallieren": "Disinstalla",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Il codice non è giusto. Per un po' non puoi inserire codici.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Il codice non è giusto. Ancora {0} tentativo/i.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Arresto del servizio in esecuzione …",
  "Neues Kind: {0}": "Nuovo bambino: {0}",
  "Noch 1 Minute": "Ancora 1 minuto",
+ "Noch {0} Min für „{1}“": "Ancora {0} min per «{1}»",
  "Noch {0} Minuten": "Ancora {0} minuti",
  "PaCo Kinderschutz": "Controllo parentale PaCo",
  "PaCo Kinderschutz von diesem PC entfernen?": "Rimuovere il controllo parentale PaCo da questo PC?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, per oggi il tuo tempo è finito. Ci vediamo domani!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, oggi puoi usare il PC dalle {1} alle {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, adesso non è l'ora del PC.",
- "— kein Kind (nicht überwacht) —": "— nessun bambino (non monitorato) —"
+ "— kein Kind (nicht überwacht) —": "— nessun bambino (non monitorato) —",
+ "„{0}“ ist für heute vorbei": "«{0}» è finito per oggi"
 }

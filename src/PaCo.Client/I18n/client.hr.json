@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Uklanjanje pravila preglednika …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Kako tvoje dijete ne bi moglo zaobići PaCo i kako bi računalo bilo dobro zaštićeno, provjereno je sljedeće:",
  "Danach gelten hier keine Regeln mehr.": "Nakon toga ovdje više neće vrijediti nikakva pravila.",
+ "Danach ist „{0}“ für heute vorbei.": "Nakon toga je za danas kraj za „{0}“.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Nakon toga zaslon će se zaključati. Sad spremi svoju igru ili rad.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Nakon toga računalo će te odjaviti. Sad spremi svoju igru ili rad.",
  "Daten-Ordner wird geschützt …": "Zaštita mape s podacima …",
  "Deine Bildschirmzeit ist aufgebraucht": "Tvoje vrijeme pred ekranom je potrošeno",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Tvoji roditelji pogledali su snimku zaslona.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Tvoje vrijeme za „{0}“ potrošeno je za danas.",
  "Deinstallieren": "Deinstaliraj",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kôd nije točan. Unos je privremeno blokiran.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kôd nije točan. Preostali pokušaji: {0}.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Zaustavljanje pokrenute usluge …",
  "Neues Kind: {0}": "Novo dijete: {0}",
  "Noch 1 Minute": "Još 1 minuta",
+ "Noch {0} Min für „{1}“": "Još {0} min za „{1}“",
  "Noch {0} Minuten": "Još {0} min",
  "PaCo Kinderschutz": "PaCo zaštita djece",
  "PaCo Kinderschutz von diesem PC entfernen?": "Ukloniti PaCo zaštitu djece s ovog računala?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, za danas je tvoje vrijeme isteklo. Sutra se nastavlja!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, danas smiješ biti za računalom od {1} do {2} sati.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, sad nije vrijeme za računalo.",
- "— kein Kind (nicht überwacht) —": "— nije dijete (bez nadzora) —"
+ "— kein Kind (nicht überwacht) —": "— nije dijete (bez nadzora) —",
+ "„{0}“ ist für heute vorbei": "„{0}“ – za danas je kraj"
 }

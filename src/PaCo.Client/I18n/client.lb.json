@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Browser-Reegele ginn ewechgeholl …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Fir datt däi Kand PaCo net ëmgoe kann an de PC gutt geschützt ass, gouf Folgendes iwwerpréift:",
  "Danach gelten hier keine Regeln mehr.": "Duerno gëllen hei keng Reegele méi.",
+ "Danach ist „{0}“ für heute vorbei.": "Duerno ass „{0}“ fir haut eriwwer.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Duerno gëtt den Ecran gespaart. Späicher elo däi Spill oder deng Aarbecht.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Duerno gëss du ofgemellt. Späicher elo däi Spill oder deng Aarbecht.",
  "Daten-Ordner wird geschützt …": "Daten-Dossier gëtt geschützt …",
  "Deine Bildschirmzeit ist aufgebraucht": "Deng Schiermzäit ass ofgelaf",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Deng Elteren hunn e Screenshot ugekuckt.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Deng Zäit fir „{0}“ ass fir haut opgebraucht.",
  "Deinstallieren": "Deinstalléieren",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "De Code stëmmt net. Du kanns eng Zäitchen keen Code méi aginn.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "De Code stëmmt net. Nach {0} Versuch(en).",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Lafende Service gëtt gestoppt …",
  "Neues Kind: {0}": "Neit Kand: {0}",
  "Noch 1 Minute": "Nach 1 Minutt",
+ "Noch {0} Min für „{1}“": "Nach {0} Min fir „{1}“",
  "Noch {0} Minuten": "Nach {0} Minutten",
  "PaCo Kinderschutz": "PaCo Kannerschutz",
  "PaCo Kinderschutz von diesem PC entfernen?": "PaCo Kannerschutz vun dësem PC ewechhuelen?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, fir haut ass deng Zäit eriwwer. Muer geet et weider!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, haut däerfs du vun {1} bis {2} Auer un de PC.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, elo ass keng PC-Zäit.",
- "— kein Kind (nicht überwacht) —": "— kee Kand (net iwwerwaacht) —"
+ "— kein Kind (nicht überwacht) —": "— kee Kand (net iwwerwaacht) —",
+ "„{0}“ ist für heute vorbei": "„{0}“ ass fir haut eriwwer"
 }

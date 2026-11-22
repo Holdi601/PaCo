@@ -24,6 +24,7 @@ internal sealed class Enforcer : BackgroundService
         public DateTimeOffset? BlockedSince;
         public bool ExpiredDuringUse;
         public bool LockRequested;
+        public TimeSpan LockRequestedAt = Mono.Never;
         public bool Muted;
         public DateTimeOffset? LogoffAt;
         public double Fraction;
@@ -37,7 +38,20 @@ internal sealed class Enforcer : BackgroundService
         public TimeSpan CurrentAppAt = Mono.Never;
         public string? SentAlertConfig;
         public TimeSpan LastHelpHint = Mono.Never;
+        public string? FocusProcess;
+        public string? FocusDescription;
+        public string? FocusHost;
+        public TimeSpan FocusAt = Mono.Never;
+        public HashSet<string> GroupWarned = [];
+        public DateOnly GroupWarnDay;
+        public TimeSpan LastTabClose = Mono.Never;
     }
+
+    /// <summary>Groups of the current foreground app/site (empty if unknown or stale).</summary>
+    private static List<TimeGroup> FocusGroups(ChildPolicy child, Track track, bool inUse) =>
+        inUse && child.Groups.Count > 0 && Mono.Now - track.FocusAt < TimeSpan.FromSeconds(12)
+            ? TimeGroups.Matching(child.Groups, track.FocusProcess, track.FocusDescription, track.FocusHost)
+            : [];
 
     /// <summary>Last report time per child|category|keyword|app – the same hit is reported at most every 30 min.</summary>
     private readonly Dictionary<string, TimeSpan> _alertDedup = [];
@@ -174,7 +188,11 @@ internal sealed class Enforcer : BackgroundService
                     var whole = (long)track.Fraction;
                     if (whole > 0)
                     {
-                        TimeRules.Charge(usage, eval, whole);
+                        // Learning time (a "free" group in the foreground) uses up no PC time; every group the
+                        // foreground app/site belongs to counts its own time.
+                        var groups = FocusGroups(child, track, inUse);
+                        if (!groups.Any(g => g.Kind == TimeGroupKind.Free)) TimeRules.Charge(usage, eval, whole);
+                        foreach (var g in groups) usage.Groups[g.Id] = usage.Groups.GetValueOrDefault(g.Id) + whole;
                         track.Fraction -= whole;
                         _rt.MarkDirty();
                     }
@@ -182,9 +200,25 @@ internal sealed class Enforcer : BackgroundService
                 }
             }
 
+            // Groups whose time is used up today: their programs are closed, their sites blocked until midnight.
+            var exhausted = new List<TimeGroup>();
+            if (!child.Paused && child.Groups.Count > 0)
+            {
+                lock (_rt.Gate)
+                {
+                    var usageNow = _rt.State.UsageFor(child.ChildId, eval.Day);
+                    exhausted = child.Groups.Where(g => TimeGroups.SecondsLeft(g, usageNow, child.GroupSecondsElsewhere, eval.Day) == 0).ToList();
+                }
+                await GroupNoticesAsync(s, child, track, eval, inUse, exhausted);
+            }
+            var web = exhausted.Count == 0 ? child.Web
+                : child.Web with { BlockedSites = child.Web.BlockedSites.Concat(exhausted.SelectMany(g => g.Sites)).Distinct(StringComparer.OrdinalIgnoreCase).ToList() };
+            var blockedApps = exhausted.Count == 0 ? child.BlockedApps
+                : child.BlockedApps.Concat(exhausted.SelectMany(g => g.Apps)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
             try
             {
-                BrowserPolicies.Apply(s.Sid, child.Web, forceBrowser);
+                BrowserPolicies.Apply(s.Sid, web, forceBrowser);
                 AccountPolicies.Apply(s.Sid, child, forceBrowser);
             }
             catch (Exception ex)
@@ -192,9 +226,9 @@ internal sealed class Enforcer : BackgroundService
                 if (forceBrowser) Log.Error($"Browser-Regeln für {s.UserName}", ex);
             }
 
-            if (scanApps && !child.Paused && child.BlockedApps.Count > 0)
+            if (scanApps && !child.Paused && blockedApps.Count > 0)
             {
-                var killed = AppBlocker.Enforce(s.SessionId, child.BlockedApps);
+                var killed = AppBlocker.Enforce(s.SessionId, blockedApps);
                 if (killed.Count > 0)
                 {
                     lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, LocText.Of("Gesperrtes Programm beendet: {0}", string.Join(", ", killed)), child.ChildId);
@@ -340,7 +374,13 @@ internal sealed class Enforcer : BackgroundService
             {
                 await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text });
                 track.LockRequested = true;
+                track.LockRequestedAt = Mono.Now;
                 lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Locked, EventText(eval.Reason, logoff: false), child.ChildId);
+            }
+            else if (connected && track.LockRequested && agent?.LockShown != true && Mono.Since(track.LockRequestedAt) > LockConfirmTimeout)
+            {
+                // The agent is connected but could not show (or keep) the lock screen: sign out instead (fail closed).
+                await ForceLogoffAsync(s, child, track, LocText.Of("Sperrbildschirm konnte nicht angezeigt werden – Kind wurde abgemeldet."), failure: true);
             }
             else if (!connected && now - track.BlockedSince > AgentGrace)
             {
@@ -392,6 +432,57 @@ internal sealed class Enforcer : BackgroundService
         lock (_rt.Gate) _rt.SaveIfNeeded(force: true);
     }
 
+    /// <summary>Warnings 5 and 1 minute before a group's time runs out; closes the tab of a used-up site.</summary>
+    private async Task GroupNoticesAsync(UserSession s, ChildPolicy child, Track track, Evaluation eval, bool inUse, List<TimeGroup> exhausted)
+    {
+        if (_agents.Get(s.SessionId)?.Connected != true) return;
+        var lang = child.Language;
+        if (track.GroupWarnDay != eval.Day)
+        {
+            track.GroupWarnDay = eval.Day;
+            track.GroupWarned.Clear();
+        }
+        foreach (var g in FocusGroups(child, track, inUse).Where(g => g.Kind == TimeGroupKind.Limit))
+        {
+            long? left;
+            lock (_rt.Gate) left = TimeGroups.SecondsLeft(g, _rt.State.UsageFor(child.ChildId, eval.Day), child.GroupSecondsElsewhere, eval.Day);
+            if (left is not { } l) continue;
+            int[] thresholds = [300, 60];
+            foreach (var t in thresholds)
+            {
+                if (l > t || l == 0 || track.GroupWarned.Contains($"{g.Id}|{t}")) continue;
+                // One warning per threshold reached; a start at 50 s left marks both thresholds at once.
+                foreach (var u in thresholds.Where(u => l <= u)) track.GroupWarned.Add($"{g.Id}|{u}");
+                await _agents.SendAsync(s.SessionId, new IpcMessage
+                {
+                    Type = IpcMessage.Notify,
+                    Title = L.In(lang, "Noch {0} Min für „{1}“", Math.Max(1, (l + 59) / 60), g.Name),
+                    Text = L.In(lang, "Danach ist „{0}“ für heute vorbei.", g.Name),
+                });
+                break;
+            }
+        }
+        // Used-up site still open in the active tab → close the tab (Chromium browsers also get the site blocked).
+        if (inUse && track.FocusHost is { } host && Mono.Now - track.FocusAt < TimeSpan.FromSeconds(12)
+            && exhausted.FirstOrDefault(g => g.Sites.Any(site => TimeGroups.SiteMatches(host, site))) is { } done
+            && Mono.Now - track.LastTabClose > TimeSpan.FromSeconds(5))
+        {
+            track.LastTabClose = Mono.Now;
+            var site = done.Sites.First(x => TimeGroups.SiteMatches(host, x));
+            await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.CloseTab, Host = site });
+            await _agents.SendAsync(s.SessionId, new IpcMessage
+            {
+                Type = IpcMessage.Notify,
+                Title = L.In(lang, "„{0}“ ist für heute vorbei", done.Name),
+                Text = L.In(lang, "Deine Zeit für „{0}“ ist für heute aufgebraucht.", done.Name),
+            });
+            lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, LocText.Of("Zeit für „{0}“ aufgebraucht – {1} geschlossen", done.Name, host), child.ChildId);
+        }
+    }
+
+    /// <summary>The agent must confirm the lock screen within this time, otherwise the child is signed out.</summary>
+    private static readonly TimeSpan LockConfirmTimeout = TimeSpan.FromSeconds(20);
+
     private async Task WarnAsync(UserSession s, ChildPolicy child, Evaluation eval, Track track)
     {
         if (eval.RemainingSeconds is not { } rem || child.Paused) return;
@@ -440,7 +531,8 @@ internal sealed class Enforcer : BackgroundService
                 }
                 break;
 
-            case IpcMessage.Usage when child is not null && msg.Samples is { } samples && policy is not null:
+            case IpcMessage.Usage when child is not null && msg.Samples is { } rawSamples && policy is not null:
+                var samples = rawSamples.Where(x => x is not null && !string.IsNullOrEmpty(x.Process) && x.DisplayName is not null).Take(50).ToList();
                 lock (_tracksGate)
                 {
                     if (_tracks.TryGetValue(sessionId, out var tr) && samples.Count > 0)
@@ -468,6 +560,19 @@ internal sealed class Enforcer : BackgroundService
                 }
                 break;
 
+            case IpcMessage.Focus:
+                lock (_tracksGate)
+                {
+                    if (_tracks.TryGetValue(sessionId, out var ft))
+                    {
+                        ft.FocusProcess = Cut(msg.Process ?? "", 80) is { Length: > 0 } p ? p.ToLowerInvariant() : null;
+                        ft.FocusDescription = msg.Description is null ? null : Cut(msg.Description, 120);
+                        ft.FocusHost = msg.Host is null ? null : Cut(msg.Host, 253).ToLowerInvariant();
+                        ft.FocusAt = Mono.Now;
+                    }
+                }
+                break;
+
             case IpcMessage.Code when child is not null && policy is not null:
                 var (ok, text) = RedeemCode(child, policy, msg.Text ?? "");
                 await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.CodeResult, Flag = ok, Text = text });
@@ -478,8 +583,10 @@ internal sealed class Enforcer : BackgroundService
                 if (a is not null) a.LockShown = msg.Flag;
                 break;
 
-            case IpcMessage.AlertHits when child is not null && msg.Hits is { } hits:
-                await HandleAlertsAsync(sessionId, child, hits);
+            case IpcMessage.AlertHits when child is not null && msg.Hits is { } rawHits:
+                var hits = rawHits.Where(h => h is not null && Enum.IsDefined(h.Category) && h.Keyword is not null && h.App is not null
+                    && h.Snippet is not null && h.Source is not null).Take(20).ToList();
+                if (hits.Count > 0) await HandleAlertsAsync(sessionId, child, hits);
                 break;
 
             case IpcMessage.ScreenshotData when msg.RequestId is { } rid:
@@ -496,8 +603,9 @@ internal sealed class Enforcer : BackgroundService
                 break;
 
             case IpcMessage.LogLine:
-                Log.Warn($"Agent {sessionId}: {msg.Text}");
-                _rt.ReportError($"Sitzungsprogramm: {msg.Text}");
+                var line = Cut(msg.Text ?? "", 500);
+                Log.Warn($"Agent {sessionId}: {line}");
+                _rt.ReportError($"Sitzungsprogramm: {line}");
                 break;
         }
     }
@@ -555,7 +663,8 @@ internal sealed class Enforcer : BackgroundService
                 return (false, L.In(child.Language, "Zu viele falsche Versuche. Bitte warte {0} Minute(n).", Math.Ceiling(wait.TotalMinutes)));
 
             var day = FamilyClock.Day(now, FamilyClock.Resolve(policy.TimeZoneId));
-            if (!UnlockCodes.TryValidate(_rt.Device.UnlockKeyBytes, child.ChildId, day, code, out var decoded))
+            var key = string.IsNullOrEmpty(child.UnlockKey) ? _rt.Device.UnlockKeyBytes : Convert.FromBase64String(child.UnlockKey);
+            if (!UnlockCodes.TryValidate(key, child.ChildId, day, code, out var decoded))
             {
                 throttle.RegisterFailure(now);
                 _rt.State.AddEvent(DeviceEventKind.UnlockFailed, LocText.Of("Falscher Freischaltcode eingegeben"), child.ChildId);

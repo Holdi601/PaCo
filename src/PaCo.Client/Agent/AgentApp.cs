@@ -83,8 +83,17 @@ internal sealed class AgentApp : ApplicationContext
         {
             Log.Error("Agent: Verbindung zum Dienst", ex);
         }
-        // Service gone or pipe closed: exit; the service starts a fresh agent when needed.
-        _ui.Post(_ => Shutdown(), null);
+        // Service gone or pipe closed: exit; the service starts a fresh agent when needed. If the lock screen is up
+        // and nobody said "unlock", sign the session out rather than revealing the desktop (fail closed).
+        _ui.Post(_ =>
+        {
+            if (_lock.IsShown && !_exitRequested)
+            {
+                Log.Warn("Verbindung zum Dienst verloren, während gesperrt – Sitzung wird abgemeldet");
+                Win32.WTSLogoffSession(Win32.WtsCurrentServer, -1, false);
+            }
+            Shutdown();
+        }, null);
     }
 
     private void Handle(IpcMessage msg)
@@ -105,8 +114,11 @@ internal sealed class AgentApp : ApplicationContext
                     break;
                 case IpcMessage.ShowLock:
                     if (msg.Lang is { } lang && Languages.IsSupported(lang)) L.Lang = lang;
-                    _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds);
-                    Send(new IpcMessage { Type = IpcMessage.LockState, Flag = true });
+                    bool locked;
+                    try { locked = _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds); }
+                    catch (Exception ex) { Log.Error("Sperrbildschirm", ex); locked = false; }
+                    // Only a confirmed lock counts – otherwise the service signs the child out (fail closed).
+                    Send(new IpcMessage { Type = IpcMessage.LockState, Flag = locked });
                     break;
                 case IpcMessage.HideLock:
                     _lock.Hide();
@@ -122,11 +134,16 @@ internal sealed class AgentApp : ApplicationContext
                     Audio.SetMuteAll(false);
                     break;
                 case IpcMessage.Exit:
+                    _exitRequested = true;
                     Shutdown();
                     break;
                 case IpcMessage.AlertConfig when msg.Text is { } json:
                     _scanner.Configure(PaCoJson.Deserialize<AlertSettings>(json));
                     break;
+                case IpcMessage.CloseTab:
+                    CloseTab(msg.Host);
+                    break;
+
                 case IpcMessage.TakeScreenshot when msg.RequestId is { } rid:
                     byte[] jpeg = [];
                     try
@@ -149,9 +166,61 @@ internal sealed class AgentApp : ApplicationContext
         }
     }
 
+    private bool _exitRequested;
+    private string? _host;
+    private (IntPtr Hwnd, string? Title) _hostFor;
+    private TimeSpan _hostAt = Mono.Never;
+    private int _hostReading;
+    private string? _sentFocus;
+    private int _focusTick;
+
+    /// <summary>
+    /// Tells the service what is in the foreground (for per-app/site limits and learning time) – on every change and
+    /// every 5 s. The browser address is read in the background (UI Automation can take a moment).
+    /// </summary>
+    private void ReportFocus()
+    {
+        var cur = _lock.IsShown ? null : _tracker.Current;
+        if (cur is { } c && BrowserAddress.IsBrowser(c.Process))
+        {
+            var stale = _hostFor != (c.Hwnd, c.Title) || Mono.Now - _hostAt > TimeSpan.FromSeconds(10);
+            if (stale && Interlocked.CompareExchange(ref _hostReading, 1, 0) == 0)
+            {
+                var (hwnd, title, process) = (c.Hwnd, c.Title, c.Process);
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        _host = BrowserAddress.ReadHost(hwnd, process);
+                        _hostFor = (hwnd, title);
+                        _hostAt = Mono.Now;
+                    }
+                    finally { Interlocked.Exchange(ref _hostReading, 0); }
+                });
+            }
+        }
+        var host = cur is { } b && BrowserAddress.IsBrowser(b.Process) && _hostFor.Hwnd == b.Hwnd ? _host : null;
+        var key = cur is null ? "" : $"{cur.Value.Process}|{cur.Value.Description}|{host}";
+        if (key == _sentFocus && ++_focusTick % 5 != 0) return;
+        _sentFocus = key;
+        Send(new IpcMessage { Type = IpcMessage.Focus, Process = cur?.Process, Description = cur?.Description, Host = host });
+    }
+
+    /// <summary>Closes the active browser tab if it still shows a site whose time is used up (Ctrl+W).</summary>
+    private void CloseTab(string? site)
+    {
+        if (site is null || _tracker.Current is not { } c || !BrowserAddress.IsBrowser(c.Process)) return;
+        var host = BrowserAddress.ReadHost(c.Hwnd, c.Process);
+        if (host is null || !PaCo.Shared.TimeGroups.SiteMatches(host, site)) return;
+        if (Win32.GetForegroundWindow() != c.Hwnd) return; // focus moved meanwhile – never close something else
+        SendKeys.SendWait("^w");
+        Log.Info($"Tab mit {host} geschlossen (Zeit für heute aufgebraucht)");
+    }
+
     private void OnTick()
     {
         if (!_lock.IsShown) _tracker.Sample();
+        ReportFocus();
         if (++_tick % 5 == 0)
         {
             var samples = _tracker.Drain();

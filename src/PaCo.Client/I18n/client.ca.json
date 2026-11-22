@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "S'estan eliminant les regles del navegador …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Perquè el teu fill o filla no pugui saltar-se PaCo i l'ordinador estigui ben protegit, s'ha comprovat el següent:",
  "Danach gelten hier keine Regeln mehr.": "Després, aquí ja no s'aplicarà cap regla.",
+ "Danach ist „{0}“ für heute vorbei.": "Després, «{0}» s'acaba per avui.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Després es bloquejarà la pantalla. Desa ara la teva partida o la teva feina.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Després es tancarà la teva sessió. Desa ara la teva partida o la teva feina.",
  "Daten-Ordner wird geschützt …": "S'està protegint la carpeta de dades …",
  "Deine Bildschirmzeit ist aufgebraucht": "S'ha acabat el teu temps de pantalla",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Els teus pares han mirat una captura de pantalla.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "El teu temps per a «{0}» s'ha acabat per avui.",
  "Deinstallieren": "Desinstal·la",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "El codi no és correcte. Durant una estona no podràs escriure cap codi.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "El codi no és correcte. Et queden {0} intent(s).",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "S'està aturant el servei en execució …",
  "Neues Kind: {0}": "Infant nou: {0}",
  "Noch 1 Minute": "Queda 1 minut",
+ "Noch {0} Min für „{1}“": "Queden {0} min per a «{1}»",
  "Noch {0} Minuten": "Queden {0} minuts",
  "PaCo Kinderschutz": "Control parental PaCo",
  "PaCo Kinderschutz von diesem PC entfernen?": "Vols eliminar el control parental PaCo d'aquest ordinador?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, per avui s'ha acabat el teu temps. Demà més!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, avui pots fer servir l'ordinador de {1} a {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, ara no és hora d'ordinador.",
- "— kein Kind (nicht überwacht) —": "— cap infant (sense supervisió) —"
+ "— kein Kind (nicht überwacht) —": "— cap infant (sense supervisió) —",
+ "„{0}“ ist für heute vorbei": "«{0}» s'ha acabat per avui"
 }

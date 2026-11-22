@@ -11,11 +11,13 @@
   "Browser-Regeln werden entfernt …": "Brauseri reegleid eemaldatakse …",
   "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Et su laps ei saaks PaCost mööda minna ja arvuti oleks hästi kaitstud, kontrolliti järgmist:",
   "Danach gelten hier keine Regeln mehr.": "Pärast seda ei kehti siin enam ühtegi reeglit.",
+  "Danach ist „{0}“ für heute vorbei.": "Siis on „{0}“ tänaseks läbi.",
   "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Seejärel ekraan lukustatakse. Salvesta nüüd oma mäng või töö.",
   "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Seejärel logitakse sind välja. Salvesta nüüd oma mäng või töö.",
   "Daten-Ordner wird geschützt …": "Andmekausta kaitstakse …",
   "Deine Bildschirmzeit ist aufgebraucht": "Su ekraaniaeg on otsas",
   "Deine Eltern haben ein Bildschirmfoto angesehen.": "Su vanemad vaatasid ekraanipilti.",
+  "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Sinu „{0}“ aeg on tänaseks otsas.",
   "Deinstallieren": "Desinstalli",
   "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kood on vale. Sisestamine on ajutiselt lukus.",
   "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kood on vale. Katseid jäänud: {0}.",
@@ -52,6 +54,7 @@
   "Laufender Dienst wird angehalten …": "Töötav teenus peatatakse …",
   "Neues Kind: {0}": "Uus laps: {0}",
   "Noch 1 Minute": "Jäänud 1 minut",
+  "Noch {0} Min für „{1}“": "„{1}“: jäänud {0} min",
   "Noch {0} Minuten": "Jäänud {0} minutit",
   "PaCo Kinderschutz": "PaCo lastekaitse",
   "PaCo Kinderschutz von diesem PC entfernen?": "Kas eemaldada PaCo lastekaitse sellest arvutist?",
@@ -94,5 +97,6 @@
   "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, tänaseks on su aeg läbi. Homme saab edasi!",
   "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, täna võid arvutit kasutada kell {1}–{2}.",
   "{0}, jetzt ist keine PC-Zeit.": "{0}, praegu ei ole arvutiaeg.",
-  "— kein Kind (nicht überwacht) —": "— pole laps (ei jälgita) —"
+  "— kein Kind (nicht überwacht) —": "— pole laps (ei jälgita) —",
+  "„{0}“ ist für heute vorbei": "„{0}“ on tänaseks läbi"
 }

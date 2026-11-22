@@ -111,6 +111,8 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
 
         var familyId = InviteFamilyId ?? (await admin.CreateFamilyAsync(NewFamilyName!)).Id;
         var (user, link) = await admin.InviteParentAsync(InviteEmail, InviteName, familyId, BaseUrl());
+        if (InviteFamilyId is not null)
+            await admin.NotifyFamilyAsync(familyId, AccountAdmin.InvitedTitle, AccountAdmin.InvitedText, user.Email);
         log.LogInformation("Einladung erstellt für {Email}", user.Email);
         InviteLink = link;
         InviteFor = $"{user.DisplayName} ({user.Email})";
@@ -122,6 +124,8 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         var user = await ParentAsync(userId);
         if (user is null) return NotFound();
         InviteLink = user.InvitePending ? await admin.InviteLinkAsync(user, BaseUrl()) : await admin.ResetAccessAsync(user, BaseUrl());
+        if (user.FamilyId is { } fid)
+            await admin.NotifyFamilyAsync(fid, AccountAdmin.NewLinkTitle, AccountAdmin.NewLinkText, user.Email);
         InviteFor = $"{user.DisplayName} ({user.Email})";
         log.LogWarning("Neuer Zugangslink für {Email} erstellt", user.Email);
         return RedirectToPage();
@@ -141,6 +145,7 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         var user = await ParentAsync(userId);
         if (user is null) return NotFound();
         await users.DeleteAsync(user);
+        await DbTicketStore.RemoveAllAsync(db, user.Id);
         TempData["Message"] = Ui.F("Konto {0} gelöscht. Die Familie und ihre Daten bleiben erhalten.", user.Email);
         return RedirectToPage();
     }

@@ -146,6 +146,11 @@ public sealed class Housekeeping(IServiceScopeFactory scopes, TimeProvider clock
                 var oldLocations = now.AddDays(-30);
                 db.Locations.RemoveRange(await db.Locations.IgnoreQueryFilters().Where(l => l.TimeUtc < oldLocations).ToListAsync(ct));
                 db.DeviceIps.RemoveRange(await db.DeviceIps.IgnoreQueryFilters().Where(i => i.LastSeenUtc < oldAlerts).ToListAsync(ct));
+                await db.AuthSessions.Where(a => a.ExpiresUtc < now).ExecuteDeleteAsync(ct);
+                // Device log: 90 days; usage statistics: 400 days.
+                await db.DeviceEvents.IgnoreQueryFilters().Where(e => e.TimeUtc < oldAlerts).ExecuteDeleteAsync(ct);
+                var oldUsage = DateOnly.FromDateTime(now.UtcDateTime).AddDays(-400);
+                await db.UsageDays.IgnoreQueryFilters().Where(u => u.Day < oldUsage).ExecuteDeleteAsync(ct);
                 await db.SaveChangesAsync(ct);
                 if (oldShots.Count > 0) log.LogInformation("{Count} alte Bildschirmfotos gelöscht", oldShots.Count);
             }

@@ -184,6 +184,23 @@ internal static class Win32
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern IntPtr CreateDesktop(string name, IntPtr device, IntPtr devmode, int flags, uint access, IntPtr attributes);
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SecurityAttributes
+    {
+        public int Length;
+        public IntPtr SecurityDescriptor;
+        public bool InheritHandle;
+    }
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "CreateDesktopW")]
+    public static extern IntPtr CreateDesktopSecure(string name, IntPtr device, IntPtr devmode, int flags, uint access, ref SecurityAttributes attributes);
+
+    [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern bool ConvertStringSecurityDescriptorToSecurityDescriptor(string sddl, int revision, out IntPtr descriptor, IntPtr size);
+
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr LocalFree(IntPtr mem);
+
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern IntPtr OpenDesktop(string name, int flags, bool inherit, uint access);
 

@@ -229,6 +229,7 @@ internal static class SecurityAudit
 
     private static void RunHidden(string exe, string args)
     {
+        if (!Path.IsPathRooted(exe)) exe = Path.Combine(Environment.SystemDirectory, exe); // never from the setup's own folder
         using var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe, args) { CreateNoWindow = true, UseShellExecute = false })!;
         p.WaitForExit(15000);
     }

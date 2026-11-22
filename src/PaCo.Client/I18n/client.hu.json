@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Böngészőszabályok eltávolítása …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Hogy a gyereked ne tudja megkerülni a PaCo védelmét, és a gép jól védett legyen, a következőket ellenőriztük:",
  "Danach gelten hier keine Regeln mehr.": "Ezután itt már nem lesznek érvényben szabályok.",
+ "Danach ist „{0}“ für heute vorbei.": "Utána mára vége: „{0}”.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Utána a képernyő zárolódik. Most mentsd el a játékodat vagy a munkádat.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Utána a gép kijelentkeztet. Most mentsd el a játékodat vagy a munkádat.",
  "Daten-Ordner wird geschützt …": "Adatmappa védelme …",
  "Deine Bildschirmzeit ist aufgebraucht": "Elfogyott a képernyőidőd",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "A szüleid megnéztek egy képernyőképet.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Mára elfogyott az időd ehhez: „{0}”.",
  "Deinstallieren": "Eltávolítás",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "A kód nem jó. A beírás átmenetileg zárolva van.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "A kód nem jó. Hátralévő próbálkozások: {0}.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "A futó szolgáltatás leállítása …",
  "Neues Kind: {0}": "Új gyerek: {0}",
  "Noch 1 Minute": "Még 1 perc",
+ "Noch {0} Min für „{1}“": "Még {0} perc: „{1}”",
  "Noch {0} Minuten": "Még {0} perc",
  "PaCo Kinderschutz": "PaCo gyerekvédelem",
  "PaCo Kinderschutz von diesem PC entfernen?": "Eltávolítod a PaCo gyerekvédelmet erről a gépről?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, mára lejárt az időd. Holnap folytathatod!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, ma {1} és {2} között használhatod a gépet.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, most nincs gépidő.",
- "— kein Kind (nicht überwacht) —": "— nem gyerek (nincs felügyelet) —"
+ "— kein Kind (nicht überwacht) —": "— nem gyerek (nincs felügyelet) —",
+ "„{0}“ ist für heute vorbei": "Mára vége: „{0}”"
 }

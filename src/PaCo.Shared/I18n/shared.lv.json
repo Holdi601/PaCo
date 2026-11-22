@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Bloķēta programma aizvērta: {0}",
  "Gewalt & Waffen": "Vardarbība & ieroči",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (pieaugušie, kas pievilina bērnus)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCo aizsargātajā mapē tika atrasti un iztīrīti {0} sveši vai mainīti ieraksti.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nav atrasta aktīva pretvīrusu aizsardzība! Lūdzu, ieslēdz Microsoft Defender (Windows drošība).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Bērni administratora darbībām var ievadīt administratora paroli. Ieteikums: standarta kontiem šo vaicājumu pilnībā izslēgt.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Bērna konts „{0}” ir standarta konts.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows ugunsmūris ir ieslēgts.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows kontam „{0}” ({1}) ir administratora tiesības.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows pulkstenis tika pagriezts atpakaļ par {0} min – tas tiek ignorēts.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "„{0}”: laiks beidzies – aizvērts: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servera laiks bez derīga paraksta tika noraidīts – iespējams, viltots serveris. PaCo turpina skaitīt ar savu pulksteni."
 }

@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Letiltott program bezárva: {0}",
  "Gewalt & Waffen": "Erőszak és fegyverek",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (felnőttek, akik gyerekeket csalogatnak)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "A PaCo {0} idegen vagy módosított bejegyzést talált és takarított el a védett mappájában.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nem található aktív vírusvédelem! Kapcsold be a Microsoft Defendert (Windows biztonság).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "A gyerekek rendszergazdai műveleteknél beírhatnak egy rendszergazdai jelszót. Javaslat: a normál fiókoknál kapcsold ki teljesen a kérdést.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "A(z) „{0}” gyerekfiók normál fiók.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "A Windows tűzfal be van kapcsolva.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "A(z) „{0}” Windows-fiók ({1}) rendszergazdai jogokkal rendelkezik.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "A Windows óráját {0} perccel visszaállították – figyelmen kívül hagyva.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Elfogyott az idő: „{0}” – bezárva: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Érvényes aláírás nélküli szerveridő elutasítva – lehet, hogy hamis szerver. A PaCo a saját órájával számol tovább."
 }

@@ -25,4 +25,5 @@ ENV PaCo__DataDir=/data \
 VOLUME /data
 EXPOSE 8790
 # Runs as the non-root user given in docker-compose (owner of the data directory).
-ENTRYPOINT ["dotnet", "PaCo.Server.dll"]
+# umask 077: database, keys and screenshots are readable only by the server's own user.
+ENTRYPOINT ["/bin/sh", "-c", "umask 077 && exec dotnet PaCo.Server.dll \"$@\"", "paco"]

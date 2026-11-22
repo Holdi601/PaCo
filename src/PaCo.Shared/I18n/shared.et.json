@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Blokeeritud programm suleti: {0}",
  "Gewalt & Waffen": "Vägivald & relvad",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (lapsi ahvatlevad täiskasvanud)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCo kaitstud kaustast leiti ja puhastati {0} võõrast või muudetud kirjet.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Aktiivset viirusetõrjet ei leitud! Lülita sisse Microsoft Defender (Windowsi turve).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Lapsed saavad administraatoritoimingute juures sisestada administraatori parooli. Soovitus: lülita standardkontode jaoks see päring täielikult välja.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Lapse konto „{0}“ on standardkonto.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windowsi tulemüür on sisse lülitatud.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windowsi kontol „{0}“ ({1}) on administraatoriõigused.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windowsi kella keerati {0} minutit tagasi – seda eiratakse.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "„{0}“ aeg otsas – suletud: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Kehtiva allkirjata serveri aeg lükati tagasi – võimalik võltsserver. PaCo jätkab oma kellaga."
 }

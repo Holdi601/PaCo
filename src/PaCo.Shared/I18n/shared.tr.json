@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Engellenen program kapatıldı: {0}",
  "Gewalt & Waffen": "Şiddet ve silahlar",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (çocukları kandırıp tuzağa düşüren yetişkinler)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCo'nun korunan klasöründe {0} yabancı veya değiştirilmiş öğe bulundu ve temizlendi.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Etkin virüs koruması bulunamadı! Lütfen Microsoft Defender'ı (Windows Güvenliği) açın.",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Çocuklar yönetici işlemlerinde yönetici parolası girebilir. Öneri: Standart hesaplar için bu istemi tamamen kapatın.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "“{0}” çocuk hesabı standart bir hesap.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows Güvenlik Duvarı açık.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "{1} adlı çocuğun “{0}” Windows hesabı yönetici haklarına sahip.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows saati {0} dakika geri alındı – yok sayıldı.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "“{0}” için süre doldu – {1} kapatıldı",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Geçerli imzası olmayan sunucu saati reddedildi – sahte bir sunucu olabilir. PaCo kendi saatiyle saymaya devam ediyor."
 }

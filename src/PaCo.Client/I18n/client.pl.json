@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Usuwanie reguł przeglądarki …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Aby twoje dziecko nie mogło obejść PaCo, a komputer był dobrze chroniony, sprawdzono:",
  "Danach gelten hier keine Regeln mehr.": "Potem nie będą tu obowiązywać żadne reguły.",
+ "Danach ist „{0}“ für heute vorbei.": "Potem „{0}” kończy się na dziś.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Potem ekran zostanie zablokowany. Zapisz teraz swoją grę albo pracę.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Potem nastąpi wylogowanie. Zapisz teraz swoją grę albo pracę.",
  "Daten-Ordner wird geschützt …": "Zabezpieczanie folderu danych …",
  "Deine Bildschirmzeit ist aufgebraucht": "Twój czas przed ekranem się skończył",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Twoi rodzice obejrzeli zrzut ekranu.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Twój czas na „{0}” na dziś się skończył.",
  "Deinstallieren": "Odinstaluj",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kod jest nieprawidłowy. Wpisywanie jest chwilowo zablokowane.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kod jest nieprawidłowy. Pozostałe próby: {0}.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Zatrzymywanie działającej usługi …",
  "Neues Kind: {0}": "Nowe dziecko: {0}",
  "Noch 1 Minute": "Została 1 minuta",
+ "Noch {0} Min für „{1}“": "Zostało {0} min na „{1}”",
  "Noch {0} Minuten": "Pozostało minut: {0}",
  "PaCo Kinderschutz": "Ochrona dzieci PaCo",
  "PaCo Kinderschutz von diesem PC entfernen?": "Usunąć ochronę dzieci PaCo z tego komputera?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, twój czas na dziś się skończył. Jutro ciąg dalszy!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, dziś możesz korzystać z komputera od {1} do {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, teraz nie jest czas na komputer.",
- "— kein Kind (nicht überwacht) —": "— to nie dziecko (bez nadzoru) —"
+ "— kein Kind (nicht überwacht) —": "— to nie dziecko (bez nadzoru) —",
+ "„{0}“ ist für heute vorbei": "„{0}” – koniec na dziś"
 }

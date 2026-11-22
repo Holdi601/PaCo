@@ -11,11 +11,13 @@
   "Browser-Regeln werden entfernt …": "Αφαίρεση κανόνων προγράμματος περιήγησης …",
   "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Για να μην μπορεί το παιδί σου να παρακάμψει το PaCo και για να είναι καλά προστατευμένος ο υπολογιστής, ελέγχθηκαν τα εξής:",
   "Danach gelten hier keine Regeln mehr.": "Μετά δεν θα ισχύει πια κανένας κανόνας εδώ.",
+  "Danach ist „{0}“ für heute vorbei.": "Μετά, το «{0}» τελειώνει για σήμερα.",
   "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Μετά η οθόνη θα κλειδώσει. Αποθήκευσε τώρα το παιχνίδι ή τη δουλειά σου.",
   "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Μετά θα αποσυνδεθείς. Αποθήκευσε τώρα το παιχνίδι ή τη δουλειά σου.",
   "Daten-Ordner wird geschützt …": "Προστασία φακέλου δεδομένων …",
   "Deine Bildschirmzeit ist aufgebraucht": "Ο χρόνος οθόνης σου τελείωσε",
   "Deine Eltern haben ein Bildschirmfoto angesehen.": "Οι γονείς σου είδαν ένα στιγμιότυπο οθόνης.",
+  "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Ο χρόνος σου για το «{0}» τελείωσε για σήμερα.",
   "Deinstallieren": "Απεγκατάσταση",
   "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Ο κωδικός δεν είναι σωστός. Η πληκτρολόγηση κλειδώθηκε προσωρινά.",
   "Der Code stimmt nicht. Noch {0} Versuch(e).": "Ο κωδικός δεν είναι σωστός. Απομένουν προσπάθειες: {0}.",
@@ -52,6 +54,7 @@
   "Laufender Dienst wird angehalten …": "Διακοπή της υπηρεσίας που εκτελείται …",
   "Neues Kind: {0}": "Νέο παιδί: {0}",
   "Noch 1 Minute": "Απομένει 1 λεπτό",
+  "Noch {0} Min für „{1}“": "Απομένουν {0} λεπ. για το «{1}»",
   "Noch {0} Minuten": "Απομένουν {0} λεπτά",
   "PaCo Kinderschutz": "PaCo Προστασία παιδιών",
   "PaCo Kinderschutz von diesem PC entfernen?": "Να αφαιρεθεί το PaCo Προστασία παιδιών από αυτόν τον υπολογιστή;",
@@ -94,5 +97,6 @@
   "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, ο χρόνος σου για σήμερα τελείωσε. Αύριο συνεχίζουμε!",
   "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, σήμερα μπορείς να χρησιμοποιήσεις τον υπολογιστή από τις {1} έως τις {2}.",
   "{0}, jetzt ist keine PC-Zeit.": "{0}, δεν είναι ώρα για υπολογιστή τώρα.",
-  "— kein Kind (nicht überwacht) —": "— όχι παιδί (χωρίς επίβλεψη) —"
+  "— kein Kind (nicht überwacht) —": "— όχι παιδί (χωρίς επίβλεψη) —",
+  "„{0}“ ist für heute vorbei": "Το «{0}» τελείωσε για σήμερα"
 }

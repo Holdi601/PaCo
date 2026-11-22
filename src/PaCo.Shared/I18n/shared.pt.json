@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Programa bloqueado fechado: {0}",
  "Gewalt & Waffen": "Violência e armas",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (adultos que aliciam crianças)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "Foram encontradas e limpas {0} entradas estranhas ou alteradas na pasta protegida do PaCo.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nenhum antivírus ativo encontrado! Ativa o Microsoft Defender (Segurança do Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "As crianças podem introduzir uma palavra-passe de administrador em ações de administrador. Recomendação: desativar completamente o pedido para contas padrão.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "A conta de criança «{0}» é uma conta padrão.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "A Firewall do Windows está ativada.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "A conta do Windows «{0}» de {1} tem direitos de administrador.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "O relógio do Windows foi atrasado {0} minutos – ignorado.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Tempo para «{0}» esgotado – {1} fechado",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Hora do servidor sem assinatura válida rejeitada – possivelmente um servidor falso. O PaCo continua a contar com o seu próprio relógio."
 }

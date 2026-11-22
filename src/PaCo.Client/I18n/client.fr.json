@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Suppression des règles du navigateur …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Pour que ton enfant ne puisse pas contourner PaCo et que le PC soit bien protégé, voici ce qui a été vérifié :",
  "Danach gelten hier keine Regeln mehr.": "Ensuite, plus aucune règle ne s'applique ici.",
+ "Danach ist „{0}“ für heute vorbei.": "Ensuite, « {0} » sera terminé pour aujourd'hui.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Ensuite, l'écran sera verrouillé. Enregistre ton jeu ou ton travail maintenant.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Ensuite, ta session sera fermée. Enregistre ton jeu ou ton travail maintenant.",
  "Daten-Ordner wird geschützt …": "Protection du dossier de données …",
  "Deine Bildschirmzeit ist aufgebraucht": "Ton temps d'écran est écoulé",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Tes parents ont regardé une capture d'écran.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Ton temps pour « {0} » est écoulé pour aujourd'hui.",
  "Deinstallieren": "Désinstaller",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Ce code n'est pas le bon. La saisie est bloquée pendant un petit moment.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Ce code n'est pas le bon. Encore {0} essai(s).",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Arrêt du service en cours d'exécution …",
  "Neues Kind: {0}": "Nouvel enfant : {0}",
  "Noch 1 Minute": "Encore 1 minute",
+ "Noch {0} Min für „{1}“": "Encore {0} min pour « {1} »",
  "Noch {0} Minuten": "Encore {0} minutes",
  "PaCo Kinderschutz": "Contrôle parental PaCo",
  "PaCo Kinderschutz von diesem PC entfernen?": "Supprimer le contrôle parental PaCo de ce PC ?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, ton temps est terminé pour aujourd'hui. À demain !",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, aujourd'hui tu peux utiliser le PC de {1} à {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, ce n'est pas l'heure du PC.",
- "— kein Kind (nicht überwacht) —": "— pas un enfant (non surveillé) —"
+ "— kein Kind (nicht überwacht) —": "— pas un enfant (non surveillé) —",
+ "„{0}“ ist für heute vorbei": "« {0} » est terminé pour aujourd'hui"
 }

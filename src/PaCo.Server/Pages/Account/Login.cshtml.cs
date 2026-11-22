@@ -28,6 +28,9 @@ public sealed class LoginModel(SignInManager<ParentUser> signIn, ILogger<LoginMo
     {
         if (!ModelState.IsValid) return Page();
 
+        // Unknown address: spend the same time as a real password check, so timing reveals nothing.
+        if (await signIn.UserManager.FindByEmailAsync(Email.Trim()) is null)
+            signIn.UserManager.PasswordHasher.HashPassword(new ParentUser(), Password);
         var result = await signIn.PasswordSignInAsync(Email.Trim(), Password, RememberMe, lockoutOnFailure: true);
         if (result.Succeeded)
         {
@@ -38,12 +41,13 @@ public sealed class LoginModel(SignInManager<ParentUser> signIn, ILogger<LoginMo
         if (result.IsLockedOut)
         {
             log.LogWarning("Konto gesperrt nach Fehlversuchen: {Email}", Email);
-            Error = Ui.T("Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.");
-            return Page();
         }
-
-        log.LogWarning("Fehlgeschlagener Login für {Email} von {Ip}", Email, HttpContext.Connection.RemoteIpAddress);
-        Error = Ui.T("E-Mail oder Passwort ist falsch.");
+        else
+        {
+            log.LogWarning("Fehlgeschlagener Login für {Email} von {Ip}", Email, HttpContext.Connection.RemoteIpAddress);
+        }
+        // Same answer for every failure – nobody can find out which addresses have an account.
+        Error = Ui.T("Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort – nach mehreren Fehlversuchen ist die Anmeldung 15 Minuten gesperrt.");
         return Page();
     }
 }

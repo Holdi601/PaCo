@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Τερματίστηκε αποκλεισμένο πρόγραμμα: {0}",
  "Gewalt & Waffen": "Βία & όπλα",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (ενήλικες που δελεάζουν παιδιά)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "Στον προστατευμένο φάκελο του PaCo βρέθηκαν και καθαρίστηκαν {0} ξένες ή τροποποιημένες καταχωρίσεις.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Δεν βρέθηκε ενεργή προστασία από ιούς! Ενεργοποίησε το Microsoft Defender (Ασφάλεια των Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Τα παιδιά μπορούν να πληκτρολογήσουν κωδικό διαχειριστή σε ενέργειες διαχειριστή. Σύσταση: Απενεργοποίησε εντελώς την ερώτηση για τους τυπικούς λογαριασμούς.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Ο παιδικός λογαριασμός «{0}» είναι τυπικός λογαριασμός.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Το Τείχος προστασίας των Windows είναι ενεργοποιημένο.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Ο λογαριασμός Windows «{0}» ({1}) έχει δικαιώματα διαχειριστή.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Το ρολόι των Windows γύρισε πίσω κατά {0} λεπτά – αγνοείται.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Ο χρόνος για το «{0}» εξαντλήθηκε – έκλεισε: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Η ώρα του διακομιστή χωρίς έγκυρη υπογραφή απορρίφθηκε – πιθανώς ψεύτικος διακομιστής. Το PaCo συνεχίζει με το δικό του ρολόι."
 }

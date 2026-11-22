@@ -122,6 +122,11 @@ internal static class Installer
             Sc($"config {Paths.ServiceName} binPath= \"\\\"{Paths.InstalledExe}\\\" --service\" start= auto obj= LocalSystem");
         }
         Sc($"description {Paths.ServiceName} \"Bildschirmzeit und Jugendschutz (PaCo). Nicht beenden.\"");
+        // Native libraries of the single-file exe are unpacked into the protected data dir, not into the world-
+        // writable C:\Windows\Temp (the agent and the updater inherit this environment from the service).
+        Directory.CreateDirectory(Paths.BundleDir);
+        using (var svc = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\Services\{Paths.ServiceName}", writable: true))
+            svc?.SetValue("Environment", new[] { $"DOTNET_BUNDLE_EXTRACT_BASE_DIR={Paths.BundleDir}" }, RegistryValueKind.MultiString);
         // Restart after 5 s on every crash, counter reset after 1 day; also on non-crash failures.
         Sc($"failure {Paths.ServiceName} reset= 86400 actions= restart/5000/restart/5000/restart/5000");
         Sc($"failureflag {Paths.ServiceName} 1");
@@ -157,8 +162,16 @@ internal static class Installer
             Log.Error("Neue Version startet nicht – stelle vorherige Version wieder her", ex);
             await StopServiceAsync();
             File.Copy(backup, Paths.InstalledExe, overwrite: true);
-            await StartAndVerifyAsync();
-            Log.Warn("Vorherige Version wiederhergestellt");
+            try
+            {
+                await StartAndVerifyAsync();
+                Log.Warn("Vorherige Version wiederhergestellt");
+            }
+            finally
+            {
+                // Never leave the PC without protection: one last start attempt in any case.
+                try { Sc($"start {Paths.ServiceName}"); } catch (Exception ex2) { Log.Error("Letzter Startversuch", ex2); }
+            }
             throw;
         }
     }
@@ -226,7 +239,7 @@ internal static class Installer
         }
 
         // The running exe cannot delete itself – a detached cmd removes the folder after we exit.
-        Process.Start(new ProcessStartInfo("cmd.exe", $"/c ping 127.0.0.1 -n 4 > nul & rmdir /s /q \"{Paths.InstallDir}\"")
+        Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "cmd.exe"), $"/c \"{Path.Combine(Environment.SystemDirectory, "PING.EXE")}\" 127.0.0.1 -n 4 > nul & rmdir /s /q \"{Paths.InstallDir}\"")
         {
             CreateNoWindow = true,
             UseShellExecute = false,
@@ -285,7 +298,7 @@ internal static class Installer
 
     private static void Sc(string args, bool throwOnError = true)
     {
-        using var p = Process.Start(new ProcessStartInfo("sc.exe", args)
+        using var p = Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "sc.exe"), args)
         {
             CreateNoWindow = true,
             UseShellExecute = false,
@@ -303,4 +316,22 @@ internal static class Installer
 
     [DllImport("advapi32.dll", CharSet = CharSet.Unicode)]
     private static extern int RegLoadAppKey(string file, out SafeRegistryHandle key, int desired, int options, int reserved);
+
+    /// <summary>Removes libraries older versions unpacked into C:\Windows\Temp\.net\PaCo* (now in the protected data dir).</summary>
+    public static void RemoveOldBundleExtraction()
+    {
+        try
+        {
+            var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp", ".net");
+            if (!Directory.Exists(root)) return;
+            foreach (var d in Directory.EnumerateDirectories(root, "PaCo*"))
+            {
+                try { Directory.Delete(d, recursive: true); } catch (Exception ex) { Log.Warn($"{d} nicht gelöscht: {ex.Message}"); }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"Alte Bibliotheken nicht aufgeräumt: {ex.Message}");
+        }
+    }
 }

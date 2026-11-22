@@ -11,11 +11,13 @@
   "Browser-Regeln werden entfernt …": "Pārlūka noteikumi tiek noņemti …",
   "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Lai tavs bērns nevarētu apiet PaCo un dators būtu labi aizsargāts, tika pārbaudīts:",
   "Danach gelten hier keine Regeln mehr.": "Pēc tam šeit vairs nebūs spēkā nekādi noteikumi.",
+  "Danach ist „{0}“ für heute vorbei.": "Pēc tam „{0}” šodien beigsies.",
   "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Pēc tam ekrāns tiks bloķēts. Saglabā tagad savu spēli vai darbu.",
   "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Pēc tam notiks izrakstīšanās. Saglabā tagad savu spēli vai darbu.",
   "Daten-Ordner wird geschützt …": "Datu mape tiek aizsargāta …",
   "Deine Bildschirmzeit ist aufgebraucht": "Tavs ekrāna laiks ir beidzies",
   "Deine Eltern haben ein Bildschirmfoto angesehen.": "Tavi vecāki apskatīja ekrānuzņēmumu.",
+  "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "„{0}”: tavs laiks šodien ir beidzies.",
   "Deinstallieren": "Atinstalēt",
   "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kods nav pareizs. Ievade uz laiku bloķēta.",
   "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kods nav pareizs. Atlikušie mēģinājumi: {0}.",
@@ -52,6 +54,7 @@
   "Laufender Dienst wird angehalten …": "Darbojošais pakalpojums tiek apturēts …",
   "Neues Kind: {0}": "Jauns bērns: {0}",
   "Noch 1 Minute": "Vēl 1 minūte",
+  "Noch {0} Min für „{1}“": "„{1}”: vēl {0} min",
   "Noch {0} Minuten": "Vēl {0} min.",
   "PaCo Kinderschutz": "PaCo bērnu aizsardzība",
   "PaCo Kinderschutz von diesem PC entfernen?": "Vai noņemt PaCo bērnu aizsardzību no šī datora?",
@@ -94,5 +97,6 @@
   "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, tavs laiks šodien ir beidzies. Rīt varēsi turpināt!",
   "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, šodien tu drīksti izmantot datoru no {1} līdz {2}.",
   "{0}, jetzt ist keine PC-Zeit.": "{0}, tagad nav datora laiks.",
-  "— kein Kind (nicht überwacht) —": "— nav bērns (netiek uzraudzīts) —"
+  "— kein Kind (nicht überwacht) —": "— nav bērns (netiek uzraudzīts) —",
+  "„{0}“ ist für heute vorbei": "„{0}” šodien ir beidzies"
 }

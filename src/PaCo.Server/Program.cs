@@ -63,10 +63,13 @@ builder.Services.AddIdentity<ParentUser, IdentityRole<Guid>>(o =>
     })
     .AddEntityFrameworkStores<PaCoDb>()
     .AddDefaultTokenProviders()
+    .AddTokenProvider<OneTimeAuthenticatorTokenProvider>(TokenOptions.DefaultAuthenticatorProvider)
     .AddClaimsPrincipalFactory<PaCoClaimsFactory>()
     .AddErrorDescriber<GermanIdentityErrors>();
 
-builder.Services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(5));
+builder.Services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(1));
+// Sessions live on the server: signing out really ends them (a copied cookie is useless afterwards).
+builder.Services.AddSingleton<Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>, TicketStoreSetup>();
 builder.Services.ConfigureApplicationCookie(o =>
 {
     o.Cookie.Name = "__Host-paco";
@@ -199,6 +202,7 @@ if (!app.Environment.IsDevelopment())
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseDeviceAuthFirst();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();

@@ -200,6 +200,27 @@ namespace PaCo.Server.Data.Migrations
                     b.ToTable("Alerts");
                 });
 
+            modelBuilder.Entity("PaCo.Server.Data.AuthSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ExpiresUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Value")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuthSessions");
+                });
+
             modelBuilder.Entity("PaCo.Server.Data.Child", b =>
                 {
                     b.Property<Guid>("Id")
@@ -255,6 +276,10 @@ namespace PaCo.Server.Data.Migrations
 
                     b.Property<bool>("Paused")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("TimeGroupsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("TimePerDevice")
                         .HasColumnType("INTEGER");
@@ -847,6 +872,10 @@ namespace PaCo.Server.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("GrantSecondsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GroupsJson")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

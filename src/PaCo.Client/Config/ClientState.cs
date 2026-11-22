@@ -65,17 +65,9 @@ internal sealed class ClientState
 
     public static ClientState Load()
     {
-        var raw = SecureStore.ReadWithBackup(Paths.StateFile);
-        if (raw is null) return new ClientState();
-        try
-        {
-            return PaCoJson.Deserialize<ClientState>(raw);
-        }
-        catch (Exception ex)
-        {
-            Log.Error("state.json beschädigt – starte mit leerem Zustand", ex);
-            return new ClientState();
-        }
+        var state = SecureStore.LoadWithBackup(Paths.StateFile, raw => PaCoJson.Deserialize<ClientState>(raw));
+        if (state is null && File.Exists(Paths.StateFile)) Log.Error("state.json und Sicherung beschädigt – starte mit leerem Zustand");
+        return state ?? new ClientState();
     }
 
     public void Save() => SecureStore.WriteAtomic(Paths.StateFile, PaCoJson.SerializeToUtf8(this));
@@ -92,7 +84,21 @@ internal sealed class PolicyStore(DeviceSecrets device)
 
     public void LoadFromDisk()
     {
-        var raw = SecureStore.ReadWithBackup(Paths.PolicyFile);
+        // Main file first, then the backup – each must parse AND carry a valid signature.
+        foreach (var p in new[] { Paths.PolicyFile, Paths.PolicyFile + ".bak" })
+        {
+            try
+            {
+                if (!File.Exists(p)) continue;
+                Accept(PaCoJson.Deserialize<SignedEnvelope>(File.ReadAllBytes(p)), persist: false);
+                if (Current is not null) return;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"{Path.GetFileName(p)} ungültig: {ex.Message}");
+            }
+        }
+        var raw = (byte[]?)null;
         if (raw is null) return;
         try
         {
@@ -114,6 +120,7 @@ internal sealed class PolicyStore(DeviceSecrets device)
     public bool Accept(SignedEnvelope env, bool persist = true)
     {
         var doc = PolicySigning.Verify<PolicyDocument>(env, device.PolicyPublicKeyPem);
+        SignedKinds.Expect(doc.Kind, SignedKinds.Policy);
         if (doc.DeviceId != device.DeviceId) throw new PolicySignatureException("Regeln gehören zu einem anderen Gerät.");
         var key = PaCoJson.Serialize(doc with { IssuedUtc = default });
         bool changed;

@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Премахване на правилата на браузъра …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "За да не може детето ти да заобиколи PaCo и компютърът да е добре защитен, беше проверено следното:",
  "Danach gelten hier keine Regeln mehr.": "След това тук няма да важат никакви правила.",
+ "Danach ist „{0}“ für heute vorbei.": "След това „{0}“ свършва за днес.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "След това екранът ще се заключи. Запази сега играта или работата си.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "След това компютърът ще затвори сесията ти. Запази сега играта или работата си.",
  "Daten-Ordner wird geschützt …": "Защитаване на папката с данни …",
  "Deine Bildschirmzeit ist aufgebraucht": "Времето ти пред екрана свърши",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Родителите ти разгледаха екранна снимка.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Времето ти за „{0}“ свърши за днес.",
  "Deinstallieren": "Деинсталиране",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Кодът не е верен. Въвеждането е временно блокирано.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Кодът не е верен. Оставащи опити: {0}.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Спиране на работещата услуга …",
  "Neues Kind: {0}": "Ново дете: {0}",
  "Noch 1 Minute": "Остава 1 минута",
+ "Noch {0} Min für „{1}“": "Остават {0} мин за „{1}“",
  "Noch {0} Minuten": "Остават {0} минути",
  "PaCo Kinderschutz": "PaCo Защита на децата",
  "PaCo Kinderschutz von diesem PC entfernen?": "Да се премахне ли PaCo Защита на децата от този компютър?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, за днес времето ти свърши. Утре продължаваме!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, днес можеш да си на компютъра от {1} до {2} ч.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, сега не е време за компютър.",
- "— kein Kind (nicht überwacht) —": "— не е дете (без наблюдение) —"
+ "— kein Kind (nicht überwacht) —": "— не е дете (без наблюдение) —",
+ "„{0}“ ist für heute vorbei": "„{0}“ свърши за днес"
 }

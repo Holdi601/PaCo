@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Zamknięto zablokowany program: {0}",
  "Gewalt & Waffen": "Przemoc i broń",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (dorośli, którzy wabią dzieci)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "W chronionym folderze PaCo znaleziono i wyczyszczono obce lub zmienione wpisy: {0}.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nie znaleziono aktywnej ochrony antywirusowej! Włącz Microsoft Defender (Zabezpieczenia Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Dzieci mogą przy czynnościach administracyjnych wpisać hasło administratora. Zalecenie: całkowicie wyłącz monit dla kont standardowych.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Konto dziecka „{0}” jest kontem standardowym.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Zapora systemu Windows jest włączona.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Konto Windows „{0}” ({1}) ma uprawnienia administratora.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Zegar Windows cofnięto o {0} min – zostanie to zignorowane.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Czas na „{0}” wykorzystany – zamknięto: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Odrzucono czas serwera bez ważnego podpisu – możliwy fałszywy serwer. PaCo liczy dalej według własnego zegara."
 }

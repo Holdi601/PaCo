@@ -19,8 +19,28 @@ public static class LoginTracking
 /// Super-admin account management. Accounts are only ever created here (or by the CLI); there is no self sign-up.
 /// Invitations are password-reset tokens (valid 7 days) for a user without password.
 /// </summary>
-public sealed class AccountAdmin(PaCoDb db, UserManager<ParentUser> users, TimeProvider clock)
+public sealed class AccountAdmin(PaCoDb db, UserManager<ParentUser> users, TimeProvider clock, Notifier notifier)
 {
+    // Push texts for the family when the server operator acts inside it.
+    // i18n-keys:start server
+    public const string InvitedTitle = "PaCo: neues Elternteil eingeladen";
+    public const string InvitedText = "Der Server-Betreiber hat {0} in deine Familie eingeladen. Falls das nicht abgesprochen war, entferne die Person unter „Familie“.";
+    public const string NewLinkTitle = "PaCo: neuer Zugangslink erstellt";
+    public const string NewLinkText = "Der Server-Betreiber hat für {0} einen neuen Zugangslink erstellt. Falls das nicht abgesprochen war, melde dich bei ihm.";
+    // i18n-keys:end
+
+    /// <summary>
+    /// The server operator acted inside a family (invite, new access link): every parent of that family gets a push
+    /// message – the operator cannot quietly get access to a family's data.
+    /// </summary>
+    public async Task NotifyFamilyAsync(Guid familyId, string germanTitle, string germanText, params object?[] args)
+    {
+        var fam = await db.Families.SingleOrDefaultAsync(f => f.Id == familyId);
+        if (fam?.NtfyTopic is not { } topic) return;
+        var lang = await AlertTexts.PushLanguageAsync(db, familyId, default);
+        notifier.Enqueue(new PushMessage(topic, Ui.In(lang, germanTitle), Ui.In(lang, germanText, args), 4, null, "key"));
+    }
+
     public static readonly TimeSpan InviteLifetime = TimeSpan.FromDays(7);
 
     public async Task<Family> CreateFamilyAsync(string name, string timeZoneId = "Europe/Berlin")
@@ -70,6 +90,7 @@ public sealed class AccountAdmin(PaCoDb db, UserManager<ParentUser> users, TimeP
         await users.ResetAuthenticatorKeyAsync(user);
         await users.SetLockoutEndDateAsync(user, null);
         await users.ResetAccessFailedCountAsync(user);
+        await DbTicketStore.RemoveAllAsync(db, user.Id);
         return await InviteLinkAsync(user, baseUrl);
     }
 
@@ -77,7 +98,8 @@ public sealed class AccountAdmin(PaCoDb db, UserManager<ParentUser> users, TimeP
     {
         await users.SetLockoutEnabledAsync(user, true);
         await users.SetLockoutEndDateAsync(user, blocked ? DateTimeOffset.MaxValue : null);
-        await users.UpdateSecurityStampAsync(user); // ends existing sessions within minutes
+        await users.UpdateSecurityStampAsync(user);
+        await DbTicketStore.RemoveAllAsync(db, user.Id); // ends existing sessions immediately
     }
 
     public async Task DeleteFamilyAsync(Guid familyId)

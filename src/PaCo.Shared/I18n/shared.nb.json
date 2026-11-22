@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Sperret program avsluttet: {0}",
  "Gewalt & Waffen": "Vold & våpen",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (voksne som lokker barn)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "I PaCos beskyttede mappe ble {0} fremmede eller endrede oppføringer funnet og ryddet opp.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Fant ikke noe aktivt antivirus! Slå på Microsoft Defender (Windows-sikkerhet).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Barn kan skrive inn et administratorpassord ved administratorhandlinger. Anbefaling: Slå av spørsmålet helt for standardkontoer.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Barnekontoen «{0}» er en standardkonto.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows-brannmuren er slått på.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-kontoen «{0}», som tilhører {1}, har administratorrettigheter.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-klokken ble stilt {0} minutter tilbake – ignoreres.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Tiden for «{0}» brukt opp – {1} lukket",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertid uten gyldig signatur ble avvist – muligens en falsk server. PaCo teller videre med sin egen klokke."
 }

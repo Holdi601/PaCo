@@ -82,6 +82,12 @@ public sealed record ChildPolicy
     /// <summary>Process names (without .exe, case-insensitive) that are killed in the child's session.</summary>
     public IReadOnlyList<string> BlockedApps { get; init; } = [];
 
+    /// <summary>Per-app/site limits and learning time (see <see cref="TimeGroup"/>).</summary>
+    public IReadOnlyList<TimeGroup> Groups { get; init; } = [];
+
+    /// <summary>Group seconds used on the child's other PCs (shared time only), by group id and day.</summary>
+    public IReadOnlyDictionary<Guid, Dictionary<DateOnly, long>> GroupSecondsElsewhere { get; init; } = new Dictionary<Guid, Dictionary<DateOnly, long>>();
+
     public WebFilterPolicy Web { get; init; } = new();
 
     public AlertSettings Alerts { get; init; } = new();
@@ -91,6 +97,9 @@ public sealed record ChildPolicy
 
     /// <summary>Windows user policies for the child's account: no Registry editor, command prompt, PowerShell scripts, script host.</summary>
     public bool HardenAccount { get; init; } = true;
+
+    /// <summary>Base64 key for this child's unlock codes (see UnlockCodes.ChildKey).</summary>
+    public string UnlockKey { get; init; } = "";
 
     public DayRule RuleFor(DayOfWeek day) => Days.Count == 7 ? Days[(int)day] : DayRule.Unrestricted;
 }
@@ -107,6 +116,9 @@ public sealed record AccountMapping
 public sealed record PolicyDocument
 {
     public const int CurrentSchema = 1;
+
+    /// <summary>Signed document type (see <see cref="SignedKinds"/>).</summary>
+    public string Kind { get; init; } = SignedKinds.Policy;
 
     public int Schema { get; init; } = CurrentSchema;
 

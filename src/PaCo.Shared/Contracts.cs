@@ -150,6 +150,9 @@ public sealed record UsageReport
     public IReadOnlyList<RedeemedCode> Codes { get; init; } = [];
 
     public IReadOnlyDictionary<string, AppUsage> Apps { get; init; } = new Dictionary<string, AppUsage>();
+
+    /// <summary>Foreground seconds per time group.</summary>
+    public IReadOnlyDictionary<Guid, long> Groups { get; init; } = new Dictionary<Guid, long>();
 }
 
 public enum DeviceEventKind
@@ -258,6 +261,8 @@ public sealed record ChildLiveStatus
 /// <summary>Signed server time for one sync: bound to the device and the client's random nonce (no replay).</summary>
 public sealed record ServerTime
 {
+    public string Kind { get; init; } = SignedKinds.Time;
+
     public Guid DeviceId { get; init; }
 
     public string Nonce { get; init; } = "";
@@ -301,6 +306,9 @@ public sealed record SyncResponse
 /// <summary>Signed description of a client build the device may install.</summary>
 public sealed record UpdateManifest
 {
+    /// <summary>Signed document type – an update manifest can never be passed off as rules (or the other way round).</summary>
+    public string Kind { get; init; } = SignedKinds.Update;
+
     public Guid DeviceId { get; init; }
 
     public string Version { get; init; } = "";

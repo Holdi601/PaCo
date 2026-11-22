@@ -35,6 +35,8 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
 
     public DbSet<DeviceEventEntity> DeviceEvents => Set<DeviceEventEntity>();
 
+    public DbSet<AuthSession> AuthSessions => Set<AuthSession>();
+
     public DbSet<AlertEntity> Alerts => Set<AlertEntity>();
 
     public DbSet<ScreenshotEntity> Screenshots => Set<ScreenshotEntity>();

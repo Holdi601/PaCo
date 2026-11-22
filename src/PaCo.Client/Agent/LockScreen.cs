@@ -10,7 +10,11 @@ namespace PaCo.Client.Agent;
 /// </summary>
 internal sealed class LockScreen
 {
-    private const string DesktopName = "PaCoLock";
+    /// <summary>
+    /// New random name for every lock: a standard user cannot pre-create (squat) the desktop, and its DACL allows SYSTEM
+    /// only, so no program of the child can be started on it.
+    /// </summary>
+    private string _desktopName = "";
 
     private Thread? _thread;
     private IntPtr _desktop;
@@ -27,19 +31,32 @@ internal sealed class LockScreen
 
     public bool IsShown => _active;
 
-    public void Show(string title, string text, int? logoffInSeconds)
+    /// <summary>Shows the lock; returns true only if the lock desktop is really the active input desktop.</summary>
+    public bool Show(string title, string text, int? logoffInSeconds)
     {
         if (_active)
         {
             _form?.BeginInvoke(() => _form.Update(title, text, logoffInSeconds));
-            return;
+            return IsOnLockDesktop();
         }
 
-        _desktop = Win32.CreateDesktop(DesktopName, IntPtr.Zero, IntPtr.Zero, 0, Win32.DesktopAllAccess, IntPtr.Zero);
+        _desktopName = "PaCoLock-" + Guid.NewGuid().ToString("N");
+        if (!Win32.ConvertStringSecurityDescriptorToSecurityDescriptor("D:P(A;;GA;;;SY)", 1, out var sd, IntPtr.Zero))
+            throw Win32.LastError("ConvertStringSecurityDescriptor");
+        try
+        {
+            var sa = new Win32.SecurityAttributes { Length = System.Runtime.InteropServices.Marshal.SizeOf<Win32.SecurityAttributes>(), SecurityDescriptor = sd };
+            _desktop = Win32.CreateDesktopSecure(_desktopName, IntPtr.Zero, IntPtr.Zero, 0, Win32.DesktopAllAccess, ref sa);
+        }
+        finally
+        {
+            Win32.LocalFree(sd);
+        }
         if (_desktop == IntPtr.Zero) throw Win32.LastError("CreateDesktop");
         _active = true;
 
         var ready = new ManualResetEventSlim();
+        var shown = false;
         _thread = new Thread(() =>
         {
             try
@@ -48,7 +65,7 @@ internal sealed class LockScreen
                 if (!Win32.SetThreadDesktop(_desktop)) throw Win32.LastError("SetThreadDesktop");
                 _form = new LockForm(_onCode, _onLogoff);
                 _form.Update(title, text, logoffInSeconds);
-                _form.Shown += (_, _) => ready.Set();
+                _form.Shown += (_, _) => { shown = true; ready.Set(); };
                 Application.Run(_form);
             }
             catch (Exception ex)
@@ -64,6 +81,24 @@ internal sealed class LockScreen
 
         if (!Win32.SwitchDesktop(_desktop)) Log.Warn($"SwitchDesktop fehlgeschlagen: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
         new Thread(Watchdog) { IsBackground = true, Name = "LockWatchdog" }.Start();
+        return shown && IsOnLockDesktop();
+    }
+
+    /// <summary>True if our lock desktop is the input desktop (or the secure desktop is up, e.g. Ctrl+Alt+Del).</summary>
+    public bool IsOnLockDesktop()
+    {
+        if (!_active) return false;
+        for (var i = 0; i < 10; i++)
+        {
+            var input = Win32.OpenInputDesktop(0, false, Win32.DesktopReadObjects);
+            if (input == IntPtr.Zero) return true; // secure desktop – the child cannot use anything either
+            var name = Win32.DesktopName(input);
+            Win32.CloseDesktop(input);
+            if (string.Equals(name, _desktopName, StringComparison.OrdinalIgnoreCase)) return true;
+            Win32.SwitchDesktop(_desktop);
+            Thread.Sleep(100);
+        }
+        return false;
     }
 
     public void ShowCodeResult(bool ok, string message) => _form?.BeginInvoke(() => _form.SetResult(ok, message));
@@ -106,7 +141,7 @@ internal sealed class LockScreen
             if (input == IntPtr.Zero) continue;
             var name = Win32.DesktopName(input);
             Win32.CloseDesktop(input);
-            if (name is not null && !string.Equals(name, DesktopName, StringComparison.OrdinalIgnoreCase) && _active)
+            if (name is not null && !string.Equals(name, _desktopName, StringComparison.OrdinalIgnoreCase) && _active)
                 Win32.SwitchDesktop(_desktop);
         }
     }

@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Zatvoren blokirani program: {0}",
  "Gewalt & Waffen": "Nasilje i oružje",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (odrasli koji mame djecu)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "U zaštićenom folderu PaCo-a pronađeno je i očišćeno {0} stranih ili izmijenjenih stavki.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nije pronađena aktivna antivirusna zaštita! Uključi Microsoft Defender (Windows sigurnost).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Djeca kod administratorskih radnji mogu upisati administratorsku lozinku. Preporuka: upit za standardne račune potpuno isključiti.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Dječiji račun „{0}“ je standardni račun.",
@@ -54,5 +55,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows zaštitni zid je uključen.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows račun „{0}“ ({1}) ima administratorska prava.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows sat je vraćen za {0} min – zanemaruje se.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Vrijeme za „{0}“ potrošeno – zatvoreno: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Vrijeme servera bez važećeg potpisa odbijeno – moguće lažni server. PaCo nastavlja brojati vlastitim satom."
 }
