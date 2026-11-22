@@ -1,0 +1,6 @@
+# Third-party libraries in wwwroot/lib are not our code (kept current via Dependabot) – analyse only PaCo's own code.
+name: PaCo CodeQL
+paths-ignore:
+  - src/PaCo.Server/wwwroot/lib
+  - "**/bin"
+  - "**/obj"

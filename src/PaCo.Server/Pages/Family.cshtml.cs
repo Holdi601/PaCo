@@ -51,7 +51,7 @@ public sealed class FamilyModel(PaCoDb db, UserManager<ParentUser> users, Accoun
             return Page();
         }
         var (user, link) = await admin.InviteParentAsync(InviteEmail, InviteName, family.FamilyId!.Value, BaseUrl());
-        log.LogInformation("Elternteil {Inviter} lädt {Email} in Familie {Family} ein", ParentActions.UserId(User), user.Email, family.FamilyId);
+        log.LogInformation("Elternteil {Inviter} lädt Konto {User} in Familie {Family} ein", ParentActions.UserId(User), user.Id, family.FamilyId);
         InviteLink = link;
         InviteFor = $"{user.DisplayName} ({user.Email})";
         return RedirectToPage();

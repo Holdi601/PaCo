@@ -113,7 +113,7 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         var (user, link) = await admin.InviteParentAsync(InviteEmail, InviteName, familyId, BaseUrl());
         if (InviteFamilyId is not null)
             await admin.NotifyFamilyAsync(familyId, AccountAdmin.InvitedTitle, AccountAdmin.InvitedText, user.Email);
-        log.LogInformation("Einladung erstellt für {Email}", user.Email);
+        log.LogInformation("Einladung erstellt für Konto {User}", user.Id);
         InviteLink = link;
         InviteFor = $"{user.DisplayName} ({user.Email})";
         return RedirectToPage();

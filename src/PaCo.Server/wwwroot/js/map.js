@@ -7,7 +7,10 @@
         var frame = document.getElementById("gmap");
         if (!a || !frame) return;
         e.preventDefault();
-        frame.src = a.getAttribute("data-gmap");
+        // Only Google Maps embeds – never any other address (e.g. javascript:) in the frame.
+        var url = a.getAttribute("data-gmap") || "";
+        if (!/^https:\/\/(maps\.google\.com|www\.google\.com)\/maps[/?]/.test(url)) return;
+        frame.src = url;
         frame.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
