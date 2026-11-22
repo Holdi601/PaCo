@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Čas pro „{0}“ vyčerpán – zavřeno: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas serveru bez platného podpisu byl odmítnut – možná falešný server. PaCo počítá dál podle vlastních hodin.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Žádný kontakt se serverem od {0} – rodiče byli upozorněni.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Opět spojení se serverem (předchozí kontakt: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Opět spojení se serverem (předchozí kontakt: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Zapnutý v domácí síti, ale PaCo se neozývá od {0} – rodiče byli upozorněni."
 }

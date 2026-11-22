@@ -322,6 +322,22 @@ namespace PaCo.Server.Data.Migrations
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LanAlert")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("LanAlertSentUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LanMacsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("LanSeenUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("LanSinceUtc")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("LastPublicIp")
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
@@ -374,6 +390,9 @@ namespace PaCo.Server.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("SilentAlertSentUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SuspendedUtc")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("TokenHash")

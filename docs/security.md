@@ -33,7 +33,7 @@ PaCo geht von zwei Gegnern aus: **Angreifern aus dem Internet** (der Server ist 
 | Angriff durch das Kind | Gegenmaßnahme |
 |---|---|
 | Programm beenden (Task-Manager) | Dienst und Sitzungs-Agent laufen als **SYSTEM**; ein Standardkonto kann sie nicht beenden. Der Dienst startet nach Absturz automatisch neu. |
-| Dienst stoppen / deinstallieren | Erfordert Administratorrechte. Bei einer Deinstallation werden die Eltern informiert. Meldet sich ein PC gar nicht mehr (z. B. PaCo abgeschaltet), bekommen die Eltern nach einer einstellbaren Zahl von Tagen eine Push-Nachricht (Standard 7, pro Gerät), und eine weitere, sobald er wieder da ist. |
+| Dienst stoppen / deinstallieren | Erfordert Administratorrechte. Bei einer Deinstallation werden die Eltern informiert. Meldet sich ein PC gar nicht mehr (z. B. PaCo abgeschaltet), bekommen die Eltern nach einer einstellbaren Zahl von Tagen eine Push-Nachricht (Standard 7, pro Gerät), und eine weitere, sobald er wieder da ist. Steht der PC im Netzwerk des Servers, erkennt der optionale Wächter im Heimnetz schon nach 15 Minuten, dass der PC eingeschaltet ist, PaCo aber schweigt. |
 | Regeldatei bearbeiten | Ordner `C:\ProgramData\PaCo` ist nur für SYSTEM/Administratoren lesbar. Regeln sind zusätzlich **vom Server signiert** (ECDSA P-256); manipulierte oder fremde Regeln werden abgelehnt. |
 | Gerätedaten kopieren | `device.bin` ist mit DPAPI an diesen PC gebunden verschlüsselt. |
 | Internet trennen | Regeln gelten **offline** weiter. Die Zeit wird lokal gezählt und später nachgemeldet. Offline gibt es **keine** zusätzliche Zeit, außer über einen Freischaltcode der Eltern. |

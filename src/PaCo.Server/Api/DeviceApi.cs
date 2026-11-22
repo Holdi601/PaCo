@@ -33,6 +33,22 @@ public static class DeviceApi
             .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(MaxDiagnosticsBytes * 4));
         app.MapPost(ApiRoutes.Screenshot + "/{id:guid}", UploadScreenshotAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
             .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(MaxScreenshotBytes));
+        app.MapPost(ApiRoutes.Suspend, SuspendAsync).RequireRateLimiting(RateLimitDevice).DisableAntiforgery()
+            .WithMetadata(new Microsoft.AspNetCore.Mvc.RequestSizeLimitAttribute(1024));
+    }
+
+    /// <summary>"Going to sleep": until the next sync, the PC's presence in the network is no reason for an alarm.</summary>
+    private static async Task<IResult> SuspendAsync(HttpContext http, PaCoDb db, Notifier notifier, Microsoft.Extensions.Options.IOptions<ServerOptions> options,
+        TimeProvider clock, CancellationToken ct)
+    {
+        var device = await AuthenticateAsync(http, db, ct);
+        if (device is null || device.Revoked) return Results.Unauthorized();
+        var now = clock.GetUtcNow();
+        await SilentDevices.OnContactAsync(db, notifier, device, options.Value.PublicUrl?.TrimEnd('/'), now, ct);
+        device.LastSeenUtc = now;
+        device.SuspendedUtc = now;
+        await db.SaveChangesAsync(ct);
+        return Results.NoContent();
     }
 
     private const int MaxScreenshotBytes = 6 * 1024 * 1024;
@@ -216,6 +232,7 @@ public static class DeviceApi
         var now = clock.GetUtcNow();
         await SilentDevices.OnContactAsync(db, notifier, device, options.Value.PublicUrl?.TrimEnd('/'), now, ct);
         device.LastSeenUtc = now;
+        LanPresence.RecordMacs(device, req.NetworkMacs, now);
         device.ClientVersion = Trim(req.ClientVersion, 40);
         device.OsVersion = Trim(req.OsVersion, 100);
         device.ClockSkewSeconds = (long)(req.ClientUtcNow - now).TotalSeconds;

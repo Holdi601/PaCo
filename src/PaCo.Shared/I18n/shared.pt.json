@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Tempo para «{0}» esgotado – {1} fechado",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Hora do servidor sem assinatura válida rejeitada – possivelmente um servidor falso. O PaCo continua a contar com o seu próprio relógio.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Sem contacto com o servidor desde {0} – os pais foram avisados.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Novamente em contacto com o servidor (contacto anterior: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Novamente em contacto com o servidor (contacto anterior: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Ligado na rede doméstica, mas o PaCo não dá sinal desde {0} – os pais foram avisados."
 }

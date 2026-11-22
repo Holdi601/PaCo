@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "「{0}」的時間已用完——已關閉 {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "已拒絕沒有有效簽章的伺服器時間——可能是偽造的伺服器。PaCo 會繼續以自己的時鐘計時。",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "自 {0} 起未與伺服器連線——已通知家長。",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "已重新與伺服器連線（先前的連線：{0}）。"
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "已重新與伺服器連線（先前的連線：{0}）。",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "在家用網路中已開機，但 PaCo 自 {0} 起沒有回報——已通知家長。"
 }

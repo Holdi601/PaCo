@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Il-ħin għal “{0}” spiċċa – {1} magħluq",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Il-ħin tas-server mingħajr firma valida ġie miċħud – forsi server falz. PaCo jibqa' jgħodd bl-arloġġ tiegħu.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "L-ebda kuntatt mas-server minn {0} – il-ġenituri ġew infurmati.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Kuntatt mas-server mill-ġdid (kuntatt ta' qabel: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Kuntatt mas-server mill-ġdid (kuntatt ta' qabel: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Mixgħul fin-netwerk tad-dar, iżda PaCo ma kkomunikax minn {0} – il-ġenituri ġew infurmati."
 }

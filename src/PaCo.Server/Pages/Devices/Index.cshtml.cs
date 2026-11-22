@@ -96,6 +96,23 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         return RedirectToPage();
     }
 
+    /// <summary>The server operator runs the LAN watcher (otherwise the setting is hidden).</summary>
+    public bool LanWatch => options.Value.LanWatchEnabled;
+
+    public int LanMinutes => options.Value.LanSilentMinutes;
+
+    public async Task<IActionResult> OnPostLanAsync(Guid deviceId, bool enabled)
+    {
+        var d = await db.Devices.FirstOrDefaultAsync(x => x.Id == deviceId && !x.Revoked);
+        if (d is null) return NotFound();
+        d.LanAlert = enabled;
+        await db.SaveChangesAsync();
+        TempData["Message"] = enabled
+            ? Ui.F("{0}: Warnung im Heimnetz eingeschaltet.", d.Name)
+            : Ui.F("{0}: Warnung im Heimnetz ausgeschaltet.", d.Name);
+        return RedirectToPage();
+    }
+
     /// <summary>Asks the device to install the newest client version at its next contact.</summary>
     public async Task<IActionResult> OnPostUpdateAsync(Guid deviceId)
     {

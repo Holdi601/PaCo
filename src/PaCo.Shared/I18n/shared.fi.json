@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "”{0}”: aika käytetty – suljettu: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Palvelimen aika ilman kelvollista allekirjoitusta hylättiin – mahdollisesti väärennetty palvelin. PaCo jatkaa omalla kellollaan.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ei yhteyttä palvelimeen {0} jälkeen – vanhemmille on ilmoitettu.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Taas yhteydessä palvelimeen (edellinen yhteys: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Taas yhteydessä palvelimeen (edellinen yhteys: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Päällä kotiverkossa, mutta PaCo ei ole ilmoittautunut {0} jälkeen – vanhemmille on ilmoitettu."
 }
