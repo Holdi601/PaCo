@@ -160,7 +160,7 @@ internal sealed class LockForm : Form
     private readonly Button _unlock = new() { Text = L.T("Freischalten"), Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(47, 93, 138), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
     private readonly Label _result = new() { ForeColor = Color.Gainsboro, Font = new Font("Segoe UI", 12), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 40 };
     private readonly Button _logoff = new() { Text = L.T("Abmelden"), Font = new Font("Segoe UI", 11), Width = 140, Height = 40, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-    private readonly Button _learn = new() { Text = L.T("Lernen"), Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(46, 125, 80), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Visible = false };
+    private readonly Button _learn = new() { Text = "&" + L.T("Lernen"), Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(46, 125, 80), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Visible = false };
     private readonly Label _learnHint = new() { ForeColor = Color.Gainsboro, Font = new Font("Segoe UI", 11), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 0 };
     private readonly System.Windows.Forms.Timer _timer = new() { Interval = 1000 };
     private readonly Action<string> _onCode;
