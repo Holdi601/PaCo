@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Builds the PaCo server (Linux) and the Windows client installer in one go.
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 COPY global.json Directory.Build.props PaCo.slnx ./
 COPY src/ src/
