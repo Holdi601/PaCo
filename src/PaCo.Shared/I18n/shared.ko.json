@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "차단된 프로그램 종료: {0}",
  "Gewalt & Waffen": "폭력 및 무기",
  "Grooming (Erwachsene, die Kinder ködern)": "그루밍(아이들을 꾀어내는 어른)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCo 보호 폴더에서 알 수 없거나 변경된 항목 {0}개를 찾아 정리했습니다.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "활성화된 바이러스 백신을 찾을 수 없습니다! Microsoft Defender(Windows 보안)를 켜세요.",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "자녀가 관리자 작업을 할 때 관리자 암호를 입력할 수 있습니다. 권장: 표준 계정에 대한 확인 요청을 완전히 끄세요.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "자녀 계정 '{0}'은(는) 표준 계정입니다.",

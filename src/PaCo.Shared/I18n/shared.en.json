@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Blocked program closed: {0}",
  "Gewalt & Waffen": "Violence & weapons",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (adults luring children)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "{0} unknown or modified entries were found in PaCo's protected folder and cleaned up.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "No active antivirus found! Please turn on Microsoft Defender (Windows Security).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Children can enter an admin password for admin actions. Recommendation: turn off the prompt for standard accounts completely.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Child account “{0}” is a standard account.",

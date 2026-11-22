@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Ukončený zablokovaný program: {0}",
  "Gewalt & Waffen": "Násilie a zbrane",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (dospelí, ktorí lákajú deti)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "V chránenom priečinku PaCo sa našlo a vyčistilo {0} cudzích alebo zmenených položiek.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nenašla sa žiadna aktívna antivírusová ochrana! Zapni, prosím, Microsoft Defender (Zabezpečenie Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Deti môžu pri akciách správcu zadať heslo správcu. Odporúčanie: výzvu pre štandardné kontá úplne vypnúť.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Detské konto „{0}“ je štandardné konto.",

@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "已结束被禁止的程序：{0}",
  "Gewalt & Waffen": "暴力与武器",
  "Grooming (Erwachsene, die Kinder ködern)": "网络诱骗（引诱儿童的成年人）",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "在受保护的 PaCo 文件夹中发现并清理了 {0} 个外来或被修改的条目。",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "未找到有效的病毒防护！请启用 Microsoft Defender（Windows 安全中心）。",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "孩子在执行管理员操作时可以输入管理员密码。建议：对标准账户完全关闭此提示。",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "儿童账户“{0}”是标准账户。",

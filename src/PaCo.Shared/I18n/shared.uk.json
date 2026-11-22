@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Заблоковану програму закрито: {0}",
  "Gewalt & Waffen": "Насильство та зброя",
  "Grooming (Erwachsene, die Kinder ködern)": "Грумінг (дорослі, які заманюють дітей)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "У захищеній папці PaCo знайдено й усунуто сторонні або змінені записи: {0}.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Активного антивірусного захисту не знайдено! Увімкніть Microsoft Defender (Безпека Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Діти можуть вводити пароль адміністратора під час дій, що потребують прав адміністратора. Рекомендація: повністю вимкнути запит для стандартних облікових записів.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Дитячий обліковий запис «{0}» – стандартний.",

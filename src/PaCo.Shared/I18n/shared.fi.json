@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Estetty ohjelma suljettu: {0}",
  "Gewalt & Waffen": "Väkivalta & aseet",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (aikuiset, jotka houkuttelevat lapsia)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCon suojatusta kansiosta löytyi {0} vierasta tai muutettua kohdetta, jotka siivottiin.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Aktiivista virustorjuntaa ei löytynyt! Ota Microsoft Defender (Windowsin suojaus) käyttöön.",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Lapset voivat syöttää järjestelmänvalvojan salasanan valvojan toimintoja varten. Suositus: poista kysely kokonaan käytöstä vakiotileiltä.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Lapsen tili ”{0}” on vakiotili.",

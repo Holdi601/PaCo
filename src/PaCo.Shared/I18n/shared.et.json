@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Blokeeritud programm suleti: {0}",
  "Gewalt & Waffen": "Vägivald & relvad",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (lapsi ahvatlevad täiskasvanud)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "PaCo kaitstud kaustast leiti ja puhastati {0} võõrast või muudetud kirjet.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Aktiivset viirusetõrjet ei leitud! Lülita sisse Microsoft Defender (Windowsi turve).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Lapsed saavad administraatoritoimingute juures sisestada administraatori parooli. Soovitus: lülita standardkontode jaoks see päring täielikult välja.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Lapse konto „{0}“ on standardkonto.",

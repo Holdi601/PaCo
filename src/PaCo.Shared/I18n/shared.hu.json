@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Letiltott program bezárva: {0}",
  "Gewalt & Waffen": "Erőszak és fegyverek",
  "Grooming (Erwachsene, die Kinder ködern)": "Grooming (felnőttek, akik gyerekeket csalogatnak)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "A PaCo {0} idegen vagy módosított bejegyzést talált és takarított el a védett mappájában.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Nem található aktív vírusvédelem! Kapcsold be a Microsoft Defendert (Windows biztonság).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "A gyerekek rendszergazdai műveleteknél beírhatnak egy rendszergazdai jelszót. Javaslat: a normál fiókoknál kapcsold ki teljesen a kérdést.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "A(z) „{0}” gyerekfiók normál fiók.",

@@ -49,10 +49,38 @@ PaCo geht von zwei Gegnern aus: **Angreifern aus dem Internet** (der Server ist 
 | Anderer Browser / Inkognito | Browser-Richtlinien für Edge, Chrome und Firefox (Sperrlisten, SafeSearch, kein InPrivate). Andere Browser können gesperrt werden. Die Registry-Schlüssel sind für das Kind nur lesbar. |
 | Mehrere Konten / Benutzerwechsel | Jede Sitzung wird einzeln überwacht. Neue Windows-Konten erscheinen auf der Website. |
 
+## Sicherheitsprüfung (November 2026)
+
+Ein Pentest des Servers (Website, Konten, Familien-Trennung, Geräte-Schnittstelle) und eine Härtungs-Prüfung des
+Windows-Clients ergaben keine kritischen Lücken; Familien-Trennung, CSRF-Schutz, XSS-Schutz und Sicherheits-Header hielten
+allen Tests stand. Behoben wurden u. a.:
+
+- Native Bibliotheken des Clients werden im geschützten `C:\ProgramData\PaCo\bundle` entpackt statt im für alle
+  beschreibbaren `C:\Windows\Temp` (vorher wäre DLL-Unterschieben in einen SYSTEM-Prozess denkbar gewesen).
+- Sperrbildschirm auf einem Desktop mit zufälligem Namen, nur für SYSTEM zugänglich; der Dienst verlangt eine Bestätigung,
+  sonst wird das Kind abgemeldet. Bricht die Verbindung während der Sperre ab, wird ebenfalls abgemeldet.
+- Datenordner: wird bei der Erstinstallation neu angelegt und bei jedem Start bereinigt (fremde Besitzer, eigene
+  Rechte, Verknüpfungen). Updates: kein Folgen von Verknüpfungen, begrenzte Größe, Datei bis zum Start gesperrt.
+- Signierte Dokumente haben einen Typ (Regeln, Update, Uhrzeit) und können nicht gegeneinander getauscht werden.
+- Freischaltcodes: Schlüssel pro Kind statt pro Familie; ein PC erhält nur die Schlüssel seiner Kinder.
+- Server: Vorlagen von Geräten werden nur als bekannte Texte mit einfachen Platzhaltern angenommen (vorher konnten sie
+  Seiten lahmlegen), Mengenbegrenzung und Aufbewahrungsfristen für Gerätedaten, Authenticator-Codes nur einmal gültig,
+  Sitzungen serverseitig (Abmelden beendet sie wirklich), keine Rückschlüsse auf existierende Konten, Push an die Familie,
+  wenn der Server-Betreiber jemanden einlädt oder einen Zugangslink erstellt, Geräte-Authentifizierung vor dem Lesen von Daten.
+- Regelmäßig: CodeQL-Analyse und Prüfung auf verwundbare Pakete (GitHub Actions, wöchentlich), Dependabot.
+
+Offene Empfehlungen (bewusst noch nicht umgesetzt):
+
+- Releases zusätzlich mit einem Offline-Schlüssel signieren (heute vertraut der Server dem GitHub-Release).
+- 2FA-Schlüssel und Notfall-Codes in der Datenbank verschlüsseln; Datensicherungen verschlüsselt ablegen.
+- Vor dem Zurücksetzen der 2FA bzw. neuen Notfall-Codes das Passwort erneut abfragen.
+
 ## Bekannte Grenzen
 
 - **Physischer Zugriff mit Admin- oder BIOS-Kenntnissen** (Booten von USB, BIOS-Uhr vorstellen) kann jede
   Softwarelösung aushebeln. Deshalb gehören ein BIOS-Passwort und ein geheimes Admin-Passwort dazu.
+- **Lernzeit** erkennt Lern-Apps am Programmnamen und an der Programmbeschreibung, Lern-Webseiten an der Adresszeile des
+  Browsers. Wer die Programmbeschreibung eines Spiels gezielt umschreibt, könnte es als Lern-App tarnen.
 - **Mehrere PCs offline gleichzeitig**: Jeder PC kennt die Nutzung der anderen nur bis zum letzten Kontakt.
 - **Webfilter** wirken in Edge, Chrome und Firefox. Für einen netzwerkweiten Filter (alle Geräte, auch Handys) kann man
   zusätzlich einen DNS-Filter wie AdGuard Home betreiben.

@@ -26,6 +26,7 @@
  "Gesperrtes Programm beendet: {0}": "Programme bloqué fermé : {0}",
  "Gewalt & Waffen": "Violence & armes",
  "Grooming (Erwachsene, die Kinder ködern)": "Pédopiégeage (adultes qui manipulent des enfants)",
+ "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.": "{0} entrées étrangères ou modifiées ont été trouvées et nettoyées dans le dossier protégé de PaCo.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.": "Aucun antivirus actif trouvé ! Active Microsoft Defender (Sécurité Windows).",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.": "Les enfants peuvent saisir un mot de passe administrateur lors des actions d'administration. Recommandation : désactiver complètement cette demande pour les comptes standard.",
  "Kinderkonto „{0}“ ist ein Standardkonto.": "Le compte enfant « {0} » est un compte standard.",
