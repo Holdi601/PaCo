@@ -8,7 +8,7 @@ namespace PaCo.Client.Service;
 
 /// <summary>
 /// Learning mode (time used up, parents allow learning): every program with a window that is not a learning app is
-/// closed, and so are music/audio-book players running hidden in the tray. Only processes that belong to the child's
+/// closed, and so is every program playing sound (reported by the agent, also hidden ones in the tray). Only processes that belong to the child's
 /// account are touched – never Windows' own processes in the session (csrss, dwm, winlogon … run as SYSTEM; killing
 /// them would crash Windows).
 /// </summary>
@@ -21,15 +21,6 @@ internal static class LearningEnforcer
         "shellexperiencehost", "startmenuexperiencehost", "shellhost", "searchapp", "searchhost", "searchui", "textinputhost",
         "windowsinternal.composableshell.experiences.textinput.inputapp", "lockapp", "useroobebroker", "smartscreen",
         "securityhealthsystray", "systemsettingsbroker", "osk", "tabtip", "magnify", "narrator", "msedgewebview2",
-    };
-
-    /// <summary>Players that keep playing music, audio books or voice chat without a visible window (tray).</summary>
-    private static readonly HashSet<string> AudioApps = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "spotify", "vlc", "wmplayer", "music.ui", "microsoft.media.player", "itunes", "applemusic", "audible", "foobar2000",
-        "winamp", "aimp", "musicbee", "deezer", "amazon music", "amazonmusic", "tidal", "audacious", "mpc-hc", "mpc-hc64",
-        "potplayer", "potplayermini", "potplayermini64", "kodi", "plex", "discord", "teamspeak", "ts3client_win64", "tonies",
-        "soundcloud", "youtube music desktop app", "qobuz", "napster",
     };
 
     /// <summary>Closes all reported window programs that are not allowed; returns their display names.</summary>
@@ -49,8 +40,8 @@ internal static class LearningEnforcer
     }
 
     /// <summary>
-    /// Programs without a window: hidden music/audio-book players (unless the parents made them a learning app) and – in
-    /// the first round – every browser process (background tabs, "keep running in the background").
+    /// First round of learning mode: every browser process, also without a window (background tabs, "keep running in
+    /// the background"). Programs playing sound are reported by the agent and handled like windows.
     /// </summary>
     public static List<string> CloseBackground(int sessionId, string childSid, ChildPolicy child, bool firstRound)
     {
@@ -66,7 +57,7 @@ internal static class LearningEnforcer
                     name = p.ProcessName.ToLowerInvariant();
                 }
                 catch (InvalidOperationException) { continue; }
-                var target = (firstRound && BrowserAddress.IsBrowser(name)) || (AudioApps.Contains(name) && !TimeGroups.IsLearningApp(child, name, Description(p.Id)));
+                var target = firstRound && BrowserAddress.IsBrowser(name);
                 if (target && Kill(p.Id, name, sessionId, childSid)) closed.Add(name);
             }
         }

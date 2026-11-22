@@ -86,6 +86,12 @@ public sealed record ChildPolicy
     /// <summary>Learning mode also outside the allowed hours (e.g. homework late in the evening).</summary>
     public bool LearningOutsideWindow { get; init; }
 
+    /// <summary>
+    /// Learning time per day (null = unlimited): learning apps/sites do not count as PC time only up to this many
+    /// minutes, and learning mode after the time is up ends when they are used up. Summed over all of the child's PCs.
+    /// </summary>
+    public int? LearningMinutesPerDay { get; init; }
+
     /// <summary>Exactly 7 entries, index = <see cref="DayOfWeek"/> (0 = Sunday).</summary>
     public IReadOnlyList<DayRule> Days { get; init; } = Enumerable.Repeat(DayRule.Unrestricted, 7).ToArray();
 

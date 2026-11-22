@@ -75,6 +75,10 @@ internal sealed class ForegroundTracker
         return list;
     }
 
+    /// <summary>Name and description of a process (null if it is gone or PaCo's own).</summary>
+    public WindowProcess? Describe(int pid) =>
+        pid == _ownPid || pid == 0 ? null : Resolve(pid) is { } info ? new WindowProcess(pid, info.Name, info.Display) : null;
+
     public List<ForegroundSample> Drain()
     {
         var list = _pending.Select(kv => new ForegroundSample(kv.Key, kv.Value.Display, kv.Value.Seconds, kv.Value.Title)).ToList();

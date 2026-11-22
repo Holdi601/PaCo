@@ -180,7 +180,8 @@ internal sealed class AgentApp : ApplicationContext
     {
         try
         {
-            Send(new IpcMessage { Type = IpcMessage.Windows, WindowProcesses = _tracker.VisibleWindowProcesses().Take(200).ToList() });
+            var audio = Audio.PlayingProcessIds().Select(_tracker.Describe).OfType<WindowProcess>().Take(50).ToList();
+            Send(new IpcMessage { Type = IpcMessage.Windows, WindowProcesses = _tracker.VisibleWindowProcesses().Take(200).ToList(), AudioProcesses = audio });
         }
         catch (Exception ex)
         {

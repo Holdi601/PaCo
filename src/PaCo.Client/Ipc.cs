@@ -83,6 +83,9 @@ internal sealed record IpcMessage
     public string? Learning { get; init; }
 
     public IReadOnlyList<WindowProcess>? WindowProcesses { get; init; }
+
+    /// <summary>Learning mode: processes that are playing sound right now.</summary>
+    public IReadOnlyList<WindowProcess>? AudioProcesses { get; init; }
 }
 
 /// <summary>A process with a visible top-level window (UWP apps resolved to the real app process).</summary>

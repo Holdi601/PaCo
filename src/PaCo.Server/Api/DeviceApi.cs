@@ -233,6 +233,22 @@ public static class DeviceApi
         await SilentDevices.OnContactAsync(db, notifier, device, options.Value.PublicUrl?.TrimEnd('/'), now, ct);
         device.LastSeenUtc = now;
         LanPresence.RecordMacs(device, req.NetworkMacs, now);
+        if (req.InstalledApps is { } installed)
+        {
+            // Comes from the PC: names only, bounded – shown to the parents as a pick list for learning apps/aids.
+            device.InstalledAppsJson = PaCoJson.Serialize(installed
+                .Where(a => a is not null && !string.IsNullOrWhiteSpace(a.Process))
+                .Select(a => new InstalledApp
+                {
+                    Process = Trim(new string(a.Process.ToLowerInvariant().Where(ch => char.IsLetterOrDigit(ch) || ch is '_' or '-' or '.' or ' ').ToArray()), 80),
+                    Name = Trim(string.IsNullOrWhiteSpace(a.Name) ? a.Process : a.Name, 120),
+                    Description = string.IsNullOrWhiteSpace(a.Description) ? null : Trim(a.Description, 120),
+                })
+                .Where(a => a.Process.Length > 0)
+                .DistinctBy(a => a.Process)
+                .Take(400)
+                .ToList());
+        }
         device.ClientVersion = Trim(req.ClientVersion, 40);
         device.OsVersion = Trim(req.OsVersion, 100);
         device.ClockSkewSeconds = (long)(req.ClientUtcNow - now).TotalSeconds;

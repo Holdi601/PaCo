@@ -141,10 +141,25 @@ public static class TimeGroups
     /// Learning mode is possible: the parents allowed it, there is at least one learning group, and the PC is blocked
     /// only because the time is used up (or outside the allowed hours, if the parents allowed that too).
     /// </summary>
-    public static bool LearningModeAvailable(ChildPolicy child, Evaluation eval) =>
+    public static bool LearningModeAvailable(ChildPolicy child, Evaluation eval, long? learningSecondsLeft = null) =>
         child.LearningAfterExpiry && !child.Paused && !child.LockedByParent && !eval.Allowed
+        && learningSecondsLeft is not <= 0
         && child.Groups.Any(g => g.Kind == TimeGroupKind.Free && (g.Apps.Count > 0 || g.Sites.Count > 0 || g.Pages.Count > 0))
         && (eval.Reason == BlockReason.LimitReached || (eval.Reason == BlockReason.OutsideWindow && child.LearningOutsideWindow));
+
+    /// <summary>
+    /// Counter for the learning time budget, kept with the group seconds (<see cref="DayUsage.Groups"/>) so the server
+    /// sums it over all of the child's PCs like any group.
+    /// </summary>
+    public static readonly Guid LearningBudgetId = new("1ea4b0d6-7c2e-4f3a-9d5b-0000000000a1");
+
+    /// <summary>Learning time left today (null = unlimited).</summary>
+    public static long? LearningSecondsLeft(ChildPolicy child, DayUsage usage, DateOnly day)
+    {
+        if (child.LearningMinutesPerDay is not { } minutes) return null;
+        var other = child.GroupSecondsElsewhere.TryGetValue(LearningBudgetId, out var perDay) ? perDay.GetValueOrDefault(day) : 0;
+        return Math.Max(0, minutes * 60L - usage.Groups.GetValueOrDefault(LearningBudgetId) - other);
+    }
 
     public static IReadOnlyList<TimeGroup> LearningGroups(ChildPolicy child) => child.Groups.Where(g => g.Kind == TimeGroupKind.Free).ToList();
 

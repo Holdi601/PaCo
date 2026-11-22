@@ -33,6 +33,98 @@ internal static class Audio
         }
     }
 
+    /// <summary>
+    /// Process ids that are playing sound right now (active audio sessions on any playback device), without Windows'
+    /// own system sounds. Learning mode closes those that are not allowed – whatever the program is called.
+    /// </summary>
+    public static HashSet<int> PlayingProcessIds()
+    {
+        var pids = new HashSet<int>();
+        IMMDeviceEnumerator? enumerator = null;
+        try
+        {
+            enumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorCom();
+            if (enumerator.EnumAudioEndpoints(EDataFlow.Render, DeviceStateActive, out var devices) != 0) return pids;
+            devices.GetCount(out var count);
+            for (uint i = 0; i < count; i++)
+            {
+                if (devices.Item(i, out var device) != 0) continue;
+                var iid = typeof(IAudioSessionManager2).GUID;
+                if (device.Activate(ref iid, ClsctxAll, IntPtr.Zero, out var obj) == 0 && obj is IAudioSessionManager2 manager)
+                {
+                    if (manager.GetSessionEnumerator(out var sessions) == 0)
+                    {
+                        sessions.GetCount(out var n);
+                        for (var k = 0; k < n; k++)
+                        {
+                            if (sessions.GetSession(k, out var session) != 0) continue;
+                            try
+                            {
+                                // State 1 = active (sound is being played); S_OK from IsSystemSoundsSession = system sounds.
+                                if (session.GetState(out var state) == 0 && state == 1 && session.IsSystemSoundsSession() != 0
+                                    && session.GetProcessId(out var pid) == 0 && pid != 0)
+                                    pids.Add((int)pid);
+                            }
+                            finally { Marshal.ReleaseComObject(session); }
+                        }
+                        Marshal.ReleaseComObject(sessions);
+                    }
+                    Marshal.ReleaseComObject(manager);
+                }
+                Marshal.ReleaseComObject(device);
+            }
+            Marshal.ReleaseComObject(devices);
+        }
+        catch (COMException)
+        {
+            // audio service busy or restarting – next round
+        }
+        finally
+        {
+            if (enumerator is not null) Marshal.ReleaseComObject(enumerator);
+        }
+        return pids;
+    }
+
+    [ComImport, Guid("77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IAudioSessionManager2
+    {
+        [PreserveSig] int GetAudioSessionControl(IntPtr sessionGuid, uint flags, out IntPtr control);
+        [PreserveSig] int GetSimpleAudioVolume(IntPtr sessionGuid, uint flags, out IntPtr volume);
+        [PreserveSig] int GetSessionEnumerator(out IAudioSessionEnumerator sessions);
+        [PreserveSig] int RegisterSessionNotification(IntPtr notification);
+        [PreserveSig] int UnregisterSessionNotification(IntPtr notification);
+        [PreserveSig] int RegisterDuckNotification([MarshalAs(UnmanagedType.LPWStr)] string sessionId, IntPtr notification);
+        [PreserveSig] int UnregisterDuckNotification(IntPtr notification);
+    }
+
+    [ComImport, Guid("E2F5BB11-0570-40CA-ACDD-3AA01277DEE8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IAudioSessionEnumerator
+    {
+        [PreserveSig] int GetCount(out int count);
+        [PreserveSig] int GetSession(int index, out IAudioSessionControl2 session);
+    }
+
+    /// <summary>IAudioSessionControl2 including the methods of IAudioSessionControl (COM vtable order).</summary>
+    [ComImport, Guid("BFB7FF88-7239-4FC9-8FA2-07C950BE9C6D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IAudioSessionControl2
+    {
+        [PreserveSig] int GetState(out int state);
+        [PreserveSig] int GetDisplayName(out IntPtr name);
+        [PreserveSig] int SetDisplayName([MarshalAs(UnmanagedType.LPWStr)] string name, ref Guid context);
+        [PreserveSig] int GetIconPath(out IntPtr path);
+        [PreserveSig] int SetIconPath([MarshalAs(UnmanagedType.LPWStr)] string path, ref Guid context);
+        [PreserveSig] int GetGroupingParam(out Guid param);
+        [PreserveSig] int SetGroupingParam(ref Guid param, ref Guid context);
+        [PreserveSig] int RegisterAudioSessionNotification(IntPtr notification);
+        [PreserveSig] int UnregisterAudioSessionNotification(IntPtr notification);
+        [PreserveSig] int GetSessionIdentifier(out IntPtr id);
+        [PreserveSig] int GetSessionInstanceIdentifier(out IntPtr id);
+        [PreserveSig] int GetProcessId(out uint pid);
+        [PreserveSig] int IsSystemSoundsSession();
+        [PreserveSig] int SetDuckingPreference([MarshalAs(UnmanagedType.Bool)] bool optOut);
+    }
+
     private const uint DeviceStateActive = 0x1;
     private const uint ClsctxAll = 0x17;
 

@@ -253,6 +253,9 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
 
     private readonly HashSet<Guid> _handledScreenshots = [];
     private TimeSpan _lastAudit = Mono.Never;
+    private TimeSpan _appsScanned = Mono.Never;
+    private string? _appsSent;
+    private string? _appsPending;
     private readonly TimeSpan _started = Mono.Now;
 
     public async Task SyncOnceAsync(ServerApi api, CancellationToken ct)
@@ -291,6 +294,25 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             catch (Exception ex)
             {
                 Log.Error("Sicherheits-Check", ex);
+            }
+        }
+
+        // Installed programs (for the parents' choice of learning apps/aids): scanned every 6 h, sent when changed.
+        List<InstalledApp>? installed = null;
+        if (Mono.Since(_appsScanned) > TimeSpan.FromHours(6) && Mono.Since(_started) > TimeSpan.FromMinutes(2))
+        {
+            try
+            {
+                var sids = rt.Policies.Current?.Accounts.Select(a => a.Sid).ToList() ?? [];
+                var scan = await Task.Run(() => InstalledApps.Scan(sids), ct);
+                _appsScanned = Mono.Now;
+                var hash = PaCoJson.Serialize(scan);
+                if (hash != _appsSent) { installed = scan; _appsPending = hash; }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Installierte Programme lesen", ex);
+                _appsScanned = Mono.Now;
             }
         }
 
@@ -347,6 +369,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                 Locations = rt.State.PendingLocations.Take(200).ToList(),
                 Security = security,
                 NetworkMacs = NetworkInfo.ActiveMacs(),
+                InstalledApps = installed,
             };
         }
 
@@ -395,6 +418,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
             var sent = req.Events.Select(e => e.Id).ToHashSet();
             rt.State.PendingEvents.RemoveAll(e => sent.Contains(e.Id));
             if (security is not null) _lastAudit = Mono.Now;
+            if (installed is not null) _appsSent = _appsPending;
             var sentAlerts = req.Alerts.Select(a => a.Id).ToHashSet();
             rt.State.PendingAlerts.RemoveAll(a => sentAlerts.Contains(a.Id));
             var sentLocations = req.Locations.Select(l => l.Id).ToHashSet();

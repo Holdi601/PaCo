@@ -37,6 +37,9 @@ public sealed class GroupInput
 
     public string? Sites { get; set; }
 
+    /// <summary>Programs picked from the list of installed programs (added to <see cref="Apps"/>).</summary>
+    public List<string> AddApps { get; set; } = [];
+
     public bool Remove { get; set; }
 }
 
@@ -98,6 +101,11 @@ public sealed class EditModel(PaCoDb db) : PageModel
 
     [BindProperty]
     public bool LearningOutsideWindow { get; set; }
+
+    /// <summary>Learning time per day (empty = unlimited).</summary>
+    [BindProperty]
+    [Range(1, 1440, ErrorMessage = "1 bis 1440 Minuten.")]
+    public int? LearningMinutesPerDay { get; set; }
 
     [BindProperty]
     public bool Paused { get; set; }
@@ -178,6 +186,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
     /// <summary>Programs the child used in the last 30 days (process, display name) – blocked or allowed with a switch.</summary>
     public IReadOnlyList<(string Process, string Name)> KnownApps { get; private set; } = [];
 
+    /// <summary>Programs installed on the child's PCs (Start menu) – pick list for learning apps and aids.</summary>
+    public IReadOnlyList<InstalledApp> InstalledApps { get; private set; } = [];
+
     [BindProperty]
     public List<string> BlockedKnownApps { get; set; } = [];
 
@@ -201,6 +212,10 @@ public sealed class EditModel(PaCoDb db) : PageModel
             .OrderByDescending(a => a.Value.Seconds).Take(40)
             .Select(a => (a.Key.ToLowerInvariant(), string.IsNullOrWhiteSpace(a.Value.DisplayName) ? a.Key : a.Value.DisplayName))
             .OrderBy(a => a.Item2, StringComparer.CurrentCultureIgnoreCase).ToList();
+        InstalledApps = (await db.Devices.Where(d => deviceIds.Contains(d.Id) && !d.Revoked).Select(d => d.InstalledAppsJson).ToListAsync())
+            .SelectMany(j => PaCoJson.Deserialize<InstalledApp[]>(string.IsNullOrEmpty(j) ? "[]" : j))
+            .DistinctBy(a => a.Process, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
@@ -238,6 +253,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
         child.ExpiryAction = ExpiryAction;
         child.LearningAfterExpiry = LearningAfterExpiry;
         child.LearningOutsideWindow = LearningAfterExpiry && LearningOutsideWindow;
+        child.LearningMinutesPerDay = LearningMinutesPerDay;
         child.Paused = Paused;
         child.SetDays(Days.Select(d => new DayRule
         {
@@ -292,13 +308,17 @@ public sealed class EditModel(PaCoDb db) : PageModel
         {
             var old = child.GetTimeGroups().ToDictionary(g => g.Id);
             var names = KnownApps.ToDictionary(k => k.Process, k => k.Name, StringComparer.OrdinalIgnoreCase);
+            var installed = InstalledApps.ToDictionary(a => a.Process, a => a, StringComparer.OrdinalIgnoreCase);
             var groups = new List<TimeGroup>();
             foreach (var g in Groups.Where(g => !g.Remove))
             {
-                var groupApps = SplitLines(g.Apps).Select(NormalizeApp).Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(100).ToList();
+                var groupApps = SplitLines(g.Apps).Select(NormalizeApp)
+                    .Concat(g.AddApps.Select(NormalizeApp).Where(installed.ContainsKey))
+                    .Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(100).ToList();
                 // Remember the program description for learning apps, so a renamed game does not count as learning time.
                 var previous = old.TryGetValue(g.Id, out var o) ? o.AppDescriptions : new Dictionary<string, string>();
-                var descriptions = groupApps.Select(a => (a, d: previous.GetValueOrDefault(a) ?? names.GetValueOrDefault(a)))
+                // Description: as seen before, else from the usage statistics, else from the installed program itself.
+                var descriptions = groupApps.Select(a => (a, d: previous.GetValueOrDefault(a) ?? names.GetValueOrDefault(a) ?? installed.GetValueOrDefault(a)?.Description))
                     .Where(x => !string.IsNullOrEmpty(x.d))
                     .ToDictionary(x => x.a, x => x.d!, StringComparer.OrdinalIgnoreCase);
                 var (groupSites, groupPages) = ParseSites(g.Sites, g.Kind == TimeGroupKind.Free);
@@ -347,6 +367,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
         ExpiryAction = c.ExpiryAction;
         LearningAfterExpiry = c.LearningAfterExpiry;
         LearningOutsideWindow = c.LearningOutsideWindow;
+        LearningMinutesPerDay = c.LearningMinutesPerDay;
         Paused = c.Paused;
         Days = c.GetDays().Select(d => new DayInput
         {

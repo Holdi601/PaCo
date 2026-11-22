@@ -245,6 +245,19 @@ public sealed record SyncRequest
     /// older clients). Lets the server notice the PC in its own network while PaCo is silent.
     /// </summary>
     public IReadOnlyList<string>? NetworkMacs { get; init; }
+
+    /// <summary>Programs installed on the PC (Start menu), sent when changed; null = unchanged / not scanned.</summary>
+    public IReadOnlyList<InstalledApp>? InstalledApps { get; init; }
+}
+
+/// <summary>A program from the PC's Start menu: process name (without .exe), shortcut name, program description.</summary>
+public sealed record InstalledApp
+{
+    public string Process { get; init; } = "";
+
+    public string Name { get; init; } = "";
+
+    public string? Description { get; init; }
 }
 
 public sealed record ChildLiveStatus
