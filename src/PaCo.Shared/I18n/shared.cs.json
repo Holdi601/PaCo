@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Účet Windows „{0}“ ({1}) má oprávnění správce.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Hodiny Windows byly vráceny o {0} min – ignoruje se.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Čas pro „{0}“ vyčerpán – zavřeno: {1}",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas serveru bez platného podpisu byl odmítnut – možná falešný server. PaCo počítá dál podle vlastních hodin."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas serveru bez platného podpisu byl odmítnut – možná falešný server. PaCo počítá dál podle vlastních hodin.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Žádný kontakt se serverem od {0} – rodiče byli upozorněni.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Opět spojení se serverem (předchozí kontakt: {0})."
 }

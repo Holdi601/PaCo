@@ -175,6 +175,15 @@
                         </tbody>
                     </table>
                 </div>
+                <form method="post" asp-page-handler="Silent" class="mb-3">
+                    <input type="hidden" name="deviceId" value="@d.Id" />
+                    <label class="form-label small fw-semibold mb-1" for="silent-@d.Id"><span class="ico ico-bell ico-sm" aria-hidden="true"></span>@T("Warnung bei fehlendem Kontakt (Tage, 0 = aus)")</label>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <input id="silent-@d.Id" name="days" type="number" min="0" max="@SilentDevices.MaxDays" step="1" inputmode="numeric" value="@d.SilentAlertDays" class="form-control form-control-sm w-auto" required aria-describedby="silent-help-@d.Id" />
+                        <button class="btn btn-sm btn-outline-primary">@T("Speichern")</button>
+                    </div>
+                    <div class="form-text" id="silent-help-@d.Id">@T("Push-Nachricht an die Eltern, wenn dieser PC so lange keinen Kontakt zum Server hatte – z. B. weil PaCo abgeschaltet wurde. Ein ausgeschalteter oder verreister PC meldet sich natürlich auch nicht.")</div>
+                </form>
                 <div class="d-flex flex-wrap justify-content-between gap-2">
                     <form method="post" asp-page-handler="Rename" class="d-flex gap-2">
                         <input type="hidden" name="deviceId" value="@d.Id" />

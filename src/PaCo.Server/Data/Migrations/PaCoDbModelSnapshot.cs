@@ -370,10 +370,19 @@ namespace PaCo.Server.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("SilentAlertDays")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SilentAlertSentUtc")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
+
+                    b.Property<long?>("UninstalledUtc")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("UpdateRequested")
                         .HasColumnType("INTEGER");

@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-reikningurinn „{0}“ ({1}) er með stjórnandaréttindi.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-klukkunni var seinkað um {0} mín. – hunsað.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Tíminn fyrir „{0}“ búinn – lokað: {1}",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Tíma netþjóns án gildrar undirskriftar var hafnað – mögulega falskur netþjónn. PaCo heldur áfram með eigin klukku."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Tíma netþjóns án gildrar undirskriftar var hafnað – mögulega falskur netþjónn. PaCo heldur áfram með eigin klukku.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ekkert samband við þjóninn síðan {0} – foreldrunum hefur verið tilkynnt.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Aftur samband við þjóninn (fyrra samband: {0})."
 }

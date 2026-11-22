@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows сметката „{0}“ ({1}) има администраторски права.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Часовникот на Windows е вратен за {0} мин – се игнорира.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Времето за „{0}“ е потрошено – затворено: {1}",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Времето на серверот без важечки потпис е одбиено – можеби лажен сервер. PaCo продолжува со сопствениот часовник."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Времето на серверот без важечки потпис е одбиено – можеби лажен сервер. PaCo продолжува со сопствениот часовник.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Нема контакт со серверот од {0} – родителите се известени.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Повторно има контакт со серверот (претходен контакт: {0})."
 }

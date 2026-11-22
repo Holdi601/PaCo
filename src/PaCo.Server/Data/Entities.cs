@@ -218,6 +218,15 @@ public sealed class Device : IFamilyScoped
 
     public bool Revoked { get; set; }
 
+    /// <summary>Push to the parents when the PC has not contacted the server for this many days (0 = never).</summary>
+    public int SilentAlertDays { get; set; } = Services.SilentDevices.DefaultDays;
+
+    /// <summary>When the "no contact" push was sent; cleared at the next contact.</summary>
+    public DateTimeOffset? SilentAlertSentUtc { get; set; }
+
+    /// <summary>The PC reported a proper uninstall (no "no contact" warning afterwards).</summary>
+    public DateTimeOffset? UninstalledUtc { get; set; }
+
     /// <summary>JSON array of <see cref="SecurityFinding"/> from the device's last security check.</summary>
     public string SecurityJson { get; set; } = "[]";
 
