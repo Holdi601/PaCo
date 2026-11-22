@@ -54,5 +54,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows Firewall er slået til.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-kontoen “{0}”, der tilhører {1}, har administratorrettigheder.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-uret blev stillet {0} minutter tilbage – ignoreres.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Tid til “{0}” brugt op – {1} lukket",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertid uden gyldig signatur blev afvist – muligvis en falsk server. PaCo tæller videre med sit eget ur."
 }

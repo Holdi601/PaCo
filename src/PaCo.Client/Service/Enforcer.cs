@@ -24,6 +24,7 @@ internal sealed class Enforcer : BackgroundService
         public DateTimeOffset? BlockedSince;
         public bool ExpiredDuringUse;
         public bool LockRequested;
+        public TimeSpan LockRequestedAt = Mono.Never;
         public bool Muted;
         public DateTimeOffset? LogoffAt;
         public double Fraction;
@@ -373,7 +374,13 @@ internal sealed class Enforcer : BackgroundService
             {
                 await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text });
                 track.LockRequested = true;
+                track.LockRequestedAt = Mono.Now;
                 lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Locked, EventText(eval.Reason, logoff: false), child.ChildId);
+            }
+            else if (connected && track.LockRequested && agent?.LockShown != true && Mono.Since(track.LockRequestedAt) > LockConfirmTimeout)
+            {
+                // The agent is connected but could not show (or keep) the lock screen: sign out instead (fail closed).
+                await ForceLogoffAsync(s, child, track, LocText.Of("Sperrbildschirm konnte nicht angezeigt werden – Kind wurde abgemeldet."), failure: true);
             }
             else if (!connected && now - track.BlockedSince > AgentGrace)
             {
@@ -473,6 +480,9 @@ internal sealed class Enforcer : BackgroundService
         }
     }
 
+    /// <summary>The agent must confirm the lock screen within this time, otherwise the child is signed out.</summary>
+    private static readonly TimeSpan LockConfirmTimeout = TimeSpan.FromSeconds(20);
+
     private async Task WarnAsync(UserSession s, ChildPolicy child, Evaluation eval, Track track)
     {
         if (eval.RemainingSeconds is not { } rem || child.Paused) return;
@@ -521,7 +531,8 @@ internal sealed class Enforcer : BackgroundService
                 }
                 break;
 
-            case IpcMessage.Usage when child is not null && msg.Samples is { } samples && policy is not null:
+            case IpcMessage.Usage when child is not null && msg.Samples is { } rawSamples && policy is not null:
+                var samples = rawSamples.Where(x => x is not null && !string.IsNullOrEmpty(x.Process) && x.DisplayName is not null).Take(50).ToList();
                 lock (_tracksGate)
                 {
                     if (_tracks.TryGetValue(sessionId, out var tr) && samples.Count > 0)
@@ -572,8 +583,10 @@ internal sealed class Enforcer : BackgroundService
                 if (a is not null) a.LockShown = msg.Flag;
                 break;
 
-            case IpcMessage.AlertHits when child is not null && msg.Hits is { } hits:
-                await HandleAlertsAsync(sessionId, child, hits);
+            case IpcMessage.AlertHits when child is not null && msg.Hits is { } rawHits:
+                var hits = rawHits.Where(h => h is not null && Enum.IsDefined(h.Category) && h.Keyword is not null && h.App is not null
+                    && h.Snippet is not null && h.Source is not null).Take(20).ToList();
+                if (hits.Count > 0) await HandleAlertsAsync(sessionId, child, hits);
                 break;
 
             case IpcMessage.ScreenshotData when msg.RequestId is { } rid:
@@ -590,8 +603,9 @@ internal sealed class Enforcer : BackgroundService
                 break;
 
             case IpcMessage.LogLine:
-                Log.Warn($"Agent {sessionId}: {msg.Text}");
-                _rt.ReportError($"Sitzungsprogramm: {msg.Text}");
+                var line = Cut(msg.Text ?? "", 500);
+                Log.Warn($"Agent {sessionId}: {line}");
+                _rt.ReportError($"Sitzungsprogramm: {line}");
                 break;
         }
     }
@@ -649,7 +663,8 @@ internal sealed class Enforcer : BackgroundService
                 return (false, L.In(child.Language, "Zu viele falsche Versuche. Bitte warte {0} Minute(n).", Math.Ceiling(wait.TotalMinutes)));
 
             var day = FamilyClock.Day(now, FamilyClock.Resolve(policy.TimeZoneId));
-            if (!UnlockCodes.TryValidate(_rt.Device.UnlockKeyBytes, child.ChildId, day, code, out var decoded))
+            var key = string.IsNullOrEmpty(child.UnlockKey) ? _rt.Device.UnlockKeyBytes : Convert.FromBase64String(child.UnlockKey);
+            if (!UnlockCodes.TryValidate(key, child.ChildId, day, code, out var decoded))
             {
                 throttle.RegisterFailure(now);
                 _rt.State.AddEvent(DeviceEventKind.UnlockFailed, LocText.Of("Falscher Freischaltcode eingegeben"), child.ChildId);

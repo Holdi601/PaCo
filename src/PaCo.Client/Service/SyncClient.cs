@@ -15,6 +15,8 @@ internal sealed class ServerApi : IDisposable
 
     public ServerApi(string serverUrl, DeviceSecrets? device = null)
     {
+        if (!serverUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException(L.T("Die Serveradresse muss mit https:// beginnen."));
         _http = new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(10), ConnectTimeout = TimeSpan.FromSeconds(10) })
         {
             BaseAddress = new Uri(serverUrl.TrimEnd('/') + "/"),
@@ -67,13 +69,22 @@ internal sealed class ServerApi : IDisposable
     }
 
     /// <summary>Downloads the plain client exe offered by the server into <paramref name="target"/>.</summary>
-    public async Task DownloadClientAsync(string target, CancellationToken ct = default)
+    /// <summary>Downloads the client; stops as soon as more than <paramref name="maxBytes"/> arrive (no disk filling).</summary>
+    public async Task DownloadClientAsync(string target, long maxBytes, CancellationToken ct = default)
     {
         using var resp = await _http.GetAsync(ApiRoutes.ClientDownload.TrimStart('/'), HttpCompletionOption.ResponseHeadersRead, ct);
         await EnsureAsync(resp, ct);
         await using var src = await resp.Content.ReadAsStreamAsync(ct);
-        await using var dst = File.Create(target);
-        await src.CopyToAsync(dst, ct);
+        await using var dst = new FileStream(target, FileMode.Create, FileAccess.Write, FileShare.None);
+        var buffer = new byte[81920];
+        long total = 0;
+        int n;
+        while ((n = await src.ReadAsync(buffer, ct)) > 0)
+        {
+            total += n;
+            if (total > maxBytes) throw new InvalidOperationException("Update-Datei ist größer als angekündigt.");
+            await dst.WriteAsync(buffer.AsMemory(0, n), ct);
+        }
     }
 
     private static async Task EnsureAsync(HttpResponseMessage resp, CancellationToken ct)
@@ -115,6 +126,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         try
         {
             m = PolicySigning.Verify<UpdateManifest>(envelope, rt.Device.PolicyPublicKeyPem);
+            SignedKinds.Expect(m.Kind, SignedKinds.Update);
         }
         catch (PolicySignatureException ex)
         {
@@ -127,17 +139,21 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         _lastUpdateVersion = m.Version;
         _lastUpdateAttempt = Mono.Now;
 
-        var dir = Path.Combine(Paths.DataDir, "update");
-        Directory.CreateDirectory(dir);
-        var file = Path.Combine(dir, $"PaCo-{m.Version}.exe");
+        var dir = new DirectoryInfo(Paths.UpdateDir);
+        if (dir.Exists && dir.Attributes.HasFlag(FileAttributes.ReparsePoint)) dir.Delete(recursive: false); // never follow a link
+        dir.Create();
+        foreach (var old in dir.EnumerateFiles("PaCo-*.exe")) { try { old.Delete(); } catch (IOException) { } }
+        var file = Path.Combine(dir.FullName, $"PaCo-{m.Version}.exe");
         Log.Info($"Update {ServerApi.Version} → {m.Version}: lade herunter …");
-        await api.DownloadClientAsync(file, ct);
+        await api.DownloadClientAsync(file, m.Size, ct);
 
-        string sha;
-        await using (var fs = File.OpenRead(file)) sha = Convert.ToHexStringLower(await System.Security.Cryptography.SHA256.HashDataAsync(fs, ct));
-        var size = new FileInfo(file).Length;
-        if (sha != m.Sha256 || size != m.Size)
+        // Keep the file open (others may only read) from the hash check until the new version has started, so it
+        // cannot be swapped in between.
+        using var locked = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var sha = Convert.ToHexStringLower(await System.Security.Cryptography.SHA256.HashDataAsync(locked, ct));
+        if (sha != m.Sha256 || locked.Length != m.Size)
         {
+            locked.Dispose();
             File.Delete(file);
             lock (rt.Gate) rt.State.AddEvent(DeviceEventKind.PolicyRejected, LocText.Of("Update {0} verworfen: Prüfsumme stimmt nicht.", m.Version));
             return;
@@ -153,7 +169,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         {
             UseShellExecute = false,
             CreateNoWindow = true,
-            WorkingDirectory = dir,
+            WorkingDirectory = dir.FullName,
         });
     }
 
@@ -403,6 +419,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
         {
             if (resp.SignedTime is null) throw new PolicySignatureException("Serverzeit ohne Signatur.");
             var t = PolicySigning.Verify<ServerTime>(resp.SignedTime, rt.Device.PolicyPublicKeyPem);
+            SignedKinds.Expect(t.Kind, SignedKinds.Time);
             if (t.DeviceId != rt.Device.DeviceId || t.Nonce != nonce)
                 throw new PolicySignatureException("Serverzeit gehört nicht zu dieser Anfrage.");
             return t.ServerUtc;

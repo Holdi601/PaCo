@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Odebírají se pravidla prohlížeče …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Aby tvoje dítě nemohlo PaCo obejít a počítač byl dobře chráněný, bylo zkontrolováno toto:",
  "Danach gelten hier keine Regeln mehr.": "Potom tu už nebudou platit žádná pravidla.",
+ "Danach ist „{0}“ für heute vorbei.": "Pak je „{0}“ pro dnešek u konce.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Potom se obrazovka zamkne. Ulož si teď hru nebo práci.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Potom tě počítač odhlásí. Ulož si teď hru nebo práci.",
  "Daten-Ordner wird geschützt …": "Zabezpečuje se složka s daty …",
  "Deine Bildschirmzeit ist aufgebraucht": "Tvůj čas u obrazovky vypršel",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Tvoji rodiče si prohlédli snímek obrazovky.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Tvůj čas pro „{0}“ je na dnešek vyčerpaný.",
  "Deinstallieren": "Odinstalovat",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kód nesouhlasí. Zadávání je dočasně zablokované.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kód nesouhlasí. Zbývající pokusy: {0}.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Zastavuje se běžící služba …",
  "Neues Kind: {0}": "Nové dítě: {0}",
  "Noch 1 Minute": "Zbývá 1 minuta",
+ "Noch {0} Min für „{1}“": "Zbývá {0} min pro „{1}“",
  "Noch {0} Minuten": "Zbývá minut: {0}",
  "PaCo Kinderschutz": "Ochrana dětí PaCo",
  "PaCo Kinderschutz von diesem PC entfernen?": "Odebrat ochranu dětí PaCo z tohoto počítače?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, pro dnešek je tvůj čas u konce. Zítra se pokračuje!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, dnes můžeš být na počítači od {1} do {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, teď není čas na počítač.",
- "— kein Kind (nicht überwacht) —": "— není dítě (bez dohledu) —"
+ "— kein Kind (nicht überwacht) —": "— není dítě (bez dohledu) —",
+ "„{0}“ ist für heute vorbei": "„{0}“ je pro dnešek u konce"
 }

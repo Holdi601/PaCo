@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Po hiqen rregullat e shfletuesit …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Që fëmija juaj të mos e anashkalojë PaCo-n dhe kompjuteri të jetë i mbrojtur mirë, u kontrollua sa vijon:",
  "Danach gelten hier keine Regeln mehr.": "Pas kësaj këtu nuk do të vlejë më asnjë rregull.",
+ "Danach ist „{0}“ für heute vorbei.": "Pastaj „{0}“ mbaron për sot.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Pastaj ekrani do të kyçet. Ruaje tani lojën ose punën tënde.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Pastaj do të nxirresh nga llogaria. Ruaje tani lojën ose punën tënde.",
  "Daten-Ordner wird geschützt …": "Po mbrohet dosja e të dhënave …",
  "Deine Bildschirmzeit ist aufgebraucht": "Koha jote para ekranit mbaroi",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Prindërit e tu panë një pamje të ekranit.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Koha jote për „{0}“ mbaroi për sot.",
  "Deinstallieren": "Çinstalo",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kodi është i gabuar. Futja është bllokuar përkohësisht.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kodi është i gabuar. Të kanë mbetur edhe {0} përpjekje.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Po ndalohet shërbimi që po ekzekutohet …",
  "Neues Kind: {0}": "Fëmijë i ri: {0}",
  "Noch 1 Minute": "Edhe 1 minutë",
+ "Noch {0} Min für „{1}“": "Edhe {0} min për „{1}“",
  "Noch {0} Minuten": "Edhe {0} minuta",
  "PaCo Kinderschutz": "PaCo Mbrojtja e fëmijëve",
  "PaCo Kinderschutz von diesem PC entfernen?": "Të hiqet PaCo Mbrojtja e fëmijëve nga ky kompjuter?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, për sot koha jote mbaroi. Nesër vazhdojmë!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, sot mund ta përdorësh kompjuterin nga ora {1} deri në {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, tani nuk është koha për kompjuter.",
- "— kein Kind (nicht überwacht) —": "— nuk është fëmijë (pa mbikëqyrje) —"
+ "— kein Kind (nicht überwacht) —": "— nuk është fëmijë (pa mbikëqyrje) —",
+ "„{0}“ ist für heute vorbei": "„{0}“ mbaroi për sot"
 }

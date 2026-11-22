@@ -54,5 +54,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows 防火墙已开启。",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "{1} 的 Windows 账户“{0}”拥有管理员权限。",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows 时钟被调回了 {0} 分钟——已忽略。",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "“{0}”的时间已用完——已关闭 {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "已拒绝没有有效签名的服务器时间——可能是伪造的服务器。PaCo 继续使用自己的时钟计时。"
 }

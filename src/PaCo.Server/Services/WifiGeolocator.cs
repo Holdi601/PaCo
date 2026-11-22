@@ -27,7 +27,8 @@ public sealed class WifiGeolocator(IHttpClientFactory http, IOptions<ServerOptio
         // "_nomap" SSIDs opted out of Wi-Fi mapping; locally administered MACs (random/hotspot) are useless.
         var aps = networks
             .Where(n => !(n.Ssid ?? "").EndsWith("_nomap", StringComparison.OrdinalIgnoreCase))
-            .Where(n => n.Bssid.Length == 17 && (Convert.ToByte(n.Bssid[..2], 16) & 0x02) == 0)
+            .Where(n => n.Bssid is not null && System.Text.RegularExpressions.Regex.IsMatch(n.Bssid, "^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}$")
+                        && (Convert.ToByte(n.Bssid[..2], 16) & 0x02) == 0)
             .OrderByDescending(n => n.Rssi).Take(20).ToList();
         if (aps.Count < 2 || !Enabled) return null;
 

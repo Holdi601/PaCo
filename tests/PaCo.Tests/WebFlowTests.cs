@@ -146,7 +146,9 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
         using (var scope = _f.Services.CreateScope())
             unlockKey = (await scope.ServiceProvider.GetRequiredService<PaCoDb>().Families.SingleAsync(f => f.Name == "Muster")).UnlockKey;
         var today = FamilyClock.Day(DateTimeOffset.UtcNow, FamilyClock.Resolve("Europe/Berlin"));
-        Assert.True(UnlockCodes.TryValidate(unlockKey, childId, today, code, out var decoded));
+        // Codes are made with the child's own key; the family key itself no longer opens anything.
+        Assert.True(UnlockCodes.TryValidate(UnlockCodes.ChildKey(unlockKey, childId), childId, today, code, out var decoded));
+        Assert.False(UnlockCodes.TryValidate(unlockKey, childId, today, code, out _));
         Assert.Equal(15, decoded.Minutes);
         Assert.Contains("+30 Min", dash);
 

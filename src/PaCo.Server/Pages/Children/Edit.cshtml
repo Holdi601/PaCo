@@ -227,7 +227,7 @@
         <div class="card-header" id="sec-groups"><span class="head-ico" aria-hidden="true"><span class="ico ico-clock" aria-hidden="true"></span></span>@T("Zeitlimits für Apps und Webseiten")</div>
         <div class="card-body">
             <p class="form-text mt-0">@T("Eigene Limits für einzelne Programme, Webseiten oder ganze Kategorien – kürzer als die Tageszeit. Gezählt wird nur, solange die App oder Webseite im Vordergrund ist. Ist die Zeit um, werden die Programme geschlossen und die Webseiten bis Mitternacht gesperrt.")</p>
-            <p class="form-text">@T("Lernzeit: Solange eine Lern-App oder Lern-Webseite im Vordergrund ist, wird keine PC-Zeit verbraucht.")</p>
+            <p class="form-text">@T("Lernzeit: Solange eine Lern-App oder Lern-Webseite im Vordergrund ist, wird keine PC-Zeit verbraucht.") @T("Lern-Apps zählen erst als Lernzeit, wenn PaCo sie einmal auf dem PC gesehen hat – so wird ein umbenanntes Spiel nicht zur Lern-App.")</p>
             <input type="hidden" name="GroupsForm" value="true" />
             @for (var gi = 0; gi < Model.Groups.Count; gi++)
             {

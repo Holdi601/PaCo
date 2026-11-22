@@ -83,8 +83,17 @@ internal sealed class AgentApp : ApplicationContext
         {
             Log.Error("Agent: Verbindung zum Dienst", ex);
         }
-        // Service gone or pipe closed: exit; the service starts a fresh agent when needed.
-        _ui.Post(_ => Shutdown(), null);
+        // Service gone or pipe closed: exit; the service starts a fresh agent when needed. If the lock screen is up
+        // and nobody said "unlock", sign the session out rather than revealing the desktop (fail closed).
+        _ui.Post(_ =>
+        {
+            if (_lock.IsShown && !_exitRequested)
+            {
+                Log.Warn("Verbindung zum Dienst verloren, während gesperrt – Sitzung wird abgemeldet");
+                Win32.WTSLogoffSession(Win32.WtsCurrentServer, -1, false);
+            }
+            Shutdown();
+        }, null);
     }
 
     private void Handle(IpcMessage msg)
@@ -105,8 +114,11 @@ internal sealed class AgentApp : ApplicationContext
                     break;
                 case IpcMessage.ShowLock:
                     if (msg.Lang is { } lang && Languages.IsSupported(lang)) L.Lang = lang;
-                    _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds);
-                    Send(new IpcMessage { Type = IpcMessage.LockState, Flag = true });
+                    bool locked;
+                    try { locked = _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds); }
+                    catch (Exception ex) { Log.Error("Sperrbildschirm", ex); locked = false; }
+                    // Only a confirmed lock counts – otherwise the service signs the child out (fail closed).
+                    Send(new IpcMessage { Type = IpcMessage.LockState, Flag = locked });
                     break;
                 case IpcMessage.HideLock:
                     _lock.Hide();
@@ -122,6 +134,7 @@ internal sealed class AgentApp : ApplicationContext
                     Audio.SetMuteAll(false);
                     break;
                 case IpcMessage.Exit:
+                    _exitRequested = true;
                     Shutdown();
                     break;
                 case IpcMessage.AlertConfig when msg.Text is { } json:
@@ -153,6 +166,7 @@ internal sealed class AgentApp : ApplicationContext
         }
     }
 
+    private bool _exitRequested;
     private string? _host;
     private (IntPtr Hwnd, string? Title) _hostFor;
     private TimeSpan _hostAt = Mono.Never;
@@ -198,6 +212,7 @@ internal sealed class AgentApp : ApplicationContext
         if (site is null || _tracker.Current is not { } c || !BrowserAddress.IsBrowser(c.Process)) return;
         var host = BrowserAddress.ReadHost(c.Hwnd, c.Process);
         if (host is null || !PaCo.Shared.TimeGroups.SiteMatches(host, site)) return;
+        if (Win32.GetForegroundWindow() != c.Hwnd) return; // focus moved meanwhile – never close something else
         SendKeys.SendWait("^w");
         Log.Info($"Tab mit {host} geschlossen (Zeit für heute aufgebraucht)");
     }

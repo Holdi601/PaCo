@@ -20,6 +20,11 @@ internal static class Paths
 
     public static string DeviceFile => Path.Combine(DataDir, "device.bin");
 
+    /// <summary>Where the single-file bundle unpacks its native libraries (instead of the world-writable C:\Windows\Temp).</summary>
+    public static string BundleDir => Path.Combine(DataDir, "bundle");
+
+    public static string UpdateDir => Path.Combine(DataDir, "update");
+
     public static string PolicyFile => Path.Combine(DataDir, "policy.json");
 
     public static string StateFile => Path.Combine(DataDir, "state.json");
@@ -33,18 +38,108 @@ internal static class SecureStore
     private static readonly SecurityIdentifier System = new(WellKnownSidType.LocalSystemSid, null);
     private static readonly SecurityIdentifier Admins = new(WellKnownSidType.BuiltinAdministratorsSid, null);
 
-    /// <summary>Creates the data dir with an explicit, non-inherited ACL: SYSTEM and Administrators full control, nobody else.</summary>
-    public static void EnsureDataDir()
+    private static DirectorySecurity DataDirSecurity()
     {
-        var dir = new DirectoryInfo(Paths.DataDir);
-        if (!dir.Exists) dir.Create();
         var sec = new DirectorySecurity();
         sec.SetOwner(Admins);
         sec.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
         foreach (var sid in new[] { System, Admins })
             sec.AddAccessRule(new FileSystemAccessRule(sid, FileSystemRights.FullControl,
                 InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
-        dir.SetAccessControl(sec);
+        return sec;
+    }
+
+    /// <summary>
+    /// Data dir with an explicit, non-inherited ACL: SYSTEM and Administrators full control, nobody else.
+    /// On a fresh installation (not paired yet) an existing folder is removed and created anew in one step with the
+    /// ACL – anything a standard user may have placed in C:\ProgramData\PaCo beforehand is gone. In every case the
+    /// contents are sanitized (see <see cref="Sanitize"/>). Returns the number of foreign entries that were fixed.
+    /// </summary>
+    public static int EnsureDataDir()
+    {
+        Privileges.EnableOwnershipPrivileges();
+        var dir = new DirectoryInfo(Paths.DataDir);
+        if (dir.Exists && (dir.Attributes.HasFlag(FileAttributes.ReparsePoint) || !File.Exists(Paths.DeviceFile)))
+        {
+            Log.Warn("Daten-Ordner wird neu angelegt (Erstinstallation oder Verknüpfung)");
+            ForceDelete(dir);
+            dir.Refresh();
+        }
+        if (!dir.Exists) dir.Create(DataDirSecurity()); // created with the ACL – no window without protection
+        else dir.SetAccessControl(DataDirSecurity());
+        return Sanitize(dir);
+    }
+
+    /// <summary>
+    /// Every entry below the data dir: links (junctions/symlinks) are removed, files and folders get Administrators
+    /// as owner and only the inherited ACL – a file the child created or prepared cannot stay writable for them.
+    /// </summary>
+    private static int Sanitize(DirectoryInfo dir)
+    {
+        var fixedCount = 0;
+        foreach (var e in dir.EnumerateFileSystemInfos("*", new EnumerationOptions { AttributesToSkip = 0, RecurseSubdirectories = false }))
+        {
+            try
+            {
+                if (e.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                {
+                    ForceDelete(e);
+                    fixedCount++;
+                    continue;
+                }
+                if (Reset(e)) fixedCount++;
+                if (e is DirectoryInfo sub) fixedCount += Sanitize(sub);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"Daten-Ordner: {e.Name} wird entfernt ({ex.Message})");
+                try { ForceDelete(e); fixedCount++; } catch (Exception ex2) { Log.Error($"Daten-Ordner: {e.Name} nicht entfernbar", ex2); }
+            }
+        }
+        return fixedCount;
+    }
+
+    /// <summary>Owner = Administrators and no explicit ACEs (inherit only). Returns true if something had to change.</summary>
+    private static bool Reset(FileSystemInfo e)
+    {
+        FileSystemSecurity current = e is DirectoryInfo d ? d.GetAccessControl() : ((FileInfo)e).GetAccessControl();
+        var owner = current.GetOwner(typeof(SecurityIdentifier)) as SecurityIdentifier;
+        var explicitRules = current.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier)).Count;
+        if (owner is not null && (owner == Admins || owner == System) && explicitRules == 0 && !current.AreAccessRulesProtected) return false;
+
+        if (e is DirectoryInfo dir)
+        {
+            var sec = new DirectorySecurity();
+            sec.SetOwner(Admins);
+            sec.SetAccessRuleProtection(false, false);
+            dir.SetAccessControl(sec);
+        }
+        else
+        {
+            var sec = new FileSecurity();
+            sec.SetOwner(Admins);
+            sec.SetAccessRuleProtection(false, false);
+            ((FileInfo)e).SetAccessControl(sec);
+        }
+        Log.Warn($"Daten-Ordner: Rechte von {e.Name} korrigiert (Besitzer war {owner?.Value ?? "?"}, {explicitRules} eigene Regeln)");
+        return true;
+    }
+
+    /// <summary>Deletes a file, folder tree or link (a link itself, never its target).</summary>
+    private static void ForceDelete(FileSystemInfo e)
+    {
+        if (e is DirectoryInfo d)
+        {
+            if (d.Attributes.HasFlag(FileAttributes.ReparsePoint)) { d.Delete(recursive: false); return; }
+            foreach (var child in d.EnumerateFileSystemInfos("*", new EnumerationOptions { AttributesToSkip = 0 })) ForceDelete(child);
+            d.Attributes = FileAttributes.Normal;
+            d.Delete(recursive: false);
+        }
+        else
+        {
+            e.Attributes = FileAttributes.Normal;
+            e.Delete();
+        }
     }
 
     /// <summary>Write temp file, flush, then atomically replace – a crash never leaves a half-written file.</summary>
@@ -69,6 +164,27 @@ internal static class SecureStore
                 if (File.Exists(p)) return File.ReadAllBytes(p);
             }
             catch (IOException) { }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Reads and parses the file; if it is missing, unreadable or corrupt, the backup (.bak) is tried. Null only if
+    /// both fail – a damaged file never silently resets usage or rules if a good backup exists.
+    /// </summary>
+    public static T? LoadWithBackup<T>(string path, Func<byte[], T> parse) where T : class
+    {
+        foreach (var p in new[] { path, path + ".bak" })
+        {
+            try
+            {
+                if (!File.Exists(p)) continue;
+                return parse(File.ReadAllBytes(p));
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"{Path.GetFileName(p)} nicht lesbar: {ex.Message}");
+            }
         }
         return null;
     }
@@ -100,8 +216,9 @@ internal sealed record DeviceSecrets
 
     public static DeviceSecrets? Load()
     {
-        var raw = SecureStore.ReadWithBackup(Paths.DeviceFile);
-        if (raw is null) return null;
+        var loaded = SecureStore.LoadWithBackup(Paths.DeviceFile, raw => PaCoJson.Deserialize<DeviceSecrets>(SecureStore.Unprotect(raw)));
+        if (loaded is not null || !File.Exists(Paths.DeviceFile)) return loaded;
+        var raw = SecureStore.ReadWithBackup(Paths.DeviceFile)!;
         try
         {
             return PaCoJson.Deserialize<DeviceSecrets>(SecureStore.Unprotect(raw));
@@ -172,6 +289,48 @@ internal static class Log
         catch
         {
             // Logging must never take enforcement down.
+        }
+    }
+}
+
+/// <summary>Enables SeTakeOwnership/SeRestore/SeBackup in the current (SYSTEM or elevated admin) token.</summary>
+internal static class Privileges
+{
+    [System.Runtime.InteropServices.DllImport("advapi32.dll", SetLastError = true)]
+    private static extern bool OpenProcessToken(IntPtr process, uint access, out IntPtr token);
+
+    [System.Runtime.InteropServices.DllImport("advapi32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern bool LookupPrivilegeValue(string? system, string name, out long luid);
+
+    [System.Runtime.InteropServices.DllImport("advapi32.dll", SetLastError = true)]
+    private static extern bool AdjustTokenPrivileges(IntPtr token, bool disableAll, ref TokenPrivilege state, int length, IntPtr previous, IntPtr returnLength);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool CloseHandle(IntPtr h);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
+    private struct TokenPrivilege
+    {
+        public int Count;
+        public long Luid;
+        public int Attributes;
+    }
+
+    public static void EnableOwnershipPrivileges()
+    {
+        if (!OpenProcessToken(System.Diagnostics.Process.GetCurrentProcess().Handle, 0x0020 | 0x0008, out var token)) return;
+        try
+        {
+            foreach (var name in new[] { "SeTakeOwnershipPrivilege", "SeRestorePrivilege", "SeBackupPrivilege" })
+            {
+                if (!LookupPrivilegeValue(null, name, out var luid)) continue;
+                var tp = new TokenPrivilege { Count = 1, Luid = luid, Attributes = 2 /* SE_PRIVILEGE_ENABLED */ };
+                AdjustTokenPrivileges(token, false, ref tp, 0, IntPtr.Zero, IntPtr.Zero);
+            }
+        }
+        finally
+        {
+            CloseHandle(token);
         }
     }
 }

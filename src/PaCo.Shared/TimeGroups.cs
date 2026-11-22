@@ -70,8 +70,10 @@ public static class TimeGroups
     private static bool DescriptionOk(TimeGroup g, string process, string? description)
     {
         if (g.Kind != TimeGroupKind.Free) return true; // limits always apply, renamed or not
+        // Learning time only for a program PaCo has seen before with this description (filled in by the server from
+        // the usage statistics) – an unknown or renamed program never runs "for free".
         var expected = g.AppDescriptions.FirstOrDefault(kv => kv.Key.Equals(process, StringComparison.OrdinalIgnoreCase)).Value;
-        return string.IsNullOrEmpty(expected) || string.Equals(expected, description, StringComparison.OrdinalIgnoreCase);
+        return !string.IsNullOrEmpty(expected) && string.Equals(expected, description, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Seconds left today for a limited group (null = no limit).</summary>

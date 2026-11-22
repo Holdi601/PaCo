@@ -54,5 +54,6 @@
  "Windows-Firewall ist eingeschaltet.": "Windows ugniasienė įjungta.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows paskyra „{0}“ ({1}) turi administratoriaus teises.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows laikrodis atsuktas atgal {0} min. – nepaisoma.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "„{0}“: laikas išnaudotas – uždaryta: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Serverio laikas be galiojančio parašo atmestas – galbūt suklastotas serveris. PaCo toliau skaičiuoja savo laikrodžiu."
 }

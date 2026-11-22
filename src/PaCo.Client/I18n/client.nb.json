@@ -11,11 +11,13 @@
   "Browser-Regeln werden entfernt …": "Nettleserregler fjernes …",
   "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "For at barnet ditt ikke skal kunne omgå PaCo og PC-en skal være godt beskyttet, er følgende sjekket:",
   "Danach gelten hier keine Regeln mehr.": "Etter det gjelder ingen regler her lenger.",
+  "Danach ist „{0}“ für heute vorbei.": "Etter det er «{0}» over for i dag.",
   "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Etterpå blir skjermen låst. Lagre spillet eller arbeidet ditt nå.",
   "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Etterpå blir du logget av. Lagre spillet eller arbeidet ditt nå.",
   "Daten-Ordner wird geschützt …": "Datamappen beskyttes …",
   "Deine Bildschirmzeit ist aufgebraucht": "Skjermtiden din er brukt opp",
   "Deine Eltern haben ein Bildschirmfoto angesehen.": "Foreldrene dine har sett på et skjermbilde.",
+  "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Tiden din for «{0}» er brukt opp for i dag.",
   "Deinstallieren": "Avinstaller",
   "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Koden stemmer ikke. Inntasting er midlertidig sperret.",
   "Der Code stimmt nicht. Noch {0} Versuch(e).": "Koden stemmer ikke. Gjenstående forsøk: {0}.",
@@ -52,6 +54,7 @@
   "Laufender Dienst wird angehalten …": "Tjenesten som kjører, stoppes …",
   "Neues Kind: {0}": "Nytt barn: {0}",
   "Noch 1 Minute": "1 minutt igjen",
+  "Noch {0} Min für „{1}“": "{0} min igjen for «{1}»",
   "Noch {0} Minuten": "{0} minutter igjen",
   "PaCo Kinderschutz": "PaCo Barnesikring",
   "PaCo Kinderschutz von diesem PC entfernen?": "Vil du fjerne PaCo Barnesikring fra denne PC-en?",
@@ -94,5 +97,6 @@
   "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, tiden din er over for i dag. I morgen kan du fortsette!",
   "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, i dag kan du bruke PC-en fra kl. {1} til {2}.",
   "{0}, jetzt ist keine PC-Zeit.": "{0}, det er ikke PC-tid nå.",
-  "— kein Kind (nicht überwacht) —": "— ikke et barn (overvåkes ikke) —"
+  "— kein Kind (nicht überwacht) —": "— ikke et barn (overvåkes ikke) —",
+  "„{0}“ ist für heute vorbei": "«{0}» er over for i dag"
 }

@@ -40,8 +40,10 @@ public sealed class Catalog
         }
         catch (FormatException)
         {
-            // A broken translation must never break the page – fall back to the source text.
-            return string.Format(CultureInfo.InvariantCulture, source, args);
+            // A broken translation must never break the page – fall back to the source text, and if even that does
+            // not fit the arguments, show it unformatted.
+            try { return string.Format(CultureInfo.InvariantCulture, source, args); }
+            catch (FormatException) { return source; }
         }
     }
 

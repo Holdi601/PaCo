@@ -26,7 +26,7 @@ services:
     volumes:
       - ${PACO_DATA_DIR:-./data}:/data
       - ${PACO_TLS_DIR:?PACO_TLS_DIR fehlt in .env}:/tls:ro
-    # Hardening: read-only root fs, no privileges, no capabilities.
+    # Hardening: read-only root fs, no privileges, no capabilities, bounded memory/processes.
     read_only: true
     tmpfs:
       - /tmp
@@ -34,6 +34,8 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    mem_limit: 768m
+    pids_limit: 256
     logging:
       driver: json-file
       options:

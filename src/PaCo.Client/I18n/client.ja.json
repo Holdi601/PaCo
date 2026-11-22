@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "ブラウザーのルールを削除しています…",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "お子さんが PaCo を回避できないように、また PC をしっかり守るために、次の項目を確認しました：",
  "Danach gelten hier keine Regeln mehr.": "その後、この PC ではルールが適用されなくなります。",
+ "Danach ist „{0}“ für heute vorbei.": "そのあと、今日の「{0}」はおしまい。",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "そのあと画面がロックされます。いまのうちにゲームや作業を保存してね。",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "そのあとサインアウトします。いまのうちにゲームや作業を保存してね。",
  "Daten-Ordner wird geschützt …": "データ フォルダーを保護しています…",
  "Deine Bildschirmzeit ist aufgebraucht": "スクリーンタイムを使い切ったよ",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "おうちの人がスクリーンショットを見ました。",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "今日の「{0}」の時間を使い切ったよ。",
  "Deinstallieren": "アンインストール",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "コードがちがいます。しばらく入力できません。",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "コードがちがいます。あと {0} 回ためせます。",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "実行中のサービスを停止しています…",
  "Neues Kind: {0}": "新しい子ども：{0}",
  "Noch 1 Minute": "あと 1 分",
+ "Noch {0} Min für „{1}“": "「{1}」はあと {0} 分",
  "Noch {0} Minuten": "あと {0} 分",
  "PaCo Kinderschutz": "PaCo 子ども見守り",
  "PaCo Kinderschutz von diesem PC entfernen?": "この PC から PaCo 子ども見守りを削除しますか？",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}さん、今日の時間はおしまい。また明日ね！",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}さん、今日は {1} から {2} まで PC を使えるよ。",
  "{0}, jetzt ist keine PC-Zeit.": "{0}さん、いまは PC の時間じゃないよ。",
- "— kein Kind (nicht überwacht) —": "— 子どもではない（見守りなし）—"
+ "— kein Kind (nicht überwacht) —": "— 子どもではない（見守りなし）—",
+ "„{0}“ ist für heute vorbei": "今日の「{0}」はおしまい"
 }

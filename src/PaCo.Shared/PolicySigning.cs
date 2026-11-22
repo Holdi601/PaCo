@@ -50,3 +50,17 @@ public static class PolicySigning
 
     public static string ExportPublicPem(ECDsa key) => key.ExportSubjectPublicKeyInfoPem();
 }
+
+/// <summary>Types of signed documents. The client checks the type, so one signed document cannot replace another.</summary>
+public static class SignedKinds
+{
+    public const string Policy = "policy";
+    public const string Update = "update";
+    public const string Time = "time";
+
+    public static void Expect(string actual, string expected)
+    {
+        if (!string.Equals(actual, expected, StringComparison.Ordinal))
+            throw new PolicySignatureException($"Signiertes Dokument hat den falschen Typ ({actual} statt {expected}).");
+    }
+}

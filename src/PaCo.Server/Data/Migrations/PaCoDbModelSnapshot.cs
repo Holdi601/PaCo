@@ -200,6 +200,27 @@ namespace PaCo.Server.Data.Migrations
                     b.ToTable("Alerts");
                 });
 
+            modelBuilder.Entity("PaCo.Server.Data.AuthSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ExpiresUtc")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Value")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuthSessions");
+                });
+
             modelBuilder.Entity("PaCo.Server.Data.Child", b =>
                 {
                     b.Property<Guid>("Id")

@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "正在移除瀏覽器規則…",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "為了讓孩子無法繞過 PaCo，並讓電腦受到良好保護，已檢查下列項目：",
  "Danach gelten hier keine Regeln mehr.": "之後這裡將不再有任何規則。",
+ "Danach ist „{0}“ für heute vorbei.": "之後，今天的「{0}」就結束了。",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "接著螢幕會被鎖定。現在就先儲存你的遊戲或作業吧。",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "接著你會被登出。現在就先儲存你的遊戲或作業吧。",
  "Daten-Ordner wird geschützt …": "正在保護資料夾…",
  "Deine Bildschirmzeit ist aufgebraucht": "你的螢幕時間用完了",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "你的家長查看了一張螢幕擷取畫面。",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "今天「{0}」的時間用完了。",
  "Deinstallieren": "解除安裝",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "解鎖碼不對。暫時不能輸入了。",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "解鎖碼不對。還可以試 {0} 次。",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "正在停止執行中的服務…",
  "Neues Kind: {0}": "新孩子：{0}",
  "Noch 1 Minute": "還剩 1 分鐘",
+ "Noch {0} Min für „{1}“": "「{1}」還剩 {0} 分鐘",
  "Noch {0} Minuten": "還剩 {0} 分鐘",
  "PaCo Kinderschutz": "PaCo 兒童保護",
  "PaCo Kinderschutz von diesem PC entfernen?": "要從這台電腦移除 PaCo 兒童保護嗎？",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}，今天的時間用完了。明天見！",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}，今天你可以在 {1} 到 {2} 之間用電腦。",
  "{0}, jetzt ist keine PC-Zeit.": "{0}，現在不是用電腦的時間。",
- "— kein Kind (nicht überwacht) —": "— 不是孩子（不受監控）—"
+ "— kein Kind (nicht überwacht) —": "— 不是孩子（不受監控）—",
+ "„{0}“ ist für heute vorbei": "今天的「{0}」結束了"
 }

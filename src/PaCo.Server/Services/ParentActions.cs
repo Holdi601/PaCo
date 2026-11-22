@@ -152,7 +152,7 @@ public sealed class ParentActions(PaCoDb db, IFamilyContext family, TimeProvider
 
         db.UnlockCodes.Add(new UnlockCodeIssue { FamilyId = FamilyId, ChildId = child.Id, Day = today, Nonce = nonce, Minutes = minutes, CreatedBy = UserId(user) });
         await db.SaveChangesAsync(ct);
-        return UnlockCodes.Generate(fam.UnlockKey, child.Id, today, minutes, nonce);
+        return UnlockCodes.Generate(UnlockCodes.ChildKey(fam.UnlockKey, child.Id), child.Id, today, minutes, nonce);
     }
 
     public static Guid UserId(ClaimsPrincipal user) =>

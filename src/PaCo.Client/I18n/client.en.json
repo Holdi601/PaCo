@@ -11,11 +11,13 @@
  "Browser-Regeln werden entfernt …": "Removing browser rules …",
  "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "To make sure your child can't get around PaCo and the PC is well protected, the following was checked:",
  "Danach gelten hier keine Regeln mehr.": "After that, no rules apply here anymore.",
+ "Danach ist „{0}“ für heute vorbei.": "After that, “{0}” is over for today.",
  "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "After that, the screen will be locked. Save your game or your work now.",
  "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "After that, you will be signed out. Save your game or your work now.",
  "Daten-Ordner wird geschützt …": "Protecting data folder …",
  "Deine Bildschirmzeit ist aufgebraucht": "Your screen time is used up",
  "Deine Eltern haben ein Bildschirmfoto angesehen.": "Your parents looked at a screenshot.",
+ "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Your time for “{0}” is used up for today.",
  "Deinstallieren": "Uninstall",
  "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "That code isn't right. Code entry is locked for a little while.",
  "Der Code stimmt nicht. Noch {0} Versuch(e).": "That code isn't right. {0} attempt(s) left.",
@@ -52,6 +54,7 @@
  "Laufender Dienst wird angehalten …": "Stopping the running service …",
  "Neues Kind: {0}": "New child: {0}",
  "Noch 1 Minute": "1 minute left",
+ "Noch {0} Min für „{1}“": "{0} min left for “{1}”",
  "Noch {0} Minuten": "{0} minutes left",
  "PaCo Kinderschutz": "PaCo Parental Control",
  "PaCo Kinderschutz von diesem PC entfernen?": "Remove PaCo Parental Control from this PC?",
@@ -94,5 +97,6 @@
  "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, your time is up for today. See you tomorrow!",
  "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, today you can use the PC from {1} to {2}.",
  "{0}, jetzt ist keine PC-Zeit.": "{0}, it's not PC time right now.",
- "— kein Kind (nicht überwacht) —": "— no child (not monitored) —"
+ "— kein Kind (nicht überwacht) —": "— no child (not monitored) —",
+ "„{0}“ ist für heute vorbei": "“{0}” is over for today"
 }

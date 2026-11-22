@@ -54,5 +54,6 @@
  "Windows-Firewall ist eingeschaltet.": "Paravanul de protecție Windows este activat.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Contul Windows „{0}” ({1}) are drepturi de administrator.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Ceasul Windows a fost dat înapoi cu {0} min – se ignoră.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Timp pentru „{0}” epuizat – {1} închis",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Ora serverului fără semnătură validă a fost respinsă – posibil un server fals. PaCo continuă cu propriul ceas."
 }

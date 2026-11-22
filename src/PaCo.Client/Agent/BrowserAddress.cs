@@ -30,6 +30,8 @@ internal static class BrowserAddress
                 : (Condition)new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit);
             var edit = root.FindFirst(TreeScope.Descendants, condition);
             if (edit is null || !edit.TryGetCurrentPattern(ValuePattern.Pattern, out var vp)) return null;
+            // While the address bar has the keyboard focus the child may be typing – that text is not the open page.
+            if (edit.Current.HasKeyboardFocus) return null;
             return TimeGroups.HostOf(((ValuePattern)vp).Current.Value);
         }
         catch

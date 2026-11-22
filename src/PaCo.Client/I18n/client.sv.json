@@ -11,11 +11,13 @@
   "Browser-Regeln werden entfernt …": "Webbläsarregler tas bort …",
   "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "För att ditt barn inte ska kunna kringgå PaCo och datorn ska vara väl skyddad har följande kontrollerats:",
   "Danach gelten hier keine Regeln mehr.": "Efter det gäller inga regler här längre.",
+  "Danach ist „{0}“ für heute vorbei.": "Sedan är ”{0}” slut för i dag.",
   "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Sedan låses skärmen. Spara ditt spel eller ditt arbete nu.",
   "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Sedan loggas du ut. Spara ditt spel eller ditt arbete nu.",
   "Daten-Ordner wird geschützt …": "Datamappen skyddas …",
   "Deine Bildschirmzeit ist aufgebraucht": "Din skärmtid är slut",
   "Deine Eltern haben ein Bildschirmfoto angesehen.": "Dina föräldrar har tittat på en skärmbild.",
+  "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "Din tid för ”{0}” är slut för i dag.",
   "Deinstallieren": "Avinstallera",
   "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Koden stämmer inte. Inmatningen är tillfälligt spärrad.",
   "Der Code stimmt nicht. Noch {0} Versuch(e).": "Koden stämmer inte. Försök kvar: {0}.",
@@ -52,6 +54,7 @@
   "Laufender Dienst wird angehalten …": "Tjänsten som körs stoppas …",
   "Neues Kind: {0}": "Nytt barn: {0}",
   "Noch 1 Minute": "1 minut kvar",
+  "Noch {0} Min für „{1}“": "{0} min kvar för ”{1}”",
   "Noch {0} Minuten": "{0} minuter kvar",
   "PaCo Kinderschutz": "PaCo Barnskydd",
   "PaCo Kinderschutz von diesem PC entfernen?": "Ta bort PaCo Barnskydd från den här datorn?",
@@ -94,5 +97,6 @@
   "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, din tid är slut för i dag. I morgon kan du fortsätta!",
   "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, i dag får du använda datorn från kl. {1} till {2}.",
   "{0}, jetzt ist keine PC-Zeit.": "{0}, det är ingen datortid nu.",
-  "— kein Kind (nicht überwacht) —": "— inget barn (övervakas inte) —"
+  "— kein Kind (nicht überwacht) —": "— inget barn (övervakas inte) —",
+  "„{0}“ ist für heute vorbei": "”{0}” är slut för i dag"
 }

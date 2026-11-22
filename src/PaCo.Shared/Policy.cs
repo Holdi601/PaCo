@@ -98,6 +98,9 @@ public sealed record ChildPolicy
     /// <summary>Windows user policies for the child's account: no Registry editor, command prompt, PowerShell scripts, script host.</summary>
     public bool HardenAccount { get; init; } = true;
 
+    /// <summary>Base64 key for this child's unlock codes (see UnlockCodes.ChildKey).</summary>
+    public string UnlockKey { get; init; } = "";
+
     public DayRule RuleFor(DayOfWeek day) => Days.Count == 7 ? Days[(int)day] : DayRule.Unrestricted;
 }
 
@@ -113,6 +116,9 @@ public sealed record AccountMapping
 public sealed record PolicyDocument
 {
     public const int CurrentSchema = 1;
+
+    /// <summary>Signed document type (see <see cref="SignedKinds"/>).</summary>
+    public string Kind { get; init; } = SignedKinds.Policy;
 
     public int Schema { get; init; } = CurrentSchema;
 

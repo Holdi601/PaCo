@@ -106,7 +106,7 @@ internal sealed class IpcChannel(Stream stream) : IDisposable
             {
                 return PaCoJson.Deserialize<IpcMessage>(line);
             }
-            catch (System.Text.Json.JsonException)
+            catch (Exception ex) when (ex is System.Text.Json.JsonException or NotSupportedException or ArgumentException or InvalidOperationException)
             {
                 // ignore malformed line
             }

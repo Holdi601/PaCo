@@ -11,11 +11,13 @@
   "Browser-Regeln werden entfernt …": "Šalinamos naršyklės taisyklės …",
   "Damit dein Kind PaCo nicht umgehen kann und der PC gut geschützt ist, wurde Folgendes geprüft:": "Kad tavo vaikas negalėtų apeiti PaCo ir kompiuteris būtų gerai apsaugotas, patikrinta:",
   "Danach gelten hier keine Regeln mehr.": "Po to čia nebegalios jokios taisyklės.",
+  "Danach ist „{0}“ für heute vorbei.": "Po to „{0}“ šiandien baigsis.",
   "Danach wird der Bildschirm gesperrt. Speichere jetzt dein Spiel oder deine Arbeit.": "Po to ekranas bus užrakintas. Dabar išsaugok savo žaidimą ar darbą.",
   "Danach wirst du abgemeldet. Speichere jetzt dein Spiel oder deine Arbeit.": "Po to sesija bus baigta. Dabar išsaugok savo žaidimą ar darbą.",
   "Daten-Ordner wird geschützt …": "Apsaugomas duomenų aplankas …",
   "Deine Bildschirmzeit ist aufgebraucht": "Tavo ekrano laikas išnaudotas",
   "Deine Eltern haben ein Bildschirmfoto angesehen.": "Tavo tėvai peržiūrėjo ekrano kopiją.",
+  "Deine Zeit für „{0}“ ist für heute aufgebraucht.": "„{0}“: tavo laikas šiandien išnaudotas.",
   "Deinstallieren": "Pašalinti",
   "Der Code stimmt nicht. Eingabe vorübergehend gesperrt.": "Kodas neteisingas. Įvedimas laikinai užblokuotas.",
   "Der Code stimmt nicht. Noch {0} Versuch(e).": "Kodas neteisingas. Liko bandymų: {0}.",
@@ -52,6 +54,7 @@
   "Laufender Dienst wird angehalten …": "Stabdoma veikianti tarnyba …",
   "Neues Kind: {0}": "Naujas vaikas: {0}",
   "Noch 1 Minute": "Liko 1 minutė",
+  "Noch {0} Min für „{1}“": "„{1}“: liko {0} min.",
   "Noch {0} Minuten": "Liko {0} min.",
   "PaCo Kinderschutz": "PaCo vaikų apsauga",
   "PaCo Kinderschutz von diesem PC entfernen?": "Pašalinti PaCo vaikų apsaugą iš šio kompiuterio?",
@@ -94,5 +97,6 @@
   "{0}, für heute ist deine Zeit vorbei. Morgen geht es weiter!": "{0}, šiandien tavo laikas baigėsi. Rytoj galėsi tęsti!",
   "{0}, heute darfst du von {1} bis {2} Uhr an den PC.": "{0}, šiandien kompiuteriu gali naudotis nuo {1} iki {2} val.",
   "{0}, jetzt ist keine PC-Zeit.": "{0}, dabar ne kompiuterio laikas.",
-  "— kein Kind (nicht überwacht) —": "— ne vaikas (nestebima) —"
+  "— kein Kind (nicht überwacht) —": "— ne vaikas (nestebima) —",
+  "„{0}“ ist für heute vorbei": "„{0}“ šiandien baigėsi"
 }

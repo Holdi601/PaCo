@@ -541,3 +541,16 @@ public sealed class DeviceEventEntity : IFamilyScoped
 
     public string Text() => Ui.Render(Template, Template is null || string.IsNullOrEmpty(ArgsJson) ? [] : PaCoJson.Deserialize<string[]>(ArgsJson), Message);
 }
+
+/// <summary>Server-side sign-in session (see DbTicketStore) – deleting the row ends the session immediately.</summary>
+public sealed class AuthSession
+{
+    [MaxLength(64)]
+    public string Id { get; set; } = "";
+
+    public Guid? UserId { get; set; }
+
+    public DateTimeOffset ExpiresUtc { get; set; }
+
+    public byte[] Value { get; set; } = [];
+}

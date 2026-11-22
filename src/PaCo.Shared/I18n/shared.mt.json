@@ -54,5 +54,6 @@
  "Windows-Firewall ist eingeschaltet.": "Il-Firewall tal-Windows mixgħul.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Il-kont tal-Windows “{0}” ta' {1} għandu drittijiet ta' amministratur.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "L-arloġġ tal-Windows tressaq lura {0} minuti – qed jiġi injorat.",
+ "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Il-ħin għal “{0}” spiċċa – {1} magħluq",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Il-ħin tas-server mingħajr firma valida ġie miċħud – forsi server falz. PaCo jibqa' jgħodd bl-arloġġ tiegħu."
 }
