@@ -11,7 +11,7 @@ RUN dotnet publish src/PaCo.Server -c Release -o /out/server \
  && mv /out/client/PaCo.exe /out/dist/PaCo-Setup.exe \
  && sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Directory.Build.props > /out/dist/version.txt
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:11.0
 WORKDIR /app
 COPY --from=build /out/server ./
 COPY --from=build /out/dist/ ./client/
