@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows paskyra „{0}“ ({1}) turi administratoriaus teises.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows laikrodis atsuktas atgal {0} min. – nepaisoma.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "„{0}“: laikas išnaudotas – uždaryta: {1}",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Serverio laikas be galiojančio parašo atmestas – galbūt suklastotas serveris. PaCo toliau skaičiuoja savo laikrodžiu."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Serverio laikas be galiojančio parašo atmestas – galbūt suklastotas serveris. PaCo toliau skaičiuoja savo laikrodžiu.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Nėra ryšio su serveriu nuo {0} – tėvams pranešta.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Vėl yra ryšys su serveriu (ankstesnis ryšys: {0})."
 }

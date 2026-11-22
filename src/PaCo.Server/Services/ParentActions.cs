@@ -207,6 +207,7 @@ public static class Format
         DeviceEventKind.SafeMode => Ui.T("Abgesicherter Modus"),
         DeviceEventKind.OfflineUsage => Ui.T("Nutzung ohne Internet"),
         DeviceEventKind.AgentCrashed => Ui.T("Sitzungsprogramm beendet"),
+        DeviceEventKind.Silent => Ui.T("Nicht gemeldet"),
         _ => Ui.T("Info"),
     };
 
@@ -215,7 +216,7 @@ public static class Format
     [
         DeviceEventKind.ClockTampering, DeviceEventKind.UnlockFailed, DeviceEventKind.AppBlocked, DeviceEventKind.PolicyRejected,
         DeviceEventKind.SafeMode, DeviceEventKind.OfflineUsage, DeviceEventKind.AgentCrashed, DeviceEventKind.AgentFailure,
-        DeviceEventKind.Uninstalled, DeviceEventKind.ChildIsAdmin,
+        DeviceEventKind.Uninstalled, DeviceEventKind.ChildIsAdmin, DeviceEventKind.Silent,
     ];
 
     /// <summary>Weekday names in the current language, indexed by <see cref="DayOfWeek"/> (0 = Sunday).</summary>

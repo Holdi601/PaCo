@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Обліковий запис Windows «{0}» (дитина: {1}) має права адміністратора.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Годинник Windows переведено назад на {0} хв – це проігноровано.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Час для «{0}» вичерпано – закрито: {1}",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Час сервера без дійсного підпису відхилено – можливо, підроблений сервер. PaCo рахує далі за власним годинником."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Час сервера без дійсного підпису відхилено – можливо, підроблений сервер. PaCo рахує далі за власним годинником.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Немає зв’язку із сервером з {0} – батьків повідомлено.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Знову на зв’язку із сервером (попередній контакт: {0})."
 }

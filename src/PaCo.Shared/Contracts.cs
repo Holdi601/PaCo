@@ -177,6 +177,8 @@ public enum DeviceEventKind
     OfflineUsage,
     /// <summary>The session agent ended unexpectedly.</summary>
     AgentCrashed,
+    /// <summary>Server-side: the PC did not contact the server for as long as the parents allow.</summary>
+    Silent,
 }
 
 public sealed record DeviceEvent

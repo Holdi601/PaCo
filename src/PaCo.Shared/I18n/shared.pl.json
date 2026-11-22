@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Konto Windows „{0}” ({1}) ma uprawnienia administratora.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Zegar Windows cofnięto o {0} min – zostanie to zignorowane.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Czas na „{0}” wykorzystany – zamknięto: {1}",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Odrzucono czas serwera bez ważnego podpisu – możliwy fałszywy serwer. PaCo liczy dalej według własnego zegara."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Odrzucono czas serwera bez ważnego podpisu – możliwy fałszywy serwer. PaCo liczy dalej według własnego zegara.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Brak kontaktu z serwerem od {0} – rodzice zostali powiadomieni.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Znowu kontakt z serwerem (poprzedni kontakt: {0})."
 }

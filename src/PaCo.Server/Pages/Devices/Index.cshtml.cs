@@ -83,6 +83,19 @@ public sealed class IndexModel(PaCoDb db, IFamilyContext family, ClientPackage c
         return RedirectToPage();
     }
 
+    /// <summary>After how many days without contact the parents get a push message (0 = never).</summary>
+    public async Task<IActionResult> OnPostSilentAsync(Guid deviceId, int days)
+    {
+        var d = await db.Devices.FirstOrDefaultAsync(x => x.Id == deviceId && !x.Revoked);
+        if (d is null) return NotFound();
+        d.SilentAlertDays = Math.Clamp(days, 0, SilentDevices.MaxDays);
+        await db.SaveChangesAsync();
+        TempData["Message"] = d.SilentAlertDays == 0
+            ? Ui.F("{0}: keine Warnung bei fehlendem Kontakt.", d.Name)
+            : Ui.F("{0}: Warnung, wenn {1} Tage lang kein Kontakt besteht.", d.Name, d.SilentAlertDays);
+        return RedirectToPage();
+    }
+
     /// <summary>Asks the device to install the newest client version at its next contact.</summary>
     public async Task<IActionResult> OnPostUpdateAsync(Guid deviceId)
     {

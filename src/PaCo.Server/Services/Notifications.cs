@@ -115,8 +115,11 @@ public sealed class ScreenshotStore(IOptions<ServerOptions> options, IDataProtec
     }
 }
 
-/// <summary>Hourly housekeeping: expire screenshot requests, delete old screenshots (7 days) and alerts (90 days).</summary>
-public sealed class Housekeeping(IServiceScopeFactory scopes, TimeProvider clock, ILogger<Housekeeping> log) : BackgroundService
+/// <summary>
+/// Housekeeping (every minute): expire screenshot requests, delete old screenshots (7 days) and alerts (90 days),
+/// warn the parents about PCs that stopped contacting the server.
+/// </summary>
+public sealed class Housekeeping(IServiceScopeFactory scopes, TimeProvider clock, Notifier notifier, IOptions<ServerOptions> options, ILogger<Housekeeping> log) : BackgroundService
 {
     public static readonly TimeSpan ScreenshotRequestTimeout = TimeSpan.FromMinutes(2);
 
@@ -153,6 +156,9 @@ public sealed class Housekeeping(IServiceScopeFactory scopes, TimeProvider clock
                 await db.UsageDays.IgnoreQueryFilters().Where(u => u.Day < oldUsage).ExecuteDeleteAsync(ct);
                 await db.SaveChangesAsync(ct);
                 if (oldShots.Count > 0) log.LogInformation("{Count} alte Bildschirmfotos gelöscht", oldShots.Count);
+
+                var silent = await SilentDevices.CheckAsync(db, notifier, options.Value.PublicUrl?.TrimEnd('/'), now, ct);
+                if (silent > 0) log.LogWarning("{Count} Gerät(e) ohne Kontakt – Eltern benachrichtigt", silent);
             }
             catch (Exception ex) when (!ct.IsCancellationRequested)
             {

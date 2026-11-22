@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "{1} adlı çocuğun “{0}” Windows hesabı yönetici haklarına sahip.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows saati {0} dakika geri alındı – yok sayıldı.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "“{0}” için süre doldu – {1} kapatıldı",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Geçerli imzası olmayan sunucu saati reddedildi – sahte bir sunucu olabilir. PaCo kendi saatiyle saymaya devam ediyor."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Geçerli imzası olmayan sunucu saati reddedildi – sahte bir sunucu olabilir. PaCo kendi saatiyle saymaya devam ediyor.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "{0} tarihinden beri sunucuyla bağlantı yok – ebeveynler bilgilendirildi.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Sunucuyla yeniden bağlantı var (önceki bağlantı: {0})."
 }

@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "Windows-kontoen “{0}”, der tilhører {1}, har administratorrettigheder.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows-uret blev stillet {0} minutter tilbage – ignoreres.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Tid til “{0}” brugt op – {1} lukket",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertid uden gyldig signatur blev afvist – muligvis en falsk server. PaCo tæller videre med sit eget ur."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertid uden gyldig signatur blev afvist – muligvis en falsk server. PaCo tæller videre med sit eget ur.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ingen kontakt med serveren siden {0} – forældrene har fået besked.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Kontakt med serveren igen (forrige kontakt: {0})."
 }

@@ -214,6 +214,7 @@ public static class DeviceApi
         if (device is null) return Results.Unauthorized();
 
         var now = clock.GetUtcNow();
+        await SilentDevices.OnContactAsync(db, notifier, device, options.Value.PublicUrl?.TrimEnd('/'), now, ct);
         device.LastSeenUtc = now;
         device.ClientVersion = Trim(req.ClientVersion, 40);
         device.OsVersion = Trim(req.OsVersion, 100);
@@ -417,6 +418,7 @@ public static class DeviceApi
         // Deinstallation is important enough for a push message.
         if (events.Any(e => e.Kind == DeviceEventKind.Uninstalled))
         {
+            device.UninstalledUtc ??= DateTimeOffset.UtcNow;
             var fam = await db.Families.SingleAsync(f => f.Id == device.FamilyId, ct);
             if (fam.NtfyTopic is { } topic)
             {

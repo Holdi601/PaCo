@@ -56,5 +56,7 @@
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.": "{1}의 Windows 계정 '{0}'에 관리자 권한이 있습니다.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.": "Windows 시계가 {0}분 뒤로 조정되었습니다. 무시합니다.",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "‘{0}’ 시간 소진 – {1} 닫음",
- "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "유효한 서명이 없는 서버 시간을 거부했습니다. 가짜 서버일 수 있습니다. PaCo는 자체 시계로 계속 계산합니다."
+ "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "유효한 서명이 없는 서버 시간을 거부했습니다. 가짜 서버일 수 있습니다. PaCo는 자체 시계로 계속 계산합니다.",
+ "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "{0} 이후 서버와 연결되지 않았습니다. 부모에게 알렸습니다.",
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "서버와 다시 연결되었습니다(이전 연결: {0})."
 }
