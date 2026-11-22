@@ -407,6 +407,64 @@ public partial class WebFlowTests : IClassFixture<PaCoFactory>
     }
 
     [Fact]
+    public async Task TimeLimitSharedAcrossPcsPerPcOrNotOnSomePcs()
+    {
+        var (b, fam) = await ParentOfNewFamilyAsync("budget-parent@test.local");
+        Guid child, gaming, school;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        using (var scope = _f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var c = new Child { FamilyId = fam, Name = "Lea" };
+            var g = new Device { FamilyId = fam, Name = "Gaming-PC", TokenHash = Secrets.Sha256Hex(Secrets.DeviceToken()) };
+            var l = new Device { FamilyId = fam, Name = "Schul-Laptop", TokenHash = Secrets.Sha256Hex(Secrets.DeviceToken()) };
+            db.Children.Add(c);
+            db.Devices.AddRange(g, l);
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = fam, DeviceId = g.Id, Sid = "S-1-5-21-8-8-8-1001", UserName = "lea", ChildId = c.Id });
+            db.DeviceAccounts.Add(new DeviceAccount { FamilyId = fam, DeviceId = l.Id, Sid = "S-1-5-21-9-8-8-1001", UserName = "lea", ChildId = c.Id });
+            db.UsageDays.Add(new UsageDay { FamilyId = fam, DeviceId = l.Id, ChildId = c.Id, Day = today, RegularSeconds = 3600 });
+            await db.SaveChangesAsync();
+            (child, gaming, school) = (c.Id, g.Id, l.Id);
+        }
+        ChildPolicy PolicyOn(Guid deviceId)
+        {
+            using var scope = _f.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
+            var dev = db.Devices.IgnoreQueryFilters().Single(x => x.Id == deviceId);
+            return scope.ServiceProvider.GetRequiredService<PolicyBuilder>().BuildAsync(dev, default).GetAwaiter().GetResult().Children.Single();
+        }
+        async Task SaveAsync(bool perDevice, params Guid[] limited)
+        {
+            var edit = await b.GetStringAsync($"/Children/Edit/{child}");
+            Assert.Contains("name=\"TimeLimitDevices\"", edit);
+            var form = new List<KeyValuePair<string, string>>
+            {
+                new("__RequestVerificationToken", TokenRegex().Match(edit).Groups[1].Value), new("Name", "Lea"), new("ExpiryAction", "LockScreen"),
+                new("TimeDevicesForm", "true"), new("TimePerDevice", perDevice ? "true" : "false"),
+            };
+            form.AddRange(limited.Select(id => new KeyValuePair<string, string>("TimeLimitDevices", id.ToString())));
+            for (var i = 0; i < 7; i++) { form.Add(new($"Days[{i}].LimitMinutes", "120")); form.Add(new($"Days[{i}].AllDay", "true")); }
+            Assert.Equal(HttpStatusCode.Redirect, (await b.PostAsync($"/Children/Edit/{child}", new FormUrlEncodedContent(form))).StatusCode);
+        }
+
+        // Default: shared – the hour on the laptop counts on the gaming PC.
+        Assert.Equal(3600, PolicyOn(gaming).RegularSecondsElsewhere[today]);
+
+        // Every PC has the full time.
+        await SaveAsync(perDevice: true, gaming, school);
+        Assert.Empty(PolicyOn(gaming).RegularSecondsElsewhere);
+        Assert.Equal(120, PolicyOn(gaming).Days[0].LimitMinutes);
+
+        // Shared again, but no time limit on the school laptop: unrestricted there, its hour no longer counts elsewhere.
+        await SaveAsync(perDevice: false, gaming);
+        Assert.Empty(PolicyOn(gaming).RegularSecondsElsewhere);
+        Assert.Equal(120, PolicyOn(gaming).Days[3].LimitMinutes);
+        Assert.All(PolicyOn(school).Days, d => Assert.Null(d.LimitMinutes));
+        var dash = await b.GetStringAsync("/Dashboard");
+        Assert.Contains("ohne Zeitlimit", dash);
+    }
+
+    [Fact]
     public async Task EveryPageRendersInEveryLanguage()
     {
         var (b, fam) = await ParentOfNewFamilyAsync("lang-parent@test.local");

@@ -33,7 +33,11 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
 
         var childPolicies = children.Select(c =>
         {
-            var mine = otherUsage.Where(u => u.ChildId == c.Id).ToList();
+            // Time used elsewhere only counts with a shared budget, and never from PCs without time limit.
+            var timeLimitHere = c.TimeLimitOn(device.Id);
+            var mine = c.TimePerDevice
+                ? []
+                : otherUsage.Where(u => u.ChildId == c.Id && c.TimeLimitOn(u.DeviceId)).ToList();
             var grantUse = mine.SelectMany(u => u.GetGrantSeconds()).GroupBy(kv => kv.Key).ToDictionary(g => g.Key, g => g.Sum(kv => kv.Value));
             return new ChildPolicy
             {
@@ -42,7 +46,7 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                 Paused = c.Paused,
                 LockedByParent = c.LockedByParent,
                 ExpiryAction = c.ExpiryAction,
-                Days = c.GetDays(),
+                Days = timeLimitHere ? c.GetDays() : Enumerable.Repeat(DayRule.Unrestricted, 7).ToArray(),
                 BlockedApps = c.GetBlockedApps()
                     .Concat(c.BlockedToolProcesses())
                     .Concat(c.BlockStore ? [Child.StoreApp] : [])

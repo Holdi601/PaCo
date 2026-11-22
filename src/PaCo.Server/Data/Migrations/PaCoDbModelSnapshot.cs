@@ -246,10 +246,17 @@ namespace PaCo.Server.Data.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("NoTimeLimitDevicesJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("NotifyChildOnScreenshot")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("Paused")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TimePerDevice")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UnblockedToolsJson")

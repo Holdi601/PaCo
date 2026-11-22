@@ -69,6 +69,33 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="6" data-targets="0"><span class="ico ico-copy" aria-hidden="true"></span>@F("{0} auf {1} übertragen", Format.DayName(DayOfWeek.Saturday), Format.DayName(DayOfWeek.Sunday))</button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-day="1" data-targets="0,2,3,4,5,6"><span class="ico ico-copy" aria-hidden="true"></span>@F("{0} auf alle Tage übertragen", Format.DayName(DayOfWeek.Monday))</button>
             </div>
+
+            <input type="hidden" name="TimeDevicesForm" value="true" />
+            <fieldset class="mt-4">
+                <legend class="form-label fw-semibold fs-6">@T("Gilt die Zeit für alle PCs zusammen?")</legend>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="TimePerDevice" id="tpd-shared" value="false" checked="@(!Model.TimePerDevice)" />
+                    <label class="form-check-label" for="tpd-shared">@T("Ja, zusammen (empfohlen) – 1 Stunde am Laptop fehlt dann am anderen PC.")</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="TimePerDevice" id="tpd-each" value="true" checked="@Model.TimePerDevice" />
+                    <label class="form-check-label" for="tpd-each">@T("Nein, jeder PC hat die volle Zeit für sich.")</label>
+                </div>
+            </fieldset>
+            @if (Model.ChildDevices.Count > 0)
+            {
+                <fieldset class="mt-3">
+                    <legend class="form-label fw-semibold fs-6">@T("Auf welchen PCs gilt das Zeitlimit?")</legend>
+                    <p class="form-text mt-0">@T("Ausgeschaltet = keine Zeitbegrenzung und keine erlaubten Uhrzeiten auf diesem PC (z. B. Schul-Laptop). Programm- und Webseiten-Sperren und Alarme gelten dort trotzdem.")</p>
+                    @foreach (var (devId, devName) in Model.ChildDevices)
+                    {
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" role="switch" name="TimeLimitDevices" value="@devId" id="tl-@devId" checked="@Model.TimeLimitDevices.Contains(devId)" />
+                            <label class="form-check-label" for="tl-@devId">@devName</label>
+                        </div>
+                    }
+                </fieldset>
+            }
         </div>
     </section>
 

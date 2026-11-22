@@ -122,6 +122,23 @@ public sealed class Child : IFamilyScoped
     public IEnumerable<string> BlockedToolProcesses() =>
         Tools.Where(t => BlockedToolIds().Contains(t.Id)).SelectMany(t => t.Processes);
 
+    /// <summary>
+    /// false (default): the daily time counts for all PCs together (1 h on the laptop is missing on the gaming PC).
+    /// true: every PC has the full daily time on its own.
+    /// </summary>
+    public bool TimePerDevice { get; set; }
+
+    /// <summary>JSON array of device ids where the time rules (limit, allowed hours) do not apply, e.g. the school laptop.
+    /// App/web blocks and alarms still apply there; time used there does not count towards the other PCs.</summary>
+    public string NoTimeLimitDevicesJson { get; set; } = "[]";
+
+    public IReadOnlyList<Guid> GetNoTimeLimitDevices() =>
+        PaCoJson.Deserialize<Guid[]>(string.IsNullOrEmpty(NoTimeLimitDevicesJson) ? "[]" : NoTimeLimitDevicesJson);
+
+    public void SetNoTimeLimitDevices(IEnumerable<Guid> ids) => NoTimeLimitDevicesJson = PaCoJson.Serialize(ids.Distinct().ToArray());
+
+    public bool TimeLimitOn(Guid deviceId) => !GetNoTimeLimitDevices().Contains(deviceId);
+
     /// <summary>Block the Microsoft Store app, so the child cannot install apps (games, other browsers) on their own.</summary>
     public bool BlockStore { get; set; } = true;
 

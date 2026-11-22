@@ -17,7 +17,8 @@ public sealed record DeviceView(
     DateTimeOffset? LastSeenUtc,
     ChildLiveStatus? Live,
     long UsedTodaySeconds,
-    IReadOnlyList<string> WindowsUsers);
+    IReadOnlyList<string> WindowsUsers,
+    bool NoTimeLimit = false);
 
 public sealed record ChildStatus(
     Child Child,
@@ -74,7 +75,7 @@ public sealed class ParentActions(PaCoDb db, IFamilyContext family, TimeProvider
 
         return children.Select(c =>
         {
-            var u = PolicyBuilder.Aggregate(usage.Where(x => x.ChildId == c.Id));
+            var u = PolicyBuilder.Aggregate(BudgetUsage(c, usage.Where(x => x.ChildId == c.Id).ToList()));
             var policy = PolicyBuilder.ToPolicy(c, grants);
             var eval = TimeRules.Evaluate(policy, u, now, tz);
             var top = u.Apps.OrderByDescending(a => a.Value.Seconds).Take(5)
@@ -84,12 +85,23 @@ public sealed class ParentActions(PaCoDb db, IFamilyContext family, TimeProvider
                     ? new DeviceView(d.Name, d.IsOnline(now), d.LastSeenUtc,
                         d.IsOnline(now) ? d.GetLive().FirstOrDefault(l => l.ChildId == c.Id) : null,
                         usage.Where(x => x.ChildId == c.Id && x.DeviceId == d.Id).Sum(x => x.TotalSeconds),
-                        g.Select(a => a.UserName).ToList())
+                        g.Select(a => a.UserName).ToList(), !c.TimeLimitOn(d.Id))
                     : null)
                 .Where(v => v is not null).Select(v => v!).OrderBy(v => v.Name).ToList();
             return new ChildStatus(c, policy.RuleFor(FamilyClock.ToLocal(now, tz).DayOfWeek), u, eval,
                 active.Contains(c.Id), locked.Contains(c.Id), top, grants.Where(g => g.ChildId == c.Id).ToList(), views);
         }).ToList();
+    }
+
+    /// <summary>
+    /// Usage that counts against the daily time: PCs without time limit never count; with one budget per PC the most
+    /// used PC decides (that one runs out first).
+    /// </summary>
+    public static IEnumerable<UsageDay> BudgetUsage(Child c, IReadOnlyList<UsageDay> rows)
+    {
+        var limited = rows.Where(r => c.TimeLimitOn(r.DeviceId)).ToList();
+        if (!c.TimePerDevice) return limited;
+        return limited.GroupBy(r => r.DeviceId).OrderByDescending(g => g.Sum(r => r.RegularSeconds)).FirstOrDefault()?.ToList() ?? [];
     }
 
     public async Task GrantAsync(Guid childId, int minutes, ClaimsPrincipal user, CancellationToken ct = default)

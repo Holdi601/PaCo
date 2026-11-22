@@ -18,6 +18,7 @@ kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.
 - **Freischaltcodes** (z. B. „30 Minuten“). Sie funktionieren auch, wenn der Kinder-PC **offline** ist, und gelten nur
   für dieses Kind, nur heute und nur einmal.
 - Wochenplan: Minuten pro Tag und erlaubter Zeitraum (z. B. 14:00–19:00), mit Kopieren auf andere Tage
+- Mehrere PCs: Tageszeit für alle PCs zusammen oder pro PC; einzelne PCs (z. B. Schul-Laptop) ohne Zeitlimit
 - Bei Zeitablauf wahlweise **Sperrbildschirm** oder **sofortiges Abmelden**, jeweils vorher Ton aus
 - Gesperrte Programme, gesperrte Webseiten (mit Vorlagen), SafeSearch, YouTube-Jugendschutz, kein privates Surfen,
   andere Browser sperren

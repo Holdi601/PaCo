@@ -251,6 +251,7 @@
                                     @if (d.Online) { <span class="status-ok" title="@T("verbunden")"><span class="dot" aria-hidden="true"></span><span class="visually-hidden">@T("online:")</span></span> }
                                     else { <span class="text-muted" title="@T("nicht verbunden")"><span class="dot" aria-hidden="true"></span><span class="visually-hidden">@T("offline:")</span></span> }
                                     <span class="text-truncate fw-semibold">@d.Name</span>
+                                    @if (d.NoTimeLimit) { <span class="badge text-bg-secondary">@T("ohne Zeitlimit")</span> }
                                 </span>
                                 <span class="text-muted text-end">
                                     @if (!d.Online) { <span>@F("offline · zuletzt {0}", Format.Ago(d.LastSeenUtc, Model.Now))</span> }

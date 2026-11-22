@@ -120,6 +120,19 @@ public sealed class EditModel(PaCoDb db) : PageModel
     [BindProperty]
     public bool BlockStore { get; set; }
 
+    [BindProperty]
+    public bool TimePerDevice { get; set; }
+
+    /// <summary>PCs of this child (id, name) – the time limit can be switched off per PC.</summary>
+    public IReadOnlyList<(Guid Id, string Name)> ChildDevices { get; private set; } = [];
+
+    /// <summary>PCs where the time limit applies. Only used when <see cref="TimeDevicesForm"/> is posted.</summary>
+    [BindProperty]
+    public List<Guid> TimeLimitDevices { get; set; } = [];
+
+    [BindProperty]
+    public bool TimeDevicesForm { get; set; }
+
     /// <summary>Tool ids (<see cref="Child.Tools"/>) that stay blocked. Only used when <see cref="ToolsForm"/> is posted.</summary>
     [BindProperty]
     public List<string> BlockedTools { get; set; } = [];
@@ -142,6 +155,10 @@ public sealed class EditModel(PaCoDb db) : PageModel
 
     private async Task LoadKnownAppsAsync(Guid childId)
     {
+        var deviceIds = await db.DeviceAccounts.Where(a => a.ChildId == childId).Select(a => a.DeviceId).Distinct().ToListAsync();
+        ChildDevices = (await db.Devices.Where(d => deviceIds.Contains(d.Id) && !d.Revoked).ToListAsync())
+            .OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase).Select(d => (d.Id, d.Name)).ToList();
+
         var since = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-30));
         var rows = await db.UsageDays.Where(u => u.ChildId == childId && u.Day >= since).ToListAsync();
         KnownApps = Services.PolicyBuilder.Aggregate(rows).Apps
@@ -234,6 +251,11 @@ public sealed class EditModel(PaCoDb db) : PageModel
             child.BlockSystemTools = BlockSystemTools;
         }
         child.BlockStore = BlockStore;
+        if (TimeDevicesForm)
+        {
+            child.TimePerDevice = TimePerDevice;
+            child.SetNoTimeLimitDevices(ChildDevices.Select(d => d.Id).Where(id => !TimeLimitDevices.Contains(id)));
+        }
 
         await db.SaveChangesAsync();
         TempData["Message"] = Ui.F("Regeln für {0} gespeichert. Online-PCs übernehmen sie innerhalb von 30 Sekunden.", child.Name);
@@ -286,6 +308,8 @@ public sealed class EditModel(PaCoDb db) : PageModel
         BlockSystemTools = c.BlockSystemTools;
         BlockStore = c.BlockStore;
         BlockedTools = c.BlockedToolIds().ToList();
+        TimePerDevice = c.TimePerDevice;
+        TimeLimitDevices = ChildDevices.Select(d => d.Id).Where(c.TimeLimitOn).ToList();
     }
 
     private static string CanonicalLanguage(string code) =>
