@@ -52,6 +52,7 @@ internal sealed class Enforcer : BackgroundService
         public bool BrowsersRestarted;
         /// <summary>Learning label the shown lock screen was given (to update it when the parents change learning mode).</summary>
         public string? LockLearning;
+        public bool? LastLearnable;
         public DateOnly BrowserRestartDay;
         public HashSet<Guid> BrowserRestartedFor = [];
         public TimeSpan LastLearningNotice = Mono.Never;
@@ -396,6 +397,11 @@ internal sealed class Enforcer : BackgroundService
         var (title, text) = BlockText(child, eval);
         var lang = child.Language;
         var learning = learnable ? LearningLabel(child) : null;
+        if (track.LastLearnable != learnable)
+        {
+            track.LastLearnable = learnable;
+            Log.Info($"{child.Name}: Lernmodus {(learnable ? "möglich" : "nicht möglich")} (erlaubt={child.LearningAfterExpiry}, Grund={eval.Reason}, Lerngruppen={TimeGroups.LearningGroups(child).Count}, Agent={connected})");
+        }
 
         if (connected && !track.Muted)
         {
@@ -417,6 +423,7 @@ internal sealed class Enforcer : BackgroundService
             else if (connected && track.LockRequested && agent?.LockShown == true && track.LockLearning != learning)
             {
                 // Parents switched learning mode on/off (or changed the learning groups) while the lock screen is up.
+                Log.Info($"{child.Name}: Sperrbildschirm aktualisiert (Lernen: {learning ?? "-"})");
                 await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning });
                 track.LockLearning = learning;
             }
