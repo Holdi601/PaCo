@@ -52,6 +52,13 @@ internal sealed class ServerApi : IDisposable
         return (await resp.Content.ReadFromJsonAsync<SyncResponse>(PaCoJson.Options, ct))!;
     }
 
+    /// <summary>"Going to sleep" (best effort, short timeout: Windows waits for the service before suspending).</summary>
+    public async Task SuspendAsync(CancellationToken ct = default)
+    {
+        using var resp = await _http.PostAsync(ApiRoutes.Suspend.TrimStart('/'), new StringContent(""), ct);
+        await EnsureAsync(resp, ct);
+    }
+
     /// <summary>Uploads a screenshot (JPEG; empty = child not available) for a parent's request.</summary>
     public async Task UploadScreenshotAsync(Guid requestId, byte[] jpeg, CancellationToken ct = default)
     {
@@ -339,6 +346,7 @@ internal sealed class SyncWorker(Runtime rt, bool installUpdates = true) : Backg
                 Alerts = rt.State.PendingAlerts.Take(100).ToList(),
                 Locations = rt.State.PendingLocations.Take(200).ToList(),
                 Security = security,
+                NetworkMacs = NetworkInfo.ActiveMacs(),
             };
         }
 

@@ -227,6 +227,24 @@ public sealed class Device : IFamilyScoped
     /// <summary>The PC reported a proper uninstall (no "no contact" warning afterwards).</summary>
     public DateTimeOffset? UninstalledUtc { get; set; }
 
+    /// <summary>Last "going to sleep" notice; while it is the PC's latest message, LAN presence is not an alarm.</summary>
+    public DateTimeOffset? SuspendedUtc { get; set; }
+
+    /// <summary>JSON object MAC (12 hex digits) → last reported (unix seconds), max 8 entries, 30 days.</summary>
+    public string LanMacsJson { get; set; } = "{}";
+
+    /// <summary>Push when the PC is on in the server's network but PaCo is silent (needs the LAN watcher).</summary>
+    public bool LanAlert { get; set; } = true;
+
+    /// <summary>Last time the LAN watcher saw one of the PC's addresses.</summary>
+    public DateTimeOffset? LanSeenUtc { get; set; }
+
+    /// <summary>Start of the current uninterrupted presence in the server's network.</summary>
+    public DateTimeOffset? LanSinceUtc { get; set; }
+
+    /// <summary>When the "on in the network but silent" push was sent; cleared at the next contact.</summary>
+    public DateTimeOffset? LanAlertSentUtc { get; set; }
+
     /// <summary>JSON array of <see cref="SecurityFinding"/> from the device's last security check.</summary>
     public string SecurityJson { get; set; } = "[]";
 

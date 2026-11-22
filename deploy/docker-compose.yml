@@ -24,6 +24,8 @@ services:
       PaCo__MasterKey: ${PACO_MASTER_KEY:-}
       PaCo__NtfyPublicUrl: ${PACO_NTFY_PUBLIC_URL:-}
       PaCo__NtfyToken: ${PACO_NTFY_TOKEN:-}
+      # Optional LAN watcher (service lan-watch below); empty = feature off.
+      PaCo__LanWatchToken: ${PACO_LAN_TOKEN:-}
       TZ: ${PACO_TZ:-Europe/Berlin}
     volumes:
       - ${PACO_DATA_DIR:-./data}:/data
@@ -82,3 +84,34 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+  # Optional: started only with COMPOSE_PROFILES=lan in deploy/.env (plus PACO_LAN_TOKEN). Sees which devices are on
+  # in this server's network and tells PaCo – parents are warned when a PC is on here but PaCo on it is silent.
+  # Needs the host network (ARP does not cross Docker's NAT) and raw sockets; nothing else.
+  lan-watch:
+    profiles: ["lan"]
+    build: ./lan-watch
+    image: paco-lan-watch:latest
+    container_name: paco-lan-watch
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PACO_PUBLIC_URL: ${PACO_PUBLIC_URL:-}
+      PACO_PORT: ${PACO_PORT:-8790}
+      PACO_LAN_TOKEN: ${PACO_LAN_TOKEN:-}
+      LAN_INTERFACE: ${PACO_LAN_INTERFACE:-}
+      TZ: ${PACO_TZ:-Europe/Berlin}
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    mem_limit: 64m
+    pids_limit: 32
+    logging:
+      driver: json-file
+      options:
+        max-size: "2m"
+        max-file: "2"

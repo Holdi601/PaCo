@@ -64,6 +64,30 @@ docker compose -f deploy/docker-compose.yml up -d
 Anonyme Nutzer dürfen nur **lesen**, gesendet wird nur mit PaCos Token. Jede Familie bekommt ein geheimes, zufälliges
 Thema. Die Eltern richten die App über **Handy-Benachrichtigungen** auf der Website ein (Anleitung mit QR-Code).
 
+## Optional: Wächter im Heimnetz
+
+Stehen Kinder-PCs (zumindest manchmal) im **selben Netzwerk wie der Server**, kann ein kleiner Zusatz-Container
+(`paco-lan-watch`) melden, wenn ein PC dort eingeschaltet ist, PaCo darauf aber schweigt – etwa weil es abgeschaltet
+wurde oder ein anderes Betriebssystem gestartet ist. Die Eltern bekommen dann nach 15 Minuten eine Push-Nachricht
+(pro Gerät abschaltbar). Für PCs in anderen Netzwerken bringt der Wächter nichts – dafür gibt es die Warnung nach
+einigen Tagen ohne Kontakt.
+
+```bash
+# in deploy/.env:
+PACO_LAN_TOKEN=$(openssl rand -hex 32)     # Wert eintragen, nicht den Befehl
+COMPOSE_PROFILES=lan
+# optional: PACO_LAN_INTERFACE=eth0         (Standard: Netzwerkkarte mit der Standardroute)
+docker compose -f deploy/docker-compose.yml up -d --build
+docker logs paco-lan-watch                 # „PaCo-LAN-Wächter gestartet: Netzwerk an …“
+```
+
+Wie es funktioniert: Der Wächter fragt jede Minute per ARP, welche Hardware-Adressen (MAC) im Netz antworten – ARP
+beantwortet jedes eingeschaltete Gerät, auch hinter der Windows-Firewall. Er läuft deshalb im Host-Netzwerk mit der
+einzigen Berechtigung `NET_RAW` und schickt nur die Liste der Adressen (mit Token) an PaCo. PaCo vergleicht sie mit
+den Adressen, die die eigenen PCs melden, und speichert über andere Geräte nichts. Vor dem Ruhezustand meldet sich
+der PC kurz ab, damit eine Netzwerkkarte, die im Schlaf weiter antwortet, keinen Fehlalarm auslöst. Mit
+`PaCo__LanSilentMinutes` lässt sich die Wartezeit ändern.
+
 ## 3. Router
 
 Leite die TCP-Ports `PACO_PORT` (Website, Standard 8790) und `PACO_NTFY_PORT` (Push, Standard 8792) auf den Server weiter. Test von außen, z. B. vom Handy ohne WLAN:

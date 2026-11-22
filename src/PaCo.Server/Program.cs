@@ -216,6 +216,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 DeviceApi.Map(app);
+LanPresence.Map(app);
 app.MapGet("/healthz", () => Results.Text("ok"));
 
 await app.RunAsync();

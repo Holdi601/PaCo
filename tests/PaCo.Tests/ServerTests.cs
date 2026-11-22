@@ -15,9 +15,13 @@ public sealed class PaCoFactory : WebApplicationFactory<Program>
 {
     public string DataDir { get; } = Path.Combine(Path.GetTempPath(), "paco-test-" + Guid.NewGuid().ToString("N"));
 
+    /// <summary>Token of the (simulated) LAN watcher.</summary>
+    public const string LanToken = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("PaCo:DataDir", DataDir);
+        builder.UseSetting("PaCo:LanWatchToken", LanToken);
         builder.UseSetting("PaCo:AccountRateLimit", "1000");
         builder.UseSetting("PaCo:WifiGeolocationUrl", ""); // never call external services from tests
         builder.UseEnvironment("Development");

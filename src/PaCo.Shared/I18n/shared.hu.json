@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Elfogyott az idő: „{0}” – bezárva: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Érvényes aláírás nélküli szerveridő elutasítva – lehet, hogy hamis szerver. A PaCo a saját órájával számol tovább.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Nincs kapcsolat a szerverrel {0} óta – a szülők értesítést kaptak.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Újra van kapcsolat a szerverrel (előző kapcsolat: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Újra van kapcsolat a szerverrel (előző kapcsolat: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Be van kapcsolva az otthoni hálózatban, de a PaCo {0} óta nem jelentkezik – a szülők értesítést kaptak."
 }

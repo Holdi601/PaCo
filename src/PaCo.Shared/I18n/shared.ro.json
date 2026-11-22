@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Timp pentru „{0}” epuizat – {1} închis",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Ora serverului fără semnătură validă a fost respinsă – posibil un server fals. PaCo continuă cu propriul ceas.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Niciun contact cu serverul din {0} – părinții au fost anunțați.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Din nou contact cu serverul (contactul anterior: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Din nou contact cu serverul (contactul anterior: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Pornit în rețeaua de acasă, dar PaCo nu mai dă semne din {0} – părinții au fost anunțați."
 }

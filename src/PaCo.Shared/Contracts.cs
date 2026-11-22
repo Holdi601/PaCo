@@ -8,6 +8,10 @@ public static class ApiRoutes
     public const string ClientDownload = "/api/device/client";
     public const string Screenshot = "/api/device/screenshot";
     public const string Diagnostics = "/api/device/diagnostics";
+    /// <summary>The PC is about to go to sleep (best effort, sent by the service).</summary>
+    public const string Suspend = "/api/device/suspend";
+    /// <summary>Optional LAN watcher next to the server: hardware addresses currently seen in the server's network.</summary>
+    public const string LanSeen = "/api/lan/seen";
 }
 
 public enum LocationMode
@@ -235,6 +239,12 @@ public sealed record SyncRequest
     public IReadOnlyList<UsageReport> Usage { get; init; } = [];
 
     public IReadOnlyList<DeviceEvent> Events { get; init; } = [];
+
+    /// <summary>
+    /// Hardware (MAC) addresses of the PC's active network adapters, 12 hex digits each (null = not reported by
+    /// older clients). Lets the server notice the PC in its own network while PaCo is silent.
+    /// </summary>
+    public IReadOnlyList<string>? NetworkMacs { get; init; }
 }
 
 public sealed record ChildLiveStatus

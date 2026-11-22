@@ -45,6 +45,17 @@ public sealed class ServerOptions
     /// <summary>GitHub repository ("owner/name") whose releases provide client updates.</summary>
     public string UpdateRepository { get; set; } = "Holdi601/PaCo";
 
+    /// <summary>
+    /// Shared secret of the optional LAN watcher (deploy/lan-watch). Empty = feature off: the endpoint does not exist
+    /// and the website hides the setting.
+    /// </summary>
+    public string? LanWatchToken { get; set; }
+
+    /// <summary>Minutes a PC must be visible in the network while PaCo is silent before the parents are warned.</summary>
+    public int LanSilentMinutes { get; set; } = 15;
+
+    public bool LanWatchEnabled => !string.IsNullOrWhiteSpace(LanWatchToken) && LanWatchToken.Trim().Length >= 32;
+
     /// <summary>Public key (PEM) for release signatures; default: the key built into the server (release-signing.pub).</summary>
     public string? ReleasePublicKey { get; set; }
 

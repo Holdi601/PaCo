@@ -58,5 +58,6 @@
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen": "Vrijeme za „{0}“ potrošeno – zatvoreno: {1}",
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Vrijeme servera bez važećeg potpisa odbijeno – moguće lažni server. PaCo nastavlja brojati vlastitim satom.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Nema kontakta sa serverom od {0} – roditelji su obaviješteni.",
- "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Ponovo postoji kontakt sa serverom (prethodni kontakt: {0})."
+ "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Ponovo postoji kontakt sa serverom (prethodni kontakt: {0}).",
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Uključen u kućnoj mreži, ali se PaCo ne javlja od {0} – roditelji su obaviješteni."
 }

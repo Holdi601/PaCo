@@ -54,8 +54,10 @@ public static class SilentDevices
     /// <summary>Called at every device contact before LastSeenUtc is updated: reports a PC that is back.</summary>
     public static async Task OnContactAsync(PaCoDb db, Notifier notifier, Device d, string? baseUrl, DateTimeOffset now, CancellationToken ct)
     {
-        if (d.SilentAlertSentUtc is null) return;
+        // Either warning (no contact for days, or on in the network but silent) ends with one "back" message.
+        if (d.SilentAlertSentUtc is null && d.LanAlertSentUtc is null) return;
         d.SilentAlertSentUtc = null;
+        d.LanAlertSentUtc = null;
         if (d.LastSeenUtc is not { } last) return;
         var fam = await db.Families.IgnoreQueryFilters().SingleAsync(f => f.Id == d.FamilyId, ct);
         db.DeviceEvents.Add(Event(d, now, DeviceEventKind.Info, BackEvent, Stamp(last, fam)));
@@ -67,7 +69,7 @@ public static class SilentDevices
         }
     }
 
-    private static DeviceEventEntity Event(Device d, DateTimeOffset now, DeviceEventKind kind, string template, string arg) => new()
+    internal static DeviceEventEntity Event(Device d, DateTimeOffset now, DeviceEventKind kind, string template, string arg) => new()
     {
         FamilyId = d.FamilyId,
         DeviceId = d.Id,
@@ -79,10 +81,10 @@ public static class SilentDevices
     };
 
     /// <summary>Language-neutral time in the family's time zone (stored in the device log).</summary>
-    private static string Stamp(DateTimeOffset t, Family fam) =>
+    internal static string Stamp(DateTimeOffset t, Family fam) =>
         TimeZoneInfo.ConvertTime(t, FamilyClock.Resolve(fam.TimeZoneId)).ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture);
 
     /// <summary>Date and time in the family's time zone, formatted for the push language.</summary>
-    private static string Local(DateTimeOffset t, Family fam, string lang) =>
+    internal static string Local(DateTimeOffset t, Family fam, string lang) =>
         TimeZoneInfo.ConvertTime(t, FamilyClock.Resolve(fam.TimeZoneId)).ToString("g", Languages.Culture(lang));
 }

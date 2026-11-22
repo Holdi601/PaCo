@@ -70,6 +70,9 @@ internal static class Program
                 rt.State.AddEvent(DeviceEventKind.SafeMode, LocText.Of("Der PC wurde im abgesicherten Modus gestartet."));
         }
         builder.Services.AddSingleton(rt);
+        // Replaces the lifetime registered by AddWindowsService: same behaviour plus "going to sleep" notice.
+        if (Microsoft.Extensions.Hosting.WindowsServices.WindowsServiceHelpers.IsWindowsService())
+            builder.Services.AddSingleton<IHostLifetime, PowerAwareServiceLifetime>();
         builder.Services.AddHostedService<Enforcer>();
         builder.Services.AddHostedService<SyncWorker>();
         builder.Services.AddHostedService<LocationWorker>();

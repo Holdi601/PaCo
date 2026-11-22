@@ -184,6 +184,22 @@
                     </div>
                     <div class="form-text" id="silent-help-@d.Id">@T("Push-Nachricht an die Eltern, wenn dieser PC so lange keinen Kontakt zum Server hatte – z. B. weil PaCo abgeschaltet wurde. Ein ausgeschalteter oder verreister PC meldet sich natürlich auch nicht.")</div>
                 </form>
+                @if (Model.LanWatch)
+                {
+                    <form method="post" asp-page-handler="Lan" class="mb-3">
+                        <input type="hidden" name="deviceId" value="@d.Id" />
+                        <input type="hidden" name="enabled" value="@(d.LanAlert ? "false" : "true")" />
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <span class="small fw-semibold"><span class="ico ico-wifi ico-sm" aria-hidden="true"></span>@T("Warnen, wenn der PC im Heimnetz an ist, PaCo sich aber nicht meldet")</span>
+                            @if (d.LanAlert) { <span class="pill pill-ok">@T("aktiv")</span> } else { <span class="pill pill-muted">@T("Aus")</span> }
+                            <button class="btn btn-sm btn-outline-primary">@(d.LanAlert ? T("Ausschalten") : T("Einschalten"))</button>
+                        </div>
+                        <div class="form-text">
+                            @F("Der Server sieht die Geräte in seinem eigenen Netzwerk. Ist dieser PC dort {0} Minuten lang eingeschaltet, ohne dass PaCo sich meldet, bekommen die Eltern eine Push-Nachricht.", Model.LanMinutes)
+                            @if (d.LanSeenUtc is not null) { <span>@F("Im Heimnetz gesehen: {0}", Format.Ago(d.LanSeenUtc, Model.Now))</span> }
+                        </div>
+                    </form>
+                }
                 <div class="d-flex flex-wrap justify-content-between gap-2">
                     <form method="post" asp-page-handler="Rename" class="d-flex gap-2">
                         <input type="hidden" name="deviceId" value="@d.Id" />
