@@ -7,10 +7,10 @@
         var frame = document.getElementById("gmap");
         if (!a || !frame) return;
         e.preventDefault();
-        // Only Google Maps embeds – never any other address (e.g. javascript:) in the frame.
-        var url = a.getAttribute("data-gmap") || "";
-        if (!/^https:\/\/(maps\.google\.com|www\.google\.com)\/maps[/?]/.test(url)) return;
-        frame.src = url;
+        // The page only provides coordinates; the address of the Google map is built here from two numbers.
+        var lat = parseFloat(a.getAttribute("data-lat")), lon = parseFloat(a.getAttribute("data-lon"));
+        if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
+        frame.src = "https://maps.google.com/maps?q=" + lat.toFixed(6) + "," + lon.toFixed(6) + "&z=16&output=embed";
         frame.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 

@@ -87,7 +87,7 @@
                         @if (p.Latitude is { } lat && p.Longitude is { } lon)
                         {
                             <span>
-                                <a href="#gmap" data-gmap="@PaCo.Server.Pages.Devices.LocationModel.GoogleEmbed(lat, lon)">
+                                <a href="#gmap" data-gmap data-lat="@lat.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)" data-lon="@lon.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)">
                                     @lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture), @lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
                                 </a>
                                 <a href="@PaCo.Server.Pages.Devices.LocationModel.GoogleLink(lat, lon)" target="_blank" rel="noopener noreferrer" title="@T("In Google Maps öffnen")" aria-label="@T("In Google Maps öffnen")" class="ms-1"><span class="ico ico-external ico-sm" aria-hidden="true"></span></a>
