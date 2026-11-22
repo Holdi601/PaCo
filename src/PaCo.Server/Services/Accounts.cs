@@ -27,6 +27,8 @@ public sealed class AccountAdmin(PaCoDb db, UserManager<ParentUser> users, TimeP
     public const string InvitedText = "Der Server-Betreiber hat {0} in deine Familie eingeladen. Falls das nicht abgesprochen war, entferne die Person unter „Familie“.";
     public const string NewLinkTitle = "PaCo: neuer Zugangslink erstellt";
     public const string NewLinkText = "Der Server-Betreiber hat für {0} einen neuen Zugangslink erstellt. Falls das nicht abgesprochen war, melde dich bei ihm.";
+    public const string TwoFactorResetTitle = "PaCo: Authenticator zurückgesetzt";
+    public const string TwoFactorResetText = "Der Server-Betreiber hat die Authenticator-App von {0} zurückgesetzt. Bei der nächsten Anmeldung wird sie neu eingerichtet.";
     // i18n-keys:end
 
     /// <summary>
@@ -92,6 +94,28 @@ public sealed class AccountAdmin(PaCoDb db, UserManager<ParentUser> users, TimeP
         await users.ResetAccessFailedCountAsync(user);
         await DbTicketStore.RemoveAllAsync(db, user.Id);
         return await InviteLinkAsync(user, baseUrl);
+    }
+
+    /// <summary>Forgotten password: the authenticator stays, the person sets a new password via a link (the operator
+    /// never sees or chooses it), and still needs the authenticator code to sign in.</summary>
+    public async Task<string> ResetPasswordOnlyAsync(ParentUser user, string baseUrl)
+    {
+        if (await users.HasPasswordAsync(user)) await users.RemovePasswordAsync(user);
+        await users.SetLockoutEndDateAsync(user, null);
+        await users.ResetAccessFailedCountAsync(user);
+        await DbTicketStore.RemoveAllAsync(db, user.Id);
+        return await InviteLinkAsync(user, baseUrl);
+    }
+
+    /// <summary>Lost phone: the password stays; at the next sign-in the person sets up the authenticator again.</summary>
+    public async Task ResetTwoFactorOnlyAsync(ParentUser user)
+    {
+        await users.SetTwoFactorEnabledAsync(user, false);
+        await users.ResetAuthenticatorKeyAsync(user);
+        await users.SetLockoutEndDateAsync(user, null);
+        await users.ResetAccessFailedCountAsync(user);
+        await users.UpdateSecurityStampAsync(user);
+        await DbTicketStore.RemoveAllAsync(db, user.Id);
     }
 
     public async Task SetBlockedAsync(ParentUser user, bool blocked)

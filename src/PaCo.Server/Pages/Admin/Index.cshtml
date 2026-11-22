@@ -83,10 +83,21 @@
                 <details class="mt-2">
                     <summary class="small text-muted">@T("Verwalten")</summary>
                     <div class="d-flex flex-wrap gap-2 align-items-end mt-2">
+                        @if (!u.InvitePending)
+                        {
+                            <form method="post" asp-page-handler="ResetPassword">
+                                <input type="hidden" name="userId" value="@u.Id" />
+                                <button class="btn btn-sm btn-outline-primary" data-confirm="@T("Nur das Passwort zurücksetzen? Die Person bekommt einen Link und wählt selbst ein neues Passwort – die Authenticator-App bleibt.")">@T("Passwort zurücksetzen")</button>
+                            </form>
+                            <form method="post" asp-page-handler="ResetTwoFactor">
+                                <input type="hidden" name="userId" value="@u.Id" />
+                                <button class="btn btn-sm btn-outline-primary" data-confirm="@T("Nur die Authenticator-App zurücksetzen (z. B. Handy verloren)? Das Passwort bleibt; bei der nächsten Anmeldung wird die App neu eingerichtet.")">@T("2FA zurücksetzen")</button>
+                            </form>
+                        }
                         <form method="post" asp-page-handler="NewLink">
                             <input type="hidden" name="userId" value="@u.Id" />
                             <button class="btn btn-sm btn-outline-primary" data-confirm="@(u.InvitePending ? T("Neuen Einladungslink erstellen? Der alte wird ungültig.") : T("Passwort und 2FA zurücksetzen und neuen Zugangslink erstellen? Die Person muss sich danach neu einrichten."))">
-                                @(u.InvitePending ? T("Neuer Einladungslink") : T("Zugang zurücksetzen"))
+                                @(u.InvitePending ? T("Neuer Einladungslink") : T("Beides zurücksetzen"))
                             </button>
                         </form>
                         <form method="post" asp-page-handler="Block">

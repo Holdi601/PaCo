@@ -57,6 +57,9 @@ Get-Content C:\ProgramData\PaCo\paco.log -Tail 50
 1. **Neue Version veröffentlichen** (Entwickler): `<Version>` in `Directory.Build.props` erhöhen, committen,
    Tag setzen und pushen (`git tag v1.2.0 && git push --tags`). GitHub Actions testet, baut `PaCo-Setup.exe` und
    legt sie zusammen mit der SHA-256-Prüfsumme als Release an.
+   Danach auf dem Entwickler-PC **signieren**: `dotnet run tools/release/sign.cs -- release 1.2.0`. Der private
+   Schlüssel liegt nur dort (verschlüsselt für den Windows-Benutzer); der Server übernimmt nur signierte Releases –
+   ein gekapertes GitHub-Konto allein kann keine Software auf die Kinder-PCs bringen.
 2. **Auf dem Server holen** (Super-Admin): *Verwaltung → Auf GitHub nach Updates suchen*. Der Server lädt das
    Release, prüft die Prüfsumme und bietet die Version ab sofort an, auch für neue Installationen.
 3. **Verteilen**: *Verwaltung → Alle Geräte aktualisieren* oder pro Gerät durch die Eltern unter
@@ -69,24 +72,23 @@ vorherige wiederhergestellt.
 
 ## Backup
 
-Der Datenordner (`PACO_DATA_DIR`) enthält alles:
+`deploy/backup/backup.sh` sichert jede Nacht die **komplette Installation** verschlüsselt auf eine SMB-Freigabe
+(z. B. ein zweites NAS): das PaCo-Verzeichnis inkl. `deploy/.env` (alle Zugangsdaten und der Master-Schlüssel), den
+Datenordner (Datenbank – im laufenden Betrieb konsistent kopiert –, Schlüsselbund, verschlüsselter Signaturschlüssel,
+Bildschirmfotos) und die ntfy-Daten.
 
-| Datei | Inhalt | Verlust bedeutet |
-|---|---|---|
-| `paco.db` | Konten, Familien, Kinder, Regeln, Statistik | alles neu anlegen |
-| `policy-signing-key.pem` | Signaturschlüssel | **alle PCs neu koppeln** |
-| `dp-keys/` | Schlüssel für Cookies und Einladungslinks | alle müssen sich neu anmelden |
-
-Konsistentes Backup im laufenden Betrieb:
-
-```bash
-sqlite3 /pfad/zu/paco-data/paco.db ".backup '/backup/paco-$(date +%F).db'"
-cp -a /pfad/zu/paco-data/policy-signing-key.pem /pfad/zu/paco-data/dp-keys /backup/
-```
-
-> Backups enthalten personenbezogene Daten und den Signaturschlüssel. **Niemals in Git** oder in öffentliche Clouds
-> legen, nur verschlüsselt oder auf eigenen Datenträgern.
+- Verschlüsselung: AES-256 (GPG, symmetrisch) mit dem **Backup-Schlüssel** `~/.paco-backup-key`. Dieser Schlüssel
+  wird **nie** mit auf die Freigabe kopiert. **Im Passwort-Manager aufbewahren** – ohne ihn lässt sich kein Backup
+  wiederherstellen. Auch eine offene Gast-Freigabe liest damit nur unlesbare Daten.
+- Einstellungen in `~/.paco-backup.conf`, z. B. `SMB_SHARE=//nas2/backup`, `SMB_DIR=PaCo-Backup`, `KEEP_DAYS=14`.
+- Die SMB-Übertragung läuft in einem kleinen Docker-Image (`deploy/backup/Dockerfile`), auf dem Host wird nichts installiert.
+- Zeitplan per `crontab -e`: `30 3 * * * /home/<user>/paco/deploy/backup/backup.sh >> /home/<user>/paco-backup.log 2>&1`
 
 ## Wiederherstellen
 
-Container stoppen, die Dateien zurück in den Datenordner kopieren und den Container starten.
+```bash
+# Backup-Datei von der Freigabe holen, dann:
+gpg --batch --pinentry-mode loopback --passphrase-file ~/.paco-backup-key -d paco-2026-11-22_0330.tar.gz.gpg | tar -xzf -
+# Ergebnis: paco/ (Code + deploy/.env), paco-data/, paco-ntfy/ – an ihren Platz legen, dann:
+cd paco && docker compose -f deploy/docker-compose.yml up -d --build
+```

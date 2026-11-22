@@ -10,6 +10,12 @@ public sealed class ServerOptions
     /// <summary>Public base URL as seen from the children's PCs, e.g. https://example.duckdns.org:8790.</summary>
     public string? PublicUrl { get; set; }
 
+    /// <summary>
+    /// 32 random bytes (Base64) kept OUTSIDE the data directory (deploy/.env). Encrypts the key ring that protects all
+    /// secrets; without it a copy of the data directory cannot be decrypted. Keep a copy in a password manager.
+    /// </summary>
+    public string? MasterKey { get; set; }
+
     /// <summary>Path of the client installer (PaCo-Setup.exe) offered for download.</summary>
     public string ClientPath { get; set; } = "client/PaCo-Setup.exe";
 
@@ -38,6 +44,17 @@ public sealed class ServerOptions
 
     /// <summary>GitHub repository ("owner/name") whose releases provide client updates.</summary>
     public string UpdateRepository { get; set; } = "Holdi601/PaCo";
+
+    /// <summary>Public key (PEM) for release signatures; default: the key built into the server (release-signing.pub).</summary>
+    public string? ReleasePublicKey { get; set; }
+
+    public static string BuiltInReleasePublicKey { get; } = ReadBuiltIn();
+
+    private static string ReadBuiltIn()
+    {
+        using var s = typeof(ServerOptions).Assembly.GetManifestResourceStream("PaCo.Server.release-signing.pub");
+        return s is null ? "" : new StreamReader(s).ReadToEnd();
+    }
 
     /// <summary>Requests per IP and 5 minutes on sign-in pages (brute-force protection).</summary>
     public int AccountRateLimit { get; set; } = 30;

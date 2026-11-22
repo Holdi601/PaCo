@@ -69,11 +69,16 @@ allen Tests stand. Behoben wurden u. a.:
   wenn der Server-Betreiber jemanden einlädt oder einen Zugangslink erstellt, Geräte-Authentifizierung vor dem Lesen von Daten.
 - Regelmäßig: CodeQL-Analyse und Prüfung auf verwundbare Pakete (GitHub Actions, wöchentlich), Dependabot.
 
-Offene Empfehlungen (bewusst noch nicht umgesetzt):
+Ebenfalls umgesetzt (November 2026):
 
-- Releases zusätzlich mit einem Offline-Schlüssel signieren (heute vertraut der Server dem GitHub-Release).
-- 2FA-Schlüssel und Notfall-Codes in der Datenbank verschlüsseln; Datensicherungen verschlüsselt ablegen.
-- Vor dem Zurücksetzen der 2FA bzw. neuen Notfall-Codes das Passwort erneut abfragen.
+- **Release-Signatur** mit einem Offline-Schlüssel (nur auf dem Entwickler-PC); der Server übernimmt nur signierte Releases.
+- **Verschlüsselte Geheimnisse**: 2FA-Schlüssel, Notfall-Codes, Familien-Schlüssel und Signaturschlüssel liegen nur
+  verschlüsselt vor; der Schlüsselbund ist mit dem Master-Schlüssel aus `.env` verschlüsselt (nicht im Datenordner).
+  Passwörter sind ohnehin nur als nicht umkehrbarer Hash gespeichert – auch der Server-Betreiber kann sie nicht lesen.
+- **Erneute Passwort-Abfrage** vor neuen Notfall-Codes oder dem Neu-Einrichten der Authenticator-App.
+- Der Super-Admin kann **nur das Passwort**, **nur die 2FA** oder **beides** zurücksetzen. Ein Passwort-Link öffnet
+  das Konto nie allein (die 2FA bleibt nötig); die Familie bekommt jeweils eine Push-Nachricht.
+- **Verschlüsselte nächtliche Sicherung** auf ein zweites NAS (siehe docs/operations.md).
 
 ## Bekannte Grenzen
 

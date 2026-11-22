@@ -20,6 +20,8 @@ services:
       PaCo__TlsKeyPath: /tls/${PACO_TLS_KEY:-key.pem}
       # Push notifications: PaCo publishes inside the Docker network, parents subscribe via the public URL.
       PaCo__NtfyUrl: http://ntfy:8080
+      # Master key OUTSIDE the data directory – encrypts all stored secrets (see docs/server-setup.md).
+      PaCo__MasterKey: ${PACO_MASTER_KEY:-}
       PaCo__NtfyPublicUrl: ${PACO_NTFY_PUBLIC_URL:-}
       PaCo__NtfyToken: ${PACO_NTFY_TOKEN:-}
       TZ: ${PACO_TZ:-Europe/Berlin}

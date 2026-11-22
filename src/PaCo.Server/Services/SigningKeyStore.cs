@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using PaCo.Shared;
@@ -9,24 +10,35 @@ public sealed class SigningKeyStore : IDisposable
 {
     private readonly ECDsa _key;
 
-    public SigningKeyStore(IOptions<ServerOptions> options, ILogger<SigningKeyStore> log)
+    public SigningKeyStore(IOptions<ServerOptions> options, ILogger<SigningKeyStore> log, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dp)
     {
-        var path = Path.Combine(options.Value.DataDir, "policy-signing-key.pem");
+        // The private key is stored encrypted (policy-signing-key.enc); an older readable .pem is converted once.
+        var protector = dp.CreateProtector("PaCo.SigningKey.v1");
+        var plainPath = Path.Combine(options.Value.DataDir, "policy-signing-key.pem");
+        var encPath = Path.Combine(options.Value.DataDir, "policy-signing-key.enc");
         _key = ECDsa.Create();
-        if (File.Exists(path))
+        string pem;
+        if (File.Exists(encPath))
         {
-            _key.ImportFromPem(File.ReadAllText(path));
+            pem = protector.Unprotect(File.ReadAllText(encPath));
+        }
+        else if (File.Exists(plainPath))
+        {
+            pem = File.ReadAllText(plainPath);
         }
         else
         {
             using var created = PolicySigning.CreateKey();
-            var pem = created.ExportPkcs8PrivateKeyPem();
-            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-            File.WriteAllText(path, pem);
-            if (!OperatingSystem.IsWindows())
-                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-            _key.ImportFromPem(pem);
-            log.LogWarning("Neuer Signaturschlüssel erzeugt: {Path}. Diese Datei sichern – ohne sie müssen alle Geräte neu gekoppelt werden.", path);
+            pem = created.ExportPkcs8PrivateKeyPem();
+            log.LogWarning("Neuer Signaturschlüssel erzeugt. Datenordner sichern – ohne ihn müssen alle Geräte neu gekoppelt werden.");
+        }
+        _key.ImportFromPem(pem);
+        if (!File.Exists(encPath))
+        {
+            Directory.CreateDirectory(options.Value.DataDir);
+            File.WriteAllText(encPath, protector.Protect(pem));
+            if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(encPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            if (File.Exists(plainPath)) File.Delete(plainPath);
         }
         PublicKeyPem = PolicySigning.ExportPublicPem(_key);
     }

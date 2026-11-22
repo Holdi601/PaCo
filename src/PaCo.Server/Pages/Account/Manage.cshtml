@@ -62,7 +62,8 @@
                 }
                 <div class="d-flex flex-wrap gap-2">
                     <a asp-page="./SetupAuthenticator" class="btn btn-outline-secondary"><span class="ico ico-phone" aria-hidden="true"></span>@T("Neues Handy einrichten")</a>
-                    <form method="post" asp-page-handler="RecoveryCodes">
+                    <form method="post" asp-page-handler="RecoveryCodes" class="d-flex flex-wrap gap-2 align-items-center">
+                        <input type="password" name="currentPassword" class="form-control form-control-sm w-auto" required autocomplete="current-password" placeholder="@T("Aktuelles Passwort")" aria-label="@T("Aktuelles Passwort")" />
                         <button type="submit" class="btn btn-outline-secondary" data-confirm="@T("Neue Notfall-Codes erstellen? Die alten Codes funktionieren danach nicht mehr.")"><span class="ico ico-key" aria-hidden="true"></span>@T("Neue Notfall-Codes")</button>
                     </form>
                     <form method="post" asp-page-handler="LogoutEverywhere">

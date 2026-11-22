@@ -30,6 +30,7 @@ nano deploy/.env
 | `PACO_TLS_CERT` / `PACO_TLS_KEY` | Dateinamen von Zertifikatskette und Schlüssel in diesem Ordner |
 | `PACO_DATA_DIR` | Datenordner (Datenbank, Signaturschlüssel). **Sichern!** |
 | `PACO_UID` / `PACO_GID` | Benutzer, dem der Datenordner gehört und der die TLS-Dateien lesen darf (`id -u`, `id -g`) |
+| `PACO_MASTER_KEY` | **Master-Schlüssel** (`openssl rand -base64 32`). Verschlüsselt alle gespeicherten Geheimnisse (2FA, Notfall-Codes, Familien-Schlüssel, Signaturschlüssel). Liegt bewusst **nicht** im Datenordner – eine Kopie des Datenordners allein ist dadurch wertlos. Zusätzlich im Passwort-Manager aufbewahren. |
 
 ```bash
 mkdir -p /pfad/zu/paco-data        # muss PACO_UID gehören

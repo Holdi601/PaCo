@@ -44,9 +44,11 @@ builder.Services.AddHttpClient("wifi-geo", c => c.Timeout = TimeSpan.FromSeconds
 builder.Services.AddSingleton<WifiGeolocator>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = AccountAdmin.InviteLifetime);
 
-builder.Services.AddDataProtection()
+var dataProtection = builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(opts.DataDir, "dp-keys")))
     .SetApplicationName("PaCo");
+if (MasterKey.Parse(opts.MasterKey) is { } masterKey)
+    dataProtection.AddKeyManagementOptions(o => o.XmlEncryptor = new MasterKeyXmlEncryptor(masterKey));
 
 builder.Services.AddIdentity<ParentUser, IdentityRole<Guid>>(o =>
     {
@@ -62,6 +64,7 @@ builder.Services.AddIdentity<ParentUser, IdentityRole<Guid>>(o =>
         o.SignIn.RequireConfirmedAccount = false;
     })
     .AddEntityFrameworkStores<PaCoDb>()
+    .AddUserStore<PaCoUserStore>()
     .AddDefaultTokenProviders()
     .AddTokenProvider<OneTimeAuthenticatorTokenProvider>(TokenOptions.DefaultAuthenticatorProvider)
     .AddClaimsPrincipalFactory<PaCoClaimsFactory>()
@@ -190,6 +193,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PaCoDb>();
     await db.Database.MigrateAsync();
+    await SecretMigration.RunAsync(app.Services, opts, app.Logger);
     _ = scope.ServiceProvider.GetRequiredService<SigningKeyStore>();
 }
 
