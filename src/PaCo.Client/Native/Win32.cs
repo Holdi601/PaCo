@@ -157,6 +157,12 @@ internal static class Win32
     [DllImport("user32.dll")]
     public static extern bool EnumChildWindows(IntPtr parent, EnumWindowsProc callback, IntPtr lParam);
 
+    [DllImport("user32.dll")]
+    public static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsWindowVisible(IntPtr hwnd);
+
     [StructLayout(LayoutKind.Sequential)]
     public struct LastInputInfo
     {

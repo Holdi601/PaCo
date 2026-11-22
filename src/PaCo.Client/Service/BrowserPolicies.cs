@@ -77,12 +77,23 @@ internal static class BrowserPolicies
         // Settings that would otherwise allow escaping the rules.
         if (web.BlockDevTools) key.SetValue("DeveloperToolsAvailability", 2, RegistryValueKind.DWord);
 
-        if (sites.Count > 0)
+        // Learning mode: everything blocked except the learning sites (an allow entry wins over the block list).
+        var only = OnlySites(web);
+        var block = only is null ? sites : ["*"];
+        if (block.Count > 0)
         {
             using var list = CreateProtected(key, "URLBlocklist", sid);
-            for (var i = 0; i < sites.Count; i++) list.SetValue((i + 1).ToString(), sites[i], RegistryValueKind.String);
+            for (var i = 0; i < block.Count; i++) list.SetValue((i + 1).ToString(), block[i], RegistryValueKind.String);
+        }
+        if (only is { Count: > 0 })
+        {
+            using var allow = CreateProtected(key, "URLAllowlist", sid);
+            for (var i = 0; i < only.Count; i++) allow.SetValue((i + 1).ToString(), only[i], RegistryValueKind.String);
         }
     }
+
+    private static List<string>? OnlySites(WebFilterPolicy web) =>
+        web.AllowOnlySites?.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim().TrimStart('*', '.')).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
     private static void WriteFirefox(RegistryKey hive, string root, string sid, WebFilterPolicy web, List<string> sites)
     {
@@ -91,7 +102,22 @@ internal static class BrowserPolicies
         key.SetValue(Marker, 1, RegistryValueKind.DWord);
         if (web.BlockPrivateBrowsing) key.SetValue("DisablePrivateBrowsing", 1, RegistryValueKind.DWord);
         if (web.BlockDevTools) key.SetValue("DisableDeveloperTools", 1, RegistryValueKind.DWord);
-        if (sites.Count > 0)
+        var only = OnlySites(web);
+        if (only is not null)
+        {
+            // Learning mode (Firefox reads policies at start only – PaCo restarts it when learning mode begins).
+            using (var block = CreateProtected(key, @"WebsiteFilter\Block", sid)) block.SetValue("1", "<all_urls>", RegistryValueKind.String);
+            using var exceptions = CreateProtected(key, @"WebsiteFilter\Exceptions", sid);
+            var j = 1;
+            foreach (var entry in only)
+            {
+                // A whole site ("example.com") or a single page/video ("youtube.com/watch?v=ID") incl. sub-pages.
+                var rest = entry.Contains('/') ? entry + "*" : entry + "/*";
+                exceptions.SetValue((j++).ToString(), $"*://{rest}", RegistryValueKind.String);
+                exceptions.SetValue((j++).ToString(), $"*://*.{rest}", RegistryValueKind.String);
+            }
+        }
+        else if (sites.Count > 0)
         {
             using var filter = CreateProtected(key, @"WebsiteFilter\Block", sid);
             var i = 1;

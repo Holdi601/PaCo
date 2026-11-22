@@ -45,6 +45,36 @@ internal sealed class ForegroundTracker
             : (info.Display, 1, title);
     }
 
+    /// <summary>
+    /// All processes with a visible top-level window in this session (learning mode: the service closes those that are
+    /// not learning apps). UWP apps are reported as their real app process, not as ApplicationFrameHost.
+    /// </summary>
+    public List<WindowProcess> VisibleWindowProcesses()
+    {
+        var pids = new HashSet<int>();
+        Win32.EnumWindows((hwnd, _) =>
+        {
+            if (!Win32.IsWindowVisible(hwnd)) return true;
+            Win32.GetWindowThreadProcessId(hwnd, out var pid);
+            if (pid == 0 || pid == _ownPid) return true;
+            pids.Add(pid);
+            if (Resolve(pid)?.Name == "applicationframehost")
+            {
+                Win32.EnumChildWindows(hwnd, (child, _) =>
+                {
+                    Win32.GetWindowThreadProcessId(child, out var cpid);
+                    if (cpid != pid && cpid != 0) pids.Add(cpid);
+                    return true;
+                }, IntPtr.Zero);
+            }
+            return true;
+        }, IntPtr.Zero);
+        var list = new List<WindowProcess>();
+        foreach (var pid in pids)
+            if (Resolve(pid) is { } info) list.Add(new WindowProcess(pid, info.Name, info.Display));
+        return list;
+    }
+
     public List<ForegroundSample> Drain()
     {
         var list = _pending.Select(kv => new ForegroundSample(kv.Key, kv.Value.Display, kv.Value.Seconds, kv.Value.Title)).ToList();

@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Kehtiva allkirjata serveri aeg lükati tagasi – võimalik võltsserver. PaCo jätkab oma kellaga.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ühendust serveriga pole olnud alates {0} – vanemaid on teavitatud.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Taas ühendus serveriga (eelmine ühendus: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Koduvõrgus sees, kuid PaCo pole alates {0} endast märku andnud – vanemaid on teavitatud."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Koduvõrgus sees, kuid PaCo pole alates {0} endast märku andnud – vanemaid on teavitatud.",
+ "Im Lernmodus geschlossen: {0}": "Õppimisrežiimis suletud: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Õppimisrežiim algas – ainult õpirakendused, õppesaidid ja abivahendid",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Aeg „{0}“ jaoks otsas – brauser taaskäivitati, et taustal midagi edasi ei mängiks"
 }

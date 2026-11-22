@@ -13,7 +13,8 @@ namespace PaCo.Client.Service;
 /// </summary>
 internal sealed class Enforcer : BackgroundService
 {
-    private static readonly int[] WarnAt = [600, 300, 60];
+    /// <summary>Two warnings before the time runs out: 5 minutes and 1 minute.</summary>
+    private static readonly int[] WarnAt = [300, 60];
     private static readonly TimeSpan AgentGrace = TimeSpan.FromSeconds(25);
     private static readonly TimeSpan LogoffCountdownAfterLogin = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan LogoffDelayAfterExpiry = TimeSpan.FromSeconds(4);
@@ -45,12 +46,19 @@ internal sealed class Enforcer : BackgroundService
         public HashSet<string> GroupWarned = [];
         public DateOnly GroupWarnDay;
         public TimeSpan LastTabClose = Mono.Never;
+        public string? FocusUrl;
+        /// <summary>Learning mode: time used up, but learning apps/sites (and the parents' aids) stay usable.</summary>
+        public bool Learning;
+        public bool BrowsersRestarted;
+        public DateOnly BrowserRestartDay;
+        public HashSet<Guid> BrowserRestartedFor = [];
+        public TimeSpan LastLearningNotice = Mono.Never;
     }
 
     /// <summary>Groups of the current foreground app/site (empty if unknown or stale).</summary>
     private static List<TimeGroup> FocusGroups(ChildPolicy child, Track track, bool inUse) =>
         inUse && child.Groups.Count > 0 && Mono.Now - track.FocusAt < TimeSpan.FromSeconds(12)
-            ? TimeGroups.Matching(child.Groups, track.FocusProcess, track.FocusDescription, track.FocusHost)
+            ? TimeGroups.Matching(child.Groups, track.FocusProcess, track.FocusDescription, track.FocusHost, track.FocusUrl)
             : [];
 
     /// <summary>Last report time per child|category|keyword|app – the same hit is reported at most every 30 min.</summary>
@@ -211,8 +219,12 @@ internal sealed class Enforcer : BackgroundService
                 }
                 await GroupNoticesAsync(s, child, track, eval, inUse, exhausted);
             }
+            if (exhausted.Any(g => g.Sites.Count > 0) && s.Active && !s.Locked) RestartBrowsersFor(s, child, track, exhausted, eval.Day);
             var web = exhausted.Count == 0 ? child.Web
                 : child.Web with { BlockedSites = child.Web.BlockedSites.Concat(exhausted.SelectMany(g => g.Sites)).Distinct(StringComparer.OrdinalIgnoreCase).ToList() };
+            // Learning mode: only learning sites and the single pages/videos the parents allowed open in the browser.
+            if (track.Learning) web = web with { AllowOnlySites = TimeGroups.LearningAllowList(child) };
+            if (forceBrowser) LearningLinks.Sync(s.SessionId, child);
             var blockedApps = exhausted.Count == 0 ? child.BlockedApps
                 : child.BlockedApps.Concat(exhausted.SelectMany(g => g.Apps)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
@@ -322,6 +334,11 @@ internal sealed class Enforcer : BackgroundService
 
         if (eval.Allowed)
         {
+            if (track.Learning)
+            {
+                track.Learning = false;
+                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.LearningMode, Flag = false });
+            }
             if (track.BlockedSince is not null || track.LockRequested || agent?.LockShown == true)
             {
                 Log.Info($"{child.Name}: wieder freigegeben ({eval.Source})");
@@ -358,8 +375,25 @@ internal sealed class Enforcer : BackgroundService
         // Disconnected (fast user switching) or Win+L: nobody can use it; act when it becomes active again.
         if (!s.Active || s.Locked) return;
 
+        // Learning mode needs a working agent (it reports the windows); otherwise back to the normal lock (fail closed).
+        var learnable = connected && TimeGroups.LearningModeAvailable(child, eval);
+        if (track.Learning && !learnable)
+        {
+            track.Learning = false;
+            track.LockRequested = false;
+            track.BlockedSince = now; // fresh grace for the lock screen, e.g. while the agent restarts
+            if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.LearningMode, Flag = false });
+            Log.Info($"{child.Name}: Lernmodus beendet ({eval.Reason})");
+        }
+        if (track.Learning)
+        {
+            await LearningTickAsync(s, child, track, agent!);
+            return;
+        }
+
         var (title, text) = BlockText(child, eval);
         var lang = child.Language;
+        var learning = learnable ? LearningLabel(child) : null;
 
         if (connected && !track.Muted)
         {
@@ -372,7 +406,7 @@ internal sealed class Enforcer : BackgroundService
         {
             if (connected && !track.LockRequested)
             {
-                await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text });
+                await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning });
                 track.LockRequested = true;
                 track.LockRequestedAt = Mono.Now;
                 lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.Locked, EventText(eval.Reason, logoff: false), child.ChildId);
@@ -395,20 +429,20 @@ internal sealed class Enforcer : BackgroundService
             if (track.ExpiredDuringUse)
             {
                 track.LogoffAt = now + LogoffDelayAfterExpiry;
-                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Seconds = (int)LogoffDelayAfterExpiry.TotalSeconds });
+                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning, Seconds = (int)LogoffDelayAfterExpiry.TotalSeconds });
             }
             else
             {
                 // Logged in although no time is left: short window to type an unlock code, then sign out.
                 track.LogoffAt = now + LogoffCountdownAfterLogin;
-                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Seconds = (int)LogoffCountdownAfterLogin.TotalSeconds });
+                if (connected) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning, Seconds = (int)LogoffCountdownAfterLogin.TotalSeconds });
             }
             track.LockRequested = connected;
         }
         else if (!track.LockRequested && connected)
         {
             var left = (int)Math.Max(1, (track.LogoffAt.Value - now).TotalSeconds);
-            await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Seconds = left });
+            await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.ShowLock, Lang = lang, Title = title, Text = text, Learning = learning, Seconds = left });
             track.LockRequested = true;
         }
 
@@ -568,6 +602,7 @@ internal sealed class Enforcer : BackgroundService
                         ft.FocusProcess = Cut(msg.Process ?? "", 80) is { Length: > 0 } p ? p.ToLowerInvariant() : null;
                         ft.FocusDescription = msg.Description is null ? null : Cut(msg.Description, 120);
                         ft.FocusHost = msg.Host is null ? null : Cut(msg.Host, 253).ToLowerInvariant();
+                        ft.FocusUrl = msg.Url is null || ft.FocusHost is null ? null : Cut(msg.Url, 2000);
                         ft.FocusAt = Mono.Now;
                     }
                 }
@@ -576,6 +611,14 @@ internal sealed class Enforcer : BackgroundService
             case IpcMessage.Code when child is not null && policy is not null:
                 var (ok, text) = RedeemCode(child, policy, msg.Text ?? "");
                 await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.CodeResult, Flag = ok, Text = text });
+                break;
+
+            case IpcMessage.StartLearning when child is not null && policy is not null:
+                await StartLearningAsync(sessionId, child, policy);
+                break;
+
+            case IpcMessage.Windows when child is not null && msg.WindowProcesses is { } windows:
+                await CloseNonLearningAsync(sessionId, child, windows);
                 break;
 
             case IpcMessage.LockState:
@@ -608,6 +651,116 @@ internal sealed class Enforcer : BackgroundService
                 _rt.ReportError($"Sitzungsprogramm: {line}");
                 break;
         }
+    }
+
+    /// <summary>
+    /// A group with websites is used up: its sites are blocked from now on, but a tab in the background (music, audio
+    /// book) would keep playing. The browser is restarted once per group and day; restored tabs then hit the block.
+    /// </summary>
+    private void RestartBrowsersFor(UserSession s, ChildPolicy child, Track track, List<TimeGroup> exhausted, DateOnly day)
+    {
+        if (track.BrowserRestartDay != day)
+        {
+            track.BrowserRestartDay = day;
+            track.BrowserRestartedFor.Clear();
+        }
+        var fresh = exhausted.Where(g => g.Sites.Count > 0 && track.BrowserRestartedFor.Add(g.Id)).ToList();
+        if (fresh.Count == 0 || Sessions.SidOf(s.SessionId) is not { } sid) return;
+        var closed = LearningEnforcer.KillBrowsers(s.SessionId, sid);
+        if (closed.Count == 0) return;
+        var names = string.Join(", ", fresh.Select(g => g.Name));
+        Log.Info($"{child.Name}: Browser beendet, Zeit für {names} aufgebraucht");
+        lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, LocText.Of("Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft", names), child.ChildId);
+        _ = _agents.SendAsync(s.SessionId, new IpcMessage
+        {
+            Type = IpcMessage.Notify,
+            Title = L.In(child.Language, "„{0}“ ist für heute vorbei", names),
+            Text = L.In(child.Language, "Der Browser wurde geschlossen. Du kannst ihn wieder öffnen – nur diese Seiten bleiben für heute gesperrt."),
+        });
+    }
+
+    /// <summary>The child pressed "Lernen": re-checked here – the lock screen only asks.</summary>
+    private async Task StartLearningAsync(int sessionId, ChildPolicy child, PolicyDocument policy)
+    {
+        Evaluation eval;
+        lock (_rt.Gate)
+        {
+            var now = _rt.Now();
+            var tz = FamilyClock.Resolve(policy.TimeZoneId);
+            eval = TimeRules.Evaluate(child, _rt.State.UsageFor(child.ChildId, FamilyClock.Day(now, tz)), now, tz);
+        }
+        Track? track;
+        lock (_tracksGate) _tracks.TryGetValue(sessionId, out track);
+        if (track is null || _agents.Get(sessionId)?.Connected != true || !TimeGroups.LearningModeAvailable(child, eval)) return;
+
+        track.Learning = true;
+        track.BrowsersRestarted = false;
+        track.LockRequested = false;
+        track.LogoffAt = null;
+        Log.Info($"{child.Name}: Lernmodus gestartet");
+        lock (_rt.Gate)
+        {
+            _rt.State.AddEvent(DeviceEventKind.Info, LocText.Of("Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel"), child.ChildId);
+            _rt.State.AudioMutedByPaCo = false;
+            _rt.MarkDirty();
+        }
+        await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.LearningMode, Flag = true });
+        await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.HideLock });
+        await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.RestoreAudio });
+        track.Muted = false;
+        await _agents.SendAsync(sessionId, new IpcMessage
+        {
+            Type = IpcMessage.Notify,
+            Title = L.In(child.Language, "Lernmodus"),
+            Text = L.In(child.Language, "Jetzt gehen nur deine Lern-Apps, Lern-Websites und Hilfsmittel. Alles andere wird geschlossen. Freigegebene Seiten und Videos findest du im Ordner „Lernen“ auf dem Desktop."),
+        });
+    }
+
+    /// <summary>Learning mode, every tick: lock screen stays hidden; a tab with a page that is not allowed is closed.</summary>
+    private async Task LearningTickAsync(UserSession s, ChildPolicy child, Track track, AgentConnection agent)
+    {
+        if (agent.LockShown) await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.HideLock });
+        if (track.FocusHost is { } host && Mono.Now - track.FocusAt < TimeSpan.FromSeconds(12)
+            && !TimeGroups.IsLearningAddress(child, host, track.FocusUrl) && Mono.Now - track.LastTabClose > TimeSpan.FromSeconds(5))
+        {
+            track.LastTabClose = Mono.Now;
+            await _agents.SendAsync(s.SessionId, new IpcMessage { Type = IpcMessage.CloseTab, Url = track.FocusUrl });
+            await LearningNoticeAsync(s.SessionId, child, track, L.In(child.Language, "Diese Seite ist im Lernmodus nicht erlaubt."));
+        }
+    }
+
+    /// <summary>Learning mode: closes programs with windows that are neither learning apps nor aids.</summary>
+    private async Task CloseNonLearningAsync(int sessionId, ChildPolicy child, IReadOnlyList<WindowProcess> windows)
+    {
+        Track? track;
+        lock (_tracksGate) _tracks.TryGetValue(sessionId, out track);
+        if (track is not { Learning: true }) return;
+        var sid = Sessions.SidOf(sessionId);
+        if (sid is null) return;
+        var browsersOk = TimeGroups.LearningSites(child).Count + TimeGroups.LearningPages(child).Count > 0;
+        var first = !track.BrowsersRestarted;
+        var closed = LearningEnforcer.Close(sessionId, sid, windows.Where(w => w is not null).Take(200), child, browsersOk, first);
+        // Hidden players (music, audio books) and – once at the start – all browsers, so no old tab keeps playing.
+        closed.AddRange(LearningEnforcer.CloseBackground(sessionId, sid, child, first));
+        closed = closed.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        track.BrowsersRestarted = true;
+        if (closed.Count == 0) return;
+        lock (_rt.Gate) _rt.State.AddEvent(DeviceEventKind.AppBlocked, LocText.Of("Im Lernmodus geschlossen: {0}", string.Join(", ", closed)), child.ChildId);
+        await LearningNoticeAsync(sessionId, child, track, L.In(child.Language, "{0} ist im Lernmodus nicht erlaubt.", string.Join(", ", closed)));
+    }
+
+    private async Task LearningNoticeAsync(int sessionId, ChildPolicy child, Track track, string text)
+    {
+        if (Mono.Now - track.LastLearningNotice < TimeSpan.FromSeconds(20)) return;
+        track.LastLearningNotice = Mono.Now;
+        await _agents.SendAsync(sessionId, new IpcMessage { Type = IpcMessage.Notify, Title = L.In(child.Language, "Nur zum Lernen"), Text = text });
+    }
+
+    /// <summary>Names of the learning groups for the lock screen ("Lernen geht weiter: Mathe, Englisch").</summary>
+    private static string LearningLabel(ChildPolicy child)
+    {
+        var names = string.Join(", ", TimeGroups.LearningGroups(child).Select(g => g.Name));
+        return names.Length <= 120 ? names : names[..117] + "…";
     }
 
     private async Task HandleAlertsAsync(int sessionId, ChildPolicy child, IReadOnlyList<AlertHitDto> hits)

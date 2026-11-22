@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Odrzucono czas serwera bez ważnego podpisu – możliwy fałszywy serwer. PaCo liczy dalej według własnego zegara.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Brak kontaktu z serwerem od {0} – rodzice zostali powiadomieni.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Znowu kontakt z serwerem (poprzedni kontakt: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Włączony w sieci domowej, ale PaCo nie zgłasza się od {0} – rodzice zostali powiadomieni."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Włączony w sieci domowej, ale PaCo nie zgłasza się od {0} – rodzice zostali powiadomieni.",
+ "Im Lernmodus geschlossen: {0}": "Zamknięte w trybie nauki: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Tryb nauki włączony – tylko aplikacje, strony do nauki i pomoce",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Czas na „{0}” się skończył – przeglądarka uruchomiona ponownie, by nic nie grało w tle"
 }

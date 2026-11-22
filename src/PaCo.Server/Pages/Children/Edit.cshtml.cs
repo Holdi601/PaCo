@@ -94,6 +94,12 @@ public sealed class EditModel(PaCoDb db) : PageModel
     public ExpiryAction ExpiryAction { get; set; }
 
     [BindProperty]
+    public bool LearningAfterExpiry { get; set; }
+
+    [BindProperty]
+    public bool LearningOutsideWindow { get; set; }
+
+    [BindProperty]
     public bool Paused { get; set; }
 
     /// <summary>Index = DayOfWeek (0 = Sunday).</summary>
@@ -230,6 +236,8 @@ public sealed class EditModel(PaCoDb db) : PageModel
         // Saved languages are picked up by the policy each PC fetches on its next sync, like every other rule.
         if (!string.IsNullOrEmpty(ChildLanguage)) child.Language = CanonicalLanguage(ChildLanguage);
         child.ExpiryAction = ExpiryAction;
+        child.LearningAfterExpiry = LearningAfterExpiry;
+        child.LearningOutsideWindow = LearningAfterExpiry && LearningOutsideWindow;
         child.Paused = Paused;
         child.SetDays(Days.Select(d => new DayRule
         {
@@ -293,6 +301,7 @@ public sealed class EditModel(PaCoDb db) : PageModel
                 var descriptions = groupApps.Select(a => (a, d: previous.GetValueOrDefault(a) ?? names.GetValueOrDefault(a)))
                     .Where(x => !string.IsNullOrEmpty(x.d))
                     .ToDictionary(x => x.a, x => x.d!, StringComparer.OrdinalIgnoreCase);
+                var (groupSites, groupPages) = ParseSites(g.Sites, g.Kind == TimeGroupKind.Free);
                 groups.Add(new TimeGroup
                 {
                     Id = g.Id == Guid.Empty ? Guid.NewGuid() : g.Id,
@@ -300,7 +309,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
                     Kind = g.Kind == TimeGroupKind.Free ? TimeGroupKind.Free : TimeGroupKind.Limit,
                     MinutesPerDay = g.Kind == TimeGroupKind.Free ? null : g.Minutes,
                     Apps = groupApps,
-                    Sites = SplitLines(g.Sites).Select(NormalizeSite).Where(x => x.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(200).ToList(),
+                    Sites = groupSites,
+                    Pages = groupPages.Keys.ToList(),
+                    PageTitles = groupPages.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => kv.Value!, StringComparer.OrdinalIgnoreCase),
                     AppDescriptions = descriptions,
                 });
             }
@@ -334,6 +345,8 @@ public sealed class EditModel(PaCoDb db) : PageModel
         Name = c.Name;
         ChildLanguage = Languages.IsSupported(c.Language) ? CanonicalLanguage(c.Language) : Languages.Source;
         ExpiryAction = c.ExpiryAction;
+        LearningAfterExpiry = c.LearningAfterExpiry;
+        LearningOutsideWindow = c.LearningOutsideWindow;
         Paused = c.Paused;
         Days = c.GetDays().Select(d => new DayInput
         {
@@ -368,13 +381,38 @@ public sealed class EditModel(PaCoDb db) : PageModel
         Groups = c.GetTimeGroups().Select(g => new GroupInput
         {
             Id = g.Id, Name = g.Name, Kind = g.Kind, Minutes = g.MinutesPerDay,
-            Apps = string.Join("\n", g.Apps), Sites = string.Join("\n", g.Sites),
+            Apps = string.Join("\n", g.Apps), Sites = string.Join("\n", g.Sites.Concat(g.Pages.Select(p =>
+                g.PageTitles.TryGetValue(p, out var title) ? $"{title} | {TimeGroups.PageUrl(p)}" : TimeGroups.PageUrl(p)))),
         }).ToList();
         TimeLimitDevices = ChildDevices.Select(d => d.Id).Where(c.TimeLimitOn).ToList();
     }
 
     private static string CanonicalLanguage(string code) =>
         Languages.All.First(l => l.Code.Equals(code, StringComparison.OrdinalIgnoreCase)).Code;
+
+    /// <summary>
+    /// Lines of a group's "Webseiten" field: a whole site ("youtube.com") or – for learning groups – a single page or
+    /// video ("https://youtu.be/abc", optionally "Brüche erklärt | https://…"). Lines are split at line breaks only.
+    /// </summary>
+    internal static (List<string> Sites, Dictionary<string, string?> Pages) ParseSites(string? text, bool allowPages)
+    {
+        var sites = new List<string>();
+        var pages = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        foreach (var raw in (text ?? "").Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var bar = raw.LastIndexOf('|');
+            var title = bar > 0 ? raw[..bar].Trim() : null;
+            var address = bar > 0 ? raw[(bar + 1)..].Trim() : raw;
+            if (allowPages && TimeGroups.NormalizePage(address) is { } page)
+            {
+                if (pages.Count < 200) pages[page] = string.IsNullOrWhiteSpace(title) ? null : title[..Math.Min(80, title.Length)];
+                continue;
+            }
+            var site = NormalizeSite(address);
+            if (site.Length > 0 && !sites.Contains(site, StringComparer.OrdinalIgnoreCase) && sites.Count < 200) sites.Add(site);
+        }
+        return (sites, pages);
+    }
 
     private static IEnumerable<string> SplitLines(string? s) =>
         (s ?? "").Split(['\n', '\r', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

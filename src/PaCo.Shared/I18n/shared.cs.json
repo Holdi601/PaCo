@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Čas serveru bez platného podpisu byl odmítnut – možná falešný server. PaCo počítá dál podle vlastních hodin.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Žádný kontakt se serverem od {0} – rodiče byli upozorněni.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Opět spojení se serverem (předchozí kontakt: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Zapnutý v domácí síti, ale PaCo se neozývá od {0} – rodiče byli upozorněni."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Zapnutý v domácí síti, ale PaCo se neozývá od {0} – rodiče byli upozorněni.",
+ "Im Lernmodus geschlossen: {0}": "Zavřeno v režimu učení: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Režim učení spuštěn – jen výukové aplikace, weby a pomůcky",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Čas pro „{0}“ vypršel – prohlížeč restartován, aby nic nehrálo na pozadí"
 }

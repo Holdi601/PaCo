@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Heure du serveur sans signature valide rejetée – peut-être un faux serveur. PaCo continue avec sa propre horloge.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Aucun contact avec le serveur depuis {0} – les parents ont été prévenus.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "De nouveau en contact avec le serveur (contact précédent : {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Allumé dans le réseau domestique, mais PaCo ne donne plus de nouvelles depuis {0} – les parents ont été prévenus."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Allumé dans le réseau domestique, mais PaCo ne donne plus de nouvelles depuis {0} – les parents ont été prévenus.",
+ "Im Lernmodus geschlossen: {0}": "Fermé en mode apprentissage : {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Mode apprentissage démarré – seulement applis, sites d'apprentissage et outils",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Temps pour « {0} » épuisé – navigateur redémarré pour que rien ne continue en arrière-plan"
 }

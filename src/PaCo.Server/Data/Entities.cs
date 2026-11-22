@@ -69,6 +69,12 @@ public sealed class Child : IFamilyScoped
 
     public ExpiryAction ExpiryAction { get; set; } = ExpiryAction.LockScreen;
 
+    /// <summary>After the time is used up, learning apps/sites and aids (learning groups) stay usable.</summary>
+    public bool LearningAfterExpiry { get; set; }
+
+    /// <summary>Learning mode also outside the allowed hours.</summary>
+    public bool LearningOutsideWindow { get; set; }
+
     public bool Paused { get; set; }
 
     public bool LockedByParent { get; set; }

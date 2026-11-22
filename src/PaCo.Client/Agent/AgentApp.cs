@@ -53,7 +53,8 @@ internal sealed class AgentApp : ApplicationContext
         };
         _tray.Click += (_, _) => _tray.ShowBalloonTip(5000, "PaCo", _tray.Text, ToolTipIcon.Info);
         _lock = new LockScreen(code => Send(new IpcMessage { Type = IpcMessage.Code, Text = code }),
-            () => Send(new IpcMessage { Type = IpcMessage.RequestLogoff }));
+            () => Send(new IpcMessage { Type = IpcMessage.RequestLogoff }),
+            () => Send(new IpcMessage { Type = IpcMessage.StartLearning }));
         _sampleTimer.Tick += (_, _) => OnTick();
         _sampleTimer.Start();
         _scanner = new AlertScanner(
@@ -106,6 +107,7 @@ internal sealed class AgentApp : ApplicationContext
                     _childName = msg.ChildName ?? "";
                     if (msg.Lang is { } statusLang && Languages.IsSupported(statusLang)) L.Lang = statusLang;
                     _tray.Text = Truncate(msg.Paused ? L.T("PaCo: pausiert")
+                        : !msg.Allowed && _learning ? L.T("PaCo: Lernmodus – nur Lern-Apps")
                         : !msg.Allowed ? L.T("PaCo: keine Zeit mehr")
                         : msg.RemainingSeconds is { } r ? L.F("PaCo: noch {0}", FormatMinutes(r)) : L.T("PaCo: ohne Zeitlimit"), 63);
                     break;
@@ -115,7 +117,7 @@ internal sealed class AgentApp : ApplicationContext
                 case IpcMessage.ShowLock:
                     if (msg.Lang is { } lang && Languages.IsSupported(lang)) L.Lang = lang;
                     bool locked;
-                    try { locked = _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds); }
+                    try { locked = _lock.Show(msg.Title ?? L.T("Bildschirmzeit vorbei"), msg.Text ?? "", msg.Seconds, msg.Learning); }
                     catch (Exception ex) { Log.Error("Sperrbildschirm", ex); locked = false; }
                     // Only a confirmed lock counts – otherwise the service signs the child out (fail closed).
                     Send(new IpcMessage { Type = IpcMessage.LockState, Flag = locked });
@@ -141,7 +143,11 @@ internal sealed class AgentApp : ApplicationContext
                     _scanner.Configure(PaCoJson.Deserialize<AlertSettings>(json));
                     break;
                 case IpcMessage.CloseTab:
-                    CloseTab(msg.Host);
+                    CloseTab(msg.Host, msg.Url);
+                    break;
+                case IpcMessage.LearningMode:
+                    _learning = msg.Flag;
+                    if (_learning) ReportWindows();
                     break;
 
                 case IpcMessage.TakeScreenshot when msg.RequestId is { } rid:
@@ -167,7 +173,22 @@ internal sealed class AgentApp : ApplicationContext
     }
 
     private bool _exitRequested;
+    private bool _learning;
+
+    /// <summary>Learning mode: which programs have windows – the service closes everything that is not for learning.</summary>
+    private void ReportWindows()
+    {
+        try
+        {
+            Send(new IpcMessage { Type = IpcMessage.Windows, WindowProcesses = _tracker.VisibleWindowProcesses().Take(200).ToList() });
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"Fensterliste: {ex.Message}");
+        }
+    }
     private string? _host;
+    private string? _url;
     private (IntPtr Hwnd, string? Title) _hostFor;
     private TimeSpan _hostAt = Mono.Never;
     private int _hostReading;
@@ -191,7 +212,9 @@ internal sealed class AgentApp : ApplicationContext
                 {
                     try
                     {
-                        _host = BrowserAddress.ReadHost(hwnd, process);
+                        var address = BrowserAddress.ReadAddress(hwnd, process);
+                        _host = TimeGroups.HostOf(address);
+                        _url = _host is null ? null : address;
                         _hostFor = (hwnd, title);
                         _hostAt = Mono.Now;
                     }
@@ -200,27 +223,35 @@ internal sealed class AgentApp : ApplicationContext
             }
         }
         var host = cur is { } b && BrowserAddress.IsBrowser(b.Process) && _hostFor.Hwnd == b.Hwnd ? _host : null;
-        var key = cur is null ? "" : $"{cur.Value.Process}|{cur.Value.Description}|{host}";
+        var url = host is null ? null : _url;
+        var key = cur is null ? "" : $"{cur.Value.Process}|{cur.Value.Description}|{url ?? host}";
         if (key == _sentFocus && ++_focusTick % 5 != 0) return;
         _sentFocus = key;
-        Send(new IpcMessage { Type = IpcMessage.Focus, Process = cur?.Process, Description = cur?.Description, Host = host });
+        Send(new IpcMessage { Type = IpcMessage.Focus, Process = cur?.Process, Description = cur?.Description, Host = host, Url = url });
     }
 
-    /// <summary>Closes the active browser tab if it still shows a site whose time is used up (Ctrl+W).</summary>
-    private void CloseTab(string? site)
+    /// <summary>
+    /// Closes the active browser tab if it still shows the given site (time used up) or – learning mode – the given
+    /// address that is not allowed (Ctrl+W).
+    /// </summary>
+    private void CloseTab(string? site, string? url = null)
     {
-        if (site is null || _tracker.Current is not { } c || !BrowserAddress.IsBrowser(c.Process)) return;
-        var host = BrowserAddress.ReadHost(c.Hwnd, c.Process);
-        if (host is null || !PaCo.Shared.TimeGroups.SiteMatches(host, site)) return;
+        if ((site is null && url is null) || _tracker.Current is not { } c || !BrowserAddress.IsBrowser(c.Process)) return;
+        var address = BrowserAddress.ReadAddress(c.Hwnd, c.Process);
+        var host = TimeGroups.HostOf(address);
+        if (host is null) return;
+        if (site is not null && !TimeGroups.SiteMatches(host, site)) return;
+        if (url is not null && !string.Equals(address, url, StringComparison.Ordinal)) return;
         if (Win32.GetForegroundWindow() != c.Hwnd) return; // focus moved meanwhile – never close something else
         SendKeys.SendWait("^w");
-        Log.Info($"Tab mit {host} geschlossen (Zeit für heute aufgebraucht)");
+        Log.Info($"Tab mit {host} geschlossen");
     }
 
     private void OnTick()
     {
         if (!_lock.IsShown) _tracker.Sample();
         ReportFocus();
+        if (_learning && !_lock.IsShown && _tick % 2 == 0) ReportWindows();
         if (++_tick % 5 == 0)
         {
             var samples = _tracker.Drain();

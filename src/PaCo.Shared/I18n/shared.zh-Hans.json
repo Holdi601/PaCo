@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "已拒绝没有有效签名的服务器时间——可能是伪造的服务器。PaCo 继续使用自己的时钟计时。",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "自 {0} 起未与服务器联系——已通知家长。",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "已重新与服务器联系（之前的联系：{0}）。",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "在家庭网络中已开机，但 PaCo 自 {0} 起没有联系——已通知家长。"
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "在家庭网络中已开机，但 PaCo 自 {0} 起没有联系——已通知家长。",
+ "Im Lernmodus geschlossen: {0}": "在学习模式下关闭：{0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "学习模式已开始——仅学习应用、学习网站和辅助工具",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "“{0}”的时间已用完——浏览器已重启，后台不会再继续播放"
 }

@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertid uten gyldig signatur ble avvist – muligens en falsk server. PaCo teller videre med sin egen klokke.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ingen kontakt med serveren siden {0} – foreldrene har fått beskjed.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Kontakt med serveren igjen (forrige kontakt: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "På i hjemmenettverket, men PaCo har ikke meldt seg siden {0} – foreldrene har fått beskjed."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "På i hjemmenettverket, men PaCo har ikke meldt seg siden {0} – foreldrene har fått beskjed.",
+ "Im Lernmodus geschlossen: {0}": "Lukket i læringsmodus: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Læringsmodus startet – bare lære-apper, læringsnettsteder og hjelpemidler",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Tiden for «{0}» er brukt opp – nettleseren startet på nytt så ingenting fortsetter i bakgrunnen"
 }

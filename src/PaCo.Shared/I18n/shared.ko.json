@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "유효한 서명이 없는 서버 시간을 거부했습니다. 가짜 서버일 수 있습니다. PaCo는 자체 시계로 계속 계산합니다.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "{0} 이후 서버와 연결되지 않았습니다. 부모에게 알렸습니다.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "서버와 다시 연결되었습니다(이전 연결: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "홈 네트워크에서 켜져 있지만 PaCo는 {0} 이후 연락이 없습니다. 부모에게 알렸습니다."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "홈 네트워크에서 켜져 있지만 PaCo는 {0} 이후 연락이 없습니다. 부모에게 알렸습니다.",
+ "Im Lernmodus geschlossen: {0}": "학습 모드에서 닫음: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "학습 모드 시작 – 학습 앱, 학습 웹사이트, 보조 도구만",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "‘{0}’ 시간이 끝남 – 백그라운드에서 아무것도 재생되지 않도록 브라우저를 다시 시작함"
 }

@@ -259,6 +259,12 @@ namespace PaCo.Server.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LearningAfterExpiry")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LearningOutsideWindow")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("LockedByParent")
                         .HasColumnType("INTEGER");
 

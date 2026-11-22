@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Palvelimen aika ilman kelvollista allekirjoitusta hylättiin – mahdollisesti väärennetty palvelin. PaCo jatkaa omalla kellollaan.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ei yhteyttä palvelimeen {0} jälkeen – vanhemmille on ilmoitettu.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Taas yhteydessä palvelimeen (edellinen yhteys: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Päällä kotiverkossa, mutta PaCo ei ole ilmoittautunut {0} jälkeen – vanhemmille on ilmoitettu."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Päällä kotiverkossa, mutta PaCo ei ole ilmoittautunut {0} jälkeen – vanhemmille on ilmoitettu.",
+ "Im Lernmodus geschlossen: {0}": "Suljettu oppimistilassa: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Oppimistila aloitettu – vain oppimissovellukset, oppimissivustot ja apuvälineet",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Aika kohteelle ”{0}” käytetty – selain käynnistettiin uudelleen, jottei mikään jatku taustalla"
 }

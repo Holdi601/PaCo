@@ -22,21 +22,24 @@ internal sealed class LockScreen
     private LockForm? _form;
     private readonly Action<string> _onCode;
     private readonly Action _onLogoff;
+    private readonly Action _onLearn;
 
-    public LockScreen(Action<string> onCode, Action onLogoff)
+    public LockScreen(Action<string> onCode, Action onLogoff, Action onLearn)
     {
         _onCode = onCode;
         _onLogoff = onLogoff;
+        _onLearn = onLearn;
     }
 
     public bool IsShown => _active;
 
     /// <summary>Shows the lock; returns true only if the lock desktop is really the active input desktop.</summary>
-    public bool Show(string title, string text, int? logoffInSeconds)
+    /// <param name="learning">Names of the learning groups if learning mode is possible (shows a "Lernen" button).</param>
+    public bool Show(string title, string text, int? logoffInSeconds, string? learning = null)
     {
         if (_active)
         {
-            _form?.BeginInvoke(() => _form.Update(title, text, logoffInSeconds));
+            _form?.BeginInvoke(() => _form.Update(title, text, logoffInSeconds, learning));
             return IsOnLockDesktop();
         }
 
@@ -63,8 +66,8 @@ internal sealed class LockScreen
             {
                 // Must happen before this thread creates any window.
                 if (!Win32.SetThreadDesktop(_desktop)) throw Win32.LastError("SetThreadDesktop");
-                _form = new LockForm(_onCode, _onLogoff);
-                _form.Update(title, text, logoffInSeconds);
+                _form = new LockForm(_onCode, _onLogoff, _onLearn);
+                _form.Update(title, text, logoffInSeconds, learning);
                 _form.Shown += (_, _) => { shown = true; ready.Set(); };
                 Application.Run(_form);
             }
@@ -157,12 +160,14 @@ internal sealed class LockForm : Form
     private readonly Button _unlock = new() { Text = L.T("Freischalten"), Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(47, 93, 138), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
     private readonly Label _result = new() { ForeColor = Color.Gainsboro, Font = new Font("Segoe UI", 12), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 40 };
     private readonly Button _logoff = new() { Text = L.T("Abmelden"), Font = new Font("Segoe UI", 11), Width = 140, Height = 40, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+    private readonly Button _learn = new() { Text = L.T("Lernen"), Font = new Font("Segoe UI", 13), Width = 180, Height = 48, BackColor = Color.FromArgb(46, 125, 80), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Visible = false };
+    private readonly Label _learnHint = new() { ForeColor = Color.Gainsboro, Font = new Font("Segoe UI", 11), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 0 };
     private readonly System.Windows.Forms.Timer _timer = new() { Interval = 1000 };
     private readonly Action<string> _onCode;
     private bool _allowClose;
     private int? _secondsLeft;
 
-    public LockForm(Action<string> onCode, Action onLogoff)
+    public LockForm(Action<string> onCode, Action onLogoff, Action onLearn)
     {
         _onCode = onCode;
         FormBorderStyle = FormBorderStyle.None;
@@ -179,7 +184,7 @@ internal sealed class LockForm : Form
         center.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         center.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
 
-        var box = new Panel { Width = 760, Height = 420, Anchor = AnchorStyles.None, BackColor = Color.Black };
+        var box = new Panel { Width = 760, Height = 520, Anchor = AnchorStyles.None, BackColor = Color.Black };
         var entry = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 64, FlowDirection = FlowDirection.LeftToRight, Padding = new Padding(120, 6, 0, 0) };
         entry.Controls.Add(_code);
         entry.Controls.Add(_unlock);
@@ -190,9 +195,14 @@ internal sealed class LockForm : Form
         };
         var bottom = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 60, Padding = new Padding(310, 10, 0, 0) };
         bottom.Controls.Add(_logoff);
+        // Learning mode (if the parents allow it): back to the desktop, but only learning apps and sites work.
+        var learnRow = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 60, Padding = new Padding(290, 6, 0, 0) };
+        learnRow.Controls.Add(_learn);
 
         // Dock=Top stacks in reverse order of adding.
         box.Controls.Add(bottom);
+        box.Controls.Add(learnRow);
+        box.Controls.Add(_learnHint);
         box.Controls.Add(_result);
         box.Controls.Add(hint);
         box.Controls.Add(entry);
@@ -207,16 +217,21 @@ internal sealed class LockForm : Form
         _unlock.Click += (_, _) => Submit();
         _code.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; Submit(); } };
         _logoff.Click += (_, _) => onLogoff();
+        _learn.Click += (_, _) => { _learn.Enabled = false; onLearn(); };
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
         Shown += (_, _) => { Activate(); _code.Focus(); };
         Deactivate += (_, _) => BeginInvoke(() => { if (!_allowClose) { TopMost = true; Activate(); } });
     }
 
-    public void Update(string title, string text, int? logoffInSeconds)
+    public void Update(string title, string text, int? logoffInSeconds, string? learning)
     {
         _title.Text = title;
         _text.Text = text;
+        _learn.Visible = learning is not null;
+        _learn.Enabled = true;
+        _learnHint.Height = learning is null ? 0 : 40;
+        _learnHint.Text = learning is null ? "" : L.F("Lernen geht weiter: {0}", learning);
         _secondsLeft = logoffInSeconds;
         _countdown.Text = logoffInSeconds is { } s ? L.F("Du wirst in {0} Sekunden abgemeldet.", s) : "";
     }

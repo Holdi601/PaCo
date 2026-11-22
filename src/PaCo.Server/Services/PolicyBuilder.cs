@@ -70,6 +70,8 @@ public sealed class PolicyBuilder(PaCoDb db, SigningKeyStore keys, TimeProvider 
                 Paused = c.Paused,
                 LockedByParent = c.LockedByParent,
                 ExpiryAction = c.ExpiryAction,
+                LearningAfterExpiry = c.LearningAfterExpiry,
+                LearningOutsideWindow = c.LearningOutsideWindow,
                 Days = timeLimitHere ? c.GetDays() : Enumerable.Repeat(DayRule.Unrestricted, 7).ToArray(),
                 BlockedApps = c.GetBlockedApps()
                     .Concat(c.BlockedToolProcesses())
