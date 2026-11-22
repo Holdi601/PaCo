@@ -22,7 +22,10 @@ kein Abo, und die Kinderdaten verlassen das eigene Netz nicht.
 - **Zeitlimits für Apps, Webseiten und Kategorien** (z. B. „Spiele 60 Min“, „Videos 30 Min“) – gezählt wird nur, was im
   Vordergrund ist; danach werden Programme geschlossen und Webseiten bis Mitternacht gesperrt
 - **Lernzeit**: Lern-Apps und Lern-Webseiten im Vordergrund verbrauchen keine PC-Zeit
-- Bei Zeitablauf wahlweise **Sperrbildschirm** oder **sofortiges Abmelden**, jeweils vorher Ton aus
+- **Lernmodus** (optional): Ist die Zeit aufgebraucht, bleiben Lern-Apps, Lern-Webseiten und **Hilfsmittel** (z. B.
+  Taschenrechner) nutzbar – auch **einzelne Seiten oder Videos** (z. B. genau ein YouTube-Video, sonst kein YouTube).
+  Alles andere wird geschlossen, eingebettete fremde Seiten bleiben gesperrt, Musik im Hintergrund hört auf.
+- Bei Zeitablauf wahlweise **Sperrbildschirm** oder **sofortiges Abmelden**, jeweils vorher Ton aus; Warnung 5 und 1 Minute vorher
 - Gesperrte Programme, gesperrte Webseiten (mit Vorlagen), SafeSearch, YouTube-Jugendschutz, kein privates Surfen,
   andere Browser sperren
 - Statistik: 14-Tage-Verlauf, Programme pro Tag, Ereignisse (gesperrt, abgemeldet, falscher Code …)

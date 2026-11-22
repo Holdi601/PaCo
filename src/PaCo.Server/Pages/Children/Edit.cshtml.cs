@@ -37,6 +37,9 @@ public sealed class GroupInput
 
     public string? Sites { get; set; }
 
+    /// <summary>Programs picked from the list of installed programs (added to <see cref="Apps"/>).</summary>
+    public List<string> AddApps { get; set; } = [];
+
     public bool Remove { get; set; }
 }
 
@@ -92,6 +95,17 @@ public sealed class EditModel(PaCoDb db) : PageModel
 
     [BindProperty]
     public ExpiryAction ExpiryAction { get; set; }
+
+    [BindProperty]
+    public bool LearningAfterExpiry { get; set; }
+
+    [BindProperty]
+    public bool LearningOutsideWindow { get; set; }
+
+    /// <summary>Learning time per day (empty = unlimited).</summary>
+    [BindProperty]
+    [Range(1, 1440, ErrorMessage = "1 bis 1440 Minuten.")]
+    public int? LearningMinutesPerDay { get; set; }
 
     [BindProperty]
     public bool Paused { get; set; }
@@ -172,6 +186,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
     /// <summary>Programs the child used in the last 30 days (process, display name) – blocked or allowed with a switch.</summary>
     public IReadOnlyList<(string Process, string Name)> KnownApps { get; private set; } = [];
 
+    /// <summary>Programs installed on the child's PCs (Start menu) – pick list for learning apps and aids.</summary>
+    public IReadOnlyList<InstalledApp> InstalledApps { get; private set; } = [];
+
     [BindProperty]
     public List<string> BlockedKnownApps { get; set; } = [];
 
@@ -195,6 +212,10 @@ public sealed class EditModel(PaCoDb db) : PageModel
             .OrderByDescending(a => a.Value.Seconds).Take(40)
             .Select(a => (a.Key.ToLowerInvariant(), string.IsNullOrWhiteSpace(a.Value.DisplayName) ? a.Key : a.Value.DisplayName))
             .OrderBy(a => a.Item2, StringComparer.CurrentCultureIgnoreCase).ToList();
+        InstalledApps = (await db.Devices.Where(d => deviceIds.Contains(d.Id) && !d.Revoked).Select(d => d.InstalledAppsJson).ToListAsync())
+            .SelectMany(j => PaCoJson.Deserialize<InstalledApp[]>(string.IsNullOrEmpty(j) ? "[]" : j))
+            .DistinctBy(a => a.Process, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
@@ -230,6 +251,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
         // Saved languages are picked up by the policy each PC fetches on its next sync, like every other rule.
         if (!string.IsNullOrEmpty(ChildLanguage)) child.Language = CanonicalLanguage(ChildLanguage);
         child.ExpiryAction = ExpiryAction;
+        child.LearningAfterExpiry = LearningAfterExpiry;
+        child.LearningOutsideWindow = LearningAfterExpiry && LearningOutsideWindow;
+        child.LearningMinutesPerDay = LearningMinutesPerDay;
         child.Paused = Paused;
         child.SetDays(Days.Select(d => new DayRule
         {
@@ -284,15 +308,20 @@ public sealed class EditModel(PaCoDb db) : PageModel
         {
             var old = child.GetTimeGroups().ToDictionary(g => g.Id);
             var names = KnownApps.ToDictionary(k => k.Process, k => k.Name, StringComparer.OrdinalIgnoreCase);
+            var installed = InstalledApps.ToDictionary(a => a.Process, a => a, StringComparer.OrdinalIgnoreCase);
             var groups = new List<TimeGroup>();
             foreach (var g in Groups.Where(g => !g.Remove))
             {
-                var groupApps = SplitLines(g.Apps).Select(NormalizeApp).Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(100).ToList();
+                var groupApps = SplitLines(g.Apps).Select(NormalizeApp)
+                    .Concat(g.AddApps.Select(NormalizeApp).Where(installed.ContainsKey))
+                    .Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(100).ToList();
                 // Remember the program description for learning apps, so a renamed game does not count as learning time.
                 var previous = old.TryGetValue(g.Id, out var o) ? o.AppDescriptions : new Dictionary<string, string>();
-                var descriptions = groupApps.Select(a => (a, d: previous.GetValueOrDefault(a) ?? names.GetValueOrDefault(a)))
+                // Description: as seen before, else from the usage statistics, else from the installed program itself.
+                var descriptions = groupApps.Select(a => (a, d: previous.GetValueOrDefault(a) ?? names.GetValueOrDefault(a) ?? installed.GetValueOrDefault(a)?.Description))
                     .Where(x => !string.IsNullOrEmpty(x.d))
                     .ToDictionary(x => x.a, x => x.d!, StringComparer.OrdinalIgnoreCase);
+                var (groupSites, groupPages) = ParseSites(g.Sites, g.Kind == TimeGroupKind.Free);
                 groups.Add(new TimeGroup
                 {
                     Id = g.Id == Guid.Empty ? Guid.NewGuid() : g.Id,
@@ -300,7 +329,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
                     Kind = g.Kind == TimeGroupKind.Free ? TimeGroupKind.Free : TimeGroupKind.Limit,
                     MinutesPerDay = g.Kind == TimeGroupKind.Free ? null : g.Minutes,
                     Apps = groupApps,
-                    Sites = SplitLines(g.Sites).Select(NormalizeSite).Where(x => x.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Take(200).ToList(),
+                    Sites = groupSites,
+                    Pages = groupPages.Keys.ToList(),
+                    PageTitles = groupPages.Where(kv => kv.Value is not null).ToDictionary(kv => kv.Key, kv => kv.Value!, StringComparer.OrdinalIgnoreCase),
                     AppDescriptions = descriptions,
                 });
             }
@@ -334,6 +365,9 @@ public sealed class EditModel(PaCoDb db) : PageModel
         Name = c.Name;
         ChildLanguage = Languages.IsSupported(c.Language) ? CanonicalLanguage(c.Language) : Languages.Source;
         ExpiryAction = c.ExpiryAction;
+        LearningAfterExpiry = c.LearningAfterExpiry;
+        LearningOutsideWindow = c.LearningOutsideWindow;
+        LearningMinutesPerDay = c.LearningMinutesPerDay;
         Paused = c.Paused;
         Days = c.GetDays().Select(d => new DayInput
         {
@@ -368,13 +402,38 @@ public sealed class EditModel(PaCoDb db) : PageModel
         Groups = c.GetTimeGroups().Select(g => new GroupInput
         {
             Id = g.Id, Name = g.Name, Kind = g.Kind, Minutes = g.MinutesPerDay,
-            Apps = string.Join("\n", g.Apps), Sites = string.Join("\n", g.Sites),
+            Apps = string.Join("\n", g.Apps), Sites = string.Join("\n", g.Sites.Concat(g.Pages.Select(p =>
+                g.PageTitles.TryGetValue(p, out var title) ? $"{title} | {TimeGroups.PageUrl(p)}" : TimeGroups.PageUrl(p)))),
         }).ToList();
         TimeLimitDevices = ChildDevices.Select(d => d.Id).Where(c.TimeLimitOn).ToList();
     }
 
     private static string CanonicalLanguage(string code) =>
         Languages.All.First(l => l.Code.Equals(code, StringComparison.OrdinalIgnoreCase)).Code;
+
+    /// <summary>
+    /// Lines of a group's "Webseiten" field: a whole site ("youtube.com") or – for learning groups – a single page or
+    /// video ("https://youtu.be/abc", optionally "Brüche erklärt | https://…"). Lines are split at line breaks only.
+    /// </summary>
+    internal static (List<string> Sites, Dictionary<string, string?> Pages) ParseSites(string? text, bool allowPages)
+    {
+        var sites = new List<string>();
+        var pages = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        foreach (var raw in (text ?? "").Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var bar = raw.LastIndexOf('|');
+            var title = bar > 0 ? raw[..bar].Trim() : null;
+            var address = bar > 0 ? raw[(bar + 1)..].Trim() : raw;
+            if (allowPages && TimeGroups.NormalizePage(address) is { } page)
+            {
+                if (pages.Count < 200) pages[page] = string.IsNullOrWhiteSpace(title) ? null : title[..Math.Min(80, title.Length)];
+                continue;
+            }
+            var site = NormalizeSite(address);
+            if (site.Length > 0 && !sites.Contains(site, StringComparer.OrdinalIgnoreCase) && sites.Count < 200) sites.Add(site);
+        }
+        return (sites, pages);
+    }
 
     private static IEnumerable<string> SplitLines(string? s) =>
         (s ?? "").Split(['\n', '\r', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

@@ -24,6 +24,8 @@ internal sealed record IpcMessage
     public const string AlertConfig = "alertConfig";
     public const string TakeScreenshot = "takeScreenshot";
     public const string CloseTab = "closeTab";
+    /// <summary>Learning mode on/off (Flag); while on, the agent reports the programs with visible windows.</summary>
+    public const string LearningMode = "learningMode";
 
     // Agent → service
     public const string Hello = "hello";
@@ -35,6 +37,10 @@ internal sealed record IpcMessage
     public const string AlertHits = "alertHits";
     public const string ScreenshotData = "screenshotData";
     public const string Focus = "focus";
+    /// <summary>The child pressed "Lernen" on the lock screen.</summary>
+    public const string StartLearning = "startLearning";
+    /// <summary>Programs with visible windows in the session (learning mode only).</summary>
+    public const string Windows = "windows";
 
     public string Type { get; init; } = "";
 
@@ -69,7 +75,21 @@ internal sealed record IpcMessage
     public string? Description { get; init; }
 
     public string? Host { get; init; }
+
+    /// <summary>Full address of the active tab (Focus), or the address to close (CloseTab, learning mode).</summary>
+    public string? Url { get; init; }
+
+    /// <summary>ShowLock: names of the learning groups if learning mode is possible (null = no "Lernen" button).</summary>
+    public string? Learning { get; init; }
+
+    public IReadOnlyList<WindowProcess>? WindowProcesses { get; init; }
+
+    /// <summary>Learning mode: processes that are playing sound right now.</summary>
+    public IReadOnlyList<WindowProcess>? AudioProcesses { get; init; }
 }
+
+/// <summary>A process with a visible top-level window (UWP apps resolved to the real app process).</summary>
+internal sealed record WindowProcess(int Pid, string Process, string? Description);
 
 internal sealed record AlertHitDto(AlertCategory Category, string Keyword, string Snippet, string App, string? Title, string Source);
 

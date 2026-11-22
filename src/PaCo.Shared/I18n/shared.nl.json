@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Servertijd zonder geldige handtekening geweigerd – mogelijk een nepserver. PaCo telt verder met de eigen klok.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Geen contact met de server sinds {0} – de ouders zijn gewaarschuwd.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Weer contact met de server (vorig contact: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Aan in het thuisnetwerk, maar PaCo meldt zich niet sinds {0} – de ouders zijn gewaarschuwd."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Aan in het thuisnetwerk, maar PaCo meldt zich niet sinds {0} – de ouders zijn gewaarschuwd.",
+ "Im Lernmodus geschlossen: {0}": "Gesloten in leermodus: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Leermodus gestart – alleen leer-apps, leerwebsites en hulpmiddelen",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Tijd voor ‘{0}’ op – browser opnieuw gestart zodat niets op de achtergrond doorspeelt"
 }

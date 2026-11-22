@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Serverio laikas be galiojančio parašo atmestas – galbūt suklastotas serveris. PaCo toliau skaičiuoja savo laikrodžiu.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Nėra ryšio su serveriu nuo {0} – tėvams pranešta.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Vėl yra ryšys su serveriu (ankstesnis ryšys: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Įjungtas namų tinkle, bet PaCo neatsiliepia nuo {0} – tėvams pranešta."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Įjungtas namų tinkle, bet PaCo neatsiliepia nuo {0} – tėvams pranešta.",
+ "Im Lernmodus geschlossen: {0}": "Uždaryta mokymosi režimu: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Mokymosi režimas pradėtas – tik mokymosi programėlės, svetainės ir priemonės",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Laikas „{0}“ baigėsi – naršyklė paleista iš naujo, kad niekas nebegrotų fone"
 }

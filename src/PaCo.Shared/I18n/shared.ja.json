@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "有効な署名のないサーバー時刻を拒否しました。偽のサーバーの可能性があります。PaCo は自分の時計で計測を続けます。",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "{0} 以降サーバーに接続していません。保護者に通知しました。",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "サーバーとの接続が回復しました（前回の接続：{0}）。",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "ホームネットワークでオンですが、PaCo から {0} 以降連絡がありません。保護者に通知しました。"
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "ホームネットワークでオンですが、PaCo から {0} 以降連絡がありません。保護者に通知しました。",
+ "Im Lernmodus geschlossen: {0}": "学習モードで閉じました：{0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "学習モード開始 – 学習アプリ、学習サイト、補助ツールのみ",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "「{0}」の時間が終わりました – バックグラウンドで何も再生されないようブラウザーを再起動しました"
 }

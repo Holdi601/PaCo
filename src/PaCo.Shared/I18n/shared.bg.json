@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Времето на сървъра без валиден подпис е отхвърлено – възможно е фалшив сървър. PaCo продължава със собствения си часовник.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Няма връзка със сървъра от {0} – родителите са уведомени.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Отново има връзка със сървъра (предишен контакт: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Включен в домашната мрежа, но PaCo не се е обаждал от {0} – родителите са уведомени."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Включен в домашната мрежа, но PaCo не се е обаждал от {0} – родителите са уведомени.",
+ "Im Lernmodus geschlossen: {0}": "Затворено в режим на учене: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Режимът на учене е включен – само приложения, сайтове за учене и помагала",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Времето за „{0}“ изтече – браузърът е рестартиран, за да не свири нищо на заден план"
 }

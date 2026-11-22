@@ -259,6 +259,15 @@ namespace PaCo.Server.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LearningAfterExpiry")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("LearningMinutesPerDay")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LearningOutsideWindow")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("LockedByParent")
                         .HasColumnType("INTEGER");
 
@@ -320,6 +329,10 @@ namespace PaCo.Server.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid>("FamilyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("InstalledAppsJson")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LanAlert")

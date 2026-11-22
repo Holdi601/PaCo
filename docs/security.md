@@ -86,6 +86,11 @@ Ebenfalls umgesetzt (November 2026):
   Softwarelösung aushebeln. Deshalb gehören ein BIOS-Passwort und ein geheimes Admin-Passwort dazu.
 - **Lernzeit** erkennt Lern-Apps am Programmnamen und an der Programmbeschreibung, Lern-Webseiten an der Adresszeile des
   Browsers. Wer die Programmbeschreibung eines Spiels gezielt umschreibt, könnte es als Lern-App tarnen.
+- **Lernmodus**: PaCo schließt nur Programme mit Fenster, die dem Kinderkonto gehören, dazu bekannte Musik- und
+  Hörbuch-Player im Infobereich und beim Start einmal alle Browser. Ein unbekannter Player, der ohne Fenster im
+  Hintergrund weiterspielt, würde nicht erkannt. Firefox übernimmt „nur Lernseiten“ erst nach einem Neustart (den PaCo
+  beim Start des Lernmodus auslöst). Einzelne Seiten erkennt PaCo an der Adresszeile; wechselt eine Seite intern zu
+  anderen Inhalten (z. B. ein anderes YouTube-Video), wird der Tab geschlossen.
 - **Mehrere PCs offline gleichzeitig**: Jeder PC kennt die Nutzung der anderen nur bis zum letzten Kontakt.
 - **Webfilter** wirken in Edge, Chrome und Firefox. Für einen netzwerkweiten Filter (alle Geräte, auch Handys) kann man
   zusätzlich einen DNS-Filter wie AdGuard Home betreiben.

@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Η ώρα του διακομιστή χωρίς έγκυρη υπογραφή απορρίφθηκε – πιθανώς ψεύτικος διακομιστής. Το PaCo συνεχίζει με το δικό του ρολόι.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Καμία επικοινωνία με τον διακομιστή από {0} – οι γονείς ειδοποιήθηκαν.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Ξανά επικοινωνία με τον διακομιστή (προηγούμενη επικοινωνία: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Αναμμένο στο οικιακό δίκτυο, αλλά το PaCo δεν επικοινωνεί από {0} – οι γονείς ειδοποιήθηκαν."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Αναμμένο στο οικιακό δίκτυο, αλλά το PaCo δεν επικοινωνεί από {0} – οι γονείς ειδοποιήθηκαν.",
+ "Im Lernmodus geschlossen: {0}": "Έκλεισε στη λειτουργία μάθησης: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Η λειτουργία μάθησης ξεκίνησε – μόνο εφαρμογές, ιστότοποι μάθησης και βοηθήματα",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Ο χρόνος για «{0}» τελείωσε – ο περιηγητής επανεκκινήθηκε ώστε να μην παίζει τίποτα στο παρασκήνιο"
 }

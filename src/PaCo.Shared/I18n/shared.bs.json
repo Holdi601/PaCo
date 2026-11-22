@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Vrijeme servera bez važećeg potpisa odbijeno – moguće lažni server. PaCo nastavlja brojati vlastitim satom.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Nema kontakta sa serverom od {0} – roditelji su obaviješteni.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Ponovo postoji kontakt sa serverom (prethodni kontakt: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Uključen u kućnoj mreži, ali se PaCo ne javlja od {0} – roditelji su obaviješteni."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Uključen u kućnoj mreži, ali se PaCo ne javlja od {0} – roditelji su obaviješteni.",
+ "Im Lernmodus geschlossen: {0}": "Zatvoreno u načinu učenja: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Način učenja pokrenut – samo aplikacije, stranice za učenje i pomagala",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Vrijeme za „{0}“ je isteklo – preglednik ponovo pokrenut da ništa ne svira u pozadini"
 }

@@ -38,6 +38,12 @@ public sealed record WebFilterPolicy
 
     /// <summary>Browser developer tools (F12) off – they can be used to get around page blocks.</summary>
     public bool BlockDevTools { get; init; } = true;
+
+    /// <summary>
+    /// Learning mode: only these sites open (everything else blocked). Null = normal filtering. Set by the PC itself
+    /// while the child is in learning mode, never sent by the server.
+    /// </summary>
+    public IReadOnlyList<string>? AllowOnlySites { get; init; }
 }
 
 /// <summary>Extra minutes granted from the website for a given day.</summary>
@@ -70,6 +76,21 @@ public sealed record ChildPolicy
     public bool LockedByParent { get; init; }
 
     public ExpiryAction ExpiryAction { get; init; } = ExpiryAction.LockScreen;
+
+    /// <summary>
+    /// When the day's time is used up, the child may keep using the learning apps/sites (time groups of kind
+    /// <see cref="TimeGroupKind.Free"/>) – everything else stays closed. Never while the parents locked the PC.
+    /// </summary>
+    public bool LearningAfterExpiry { get; init; }
+
+    /// <summary>Learning mode also outside the allowed hours (e.g. homework late in the evening).</summary>
+    public bool LearningOutsideWindow { get; init; }
+
+    /// <summary>
+    /// Learning time per day (null = unlimited): learning apps/sites do not count as PC time only up to this many
+    /// minutes, and learning mode after the time is up ends when they are used up. Summed over all of the child's PCs.
+    /// </summary>
+    public int? LearningMinutesPerDay { get; init; }
 
     /// <summary>Exactly 7 entries, index = <see cref="DayOfWeek"/> (0 = Sunday).</summary>
     public IReadOnlyList<DayRule> Days { get; init; } = Enumerable.Repeat(DayRule.Unrestricted, 7).ToArray();

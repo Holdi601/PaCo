@@ -27,11 +27,13 @@
  "Gewalt & Waffen",
  "Grooming (Erwachsene, die Kinder ködern)",
  "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.",
+ "Im Lernmodus geschlossen: {0}",
  "Im geschützten PaCo-Ordner wurden {0} fremde oder veränderte Einträge gefunden und bereinigt.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.",
  "Kein aktiver Virenschutz gefunden! Bitte Microsoft Defender (Windows-Sicherheit) einschalten.",
  "Kinder können bei Admin-Aktionen ein Admin-Passwort eingeben. Empfehlung: Abfrage für Standardkonten ganz abschalten.",
  "Kinderkonto „{0}“ ist ein Standardkonto.",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel",
  "Microsoft Defender ist aktiv, aber die Virensignaturen sind {0} Tage alt – bitte Windows-Updates installieren.",
  "Mobbing & Beleidigungen",
  "Nutzung an einem „zukünftigen“ Tag (vorgestellte Uhr) wurde dem echten Tag angerechnet.",
@@ -59,5 +61,6 @@
  "Windows-Firewall ist eingeschaltet.",
  "Windows-Konto „{0}“ von {1} hat Administratorrechte.",
  "Windows-Uhr wurde um {0} Minuten zurückgestellt – wird ignoriert.",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft",
  "Zeit für „{0}“ aufgebraucht – {1} geschlossen"
 ]

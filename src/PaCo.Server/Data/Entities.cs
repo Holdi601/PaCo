@@ -69,6 +69,15 @@ public sealed class Child : IFamilyScoped
 
     public ExpiryAction ExpiryAction { get; set; } = ExpiryAction.LockScreen;
 
+    /// <summary>After the time is used up, learning apps/sites and aids (learning groups) stay usable.</summary>
+    public bool LearningAfterExpiry { get; set; }
+
+    /// <summary>Learning mode also outside the allowed hours.</summary>
+    public bool LearningOutsideWindow { get; set; }
+
+    /// <summary>Learning time per day in minutes (null = unlimited), see <see cref="ChildPolicy.LearningMinutesPerDay"/>.</summary>
+    public int? LearningMinutesPerDay { get; set; }
+
     public bool Paused { get; set; }
 
     public bool LockedByParent { get; set; }
@@ -229,6 +238,12 @@ public sealed class Device : IFamilyScoped
 
     /// <summary>Last "going to sleep" notice; while it is the PC's latest message, LAN presence is not an alarm.</summary>
     public DateTimeOffset? SuspendedUtc { get; set; }
+
+    /// <summary>JSON array of <see cref="InstalledApp"/> – the PC's Start menu programs (parents pick learning apps/aids).</summary>
+    public string InstalledAppsJson { get; set; } = "[]";
+
+    public IReadOnlyList<InstalledApp> GetInstalledApps() =>
+        PaCoJson.Deserialize<InstalledApp[]>(string.IsNullOrEmpty(InstalledAppsJson) ? "[]" : InstalledAppsJson);
 
     /// <summary>JSON object MAC (12 hex digits) → last reported (unix seconds), max 8 entries, 30 days.</summary>
     public string LanMacsJson { get; set; } = "{}";

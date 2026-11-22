@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Tíma netþjóns án gildrar undirskriftar var hafnað – mögulega falskur netþjónn. PaCo heldur áfram með eigin klukku.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "Ekkert samband við þjóninn síðan {0} – foreldrunum hefur verið tilkynnt.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Aftur samband við þjóninn (fyrra samband: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Kveikt á heimanetinu, en PaCo hefur ekki látið í sér heyra síðan {0} – foreldrunum hefur verið tilkynnt."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Kveikt á heimanetinu, en PaCo hefur ekki látið í sér heyra síðan {0} – foreldrunum hefur verið tilkynnt.",
+ "Im Lernmodus geschlossen: {0}": "Lokað í námsham: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Námshamur hafinn – aðeins námsforrit, námsvefir og hjálpartæki",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Tíminn fyrir „{0}“ er búinn – vafrinn endurræstur svo ekkert haldi áfram í bakgrunni"
 }

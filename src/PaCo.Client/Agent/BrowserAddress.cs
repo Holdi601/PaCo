@@ -19,7 +19,10 @@ internal static class BrowserAddress
     public static bool IsBrowser(string process) => Chromium.Contains(process) || Gecko.Contains(process);
 
     /// <summary>Host of the active tab, or null (not a browser, address not readable, or a search being typed).</summary>
-    public static string? ReadHost(IntPtr hwnd, string process)
+    public static string? ReadHost(IntPtr hwnd, string process) => TimeGroups.HostOf(ReadAddress(hwnd, process));
+
+    /// <summary>Text of the address bar of the active tab (the open page), or null.</summary>
+    public static string? ReadAddress(IntPtr hwnd, string process)
     {
         if (!IsBrowser(process)) return null;
         try
@@ -32,7 +35,7 @@ internal static class BrowserAddress
             if (edit is null || !edit.TryGetCurrentPattern(ValuePattern.Pattern, out var vp)) return null;
             // While the address bar has the keyboard focus the child may be typing – that text is not the open page.
             if (edit.Current.HasKeyboardFocus) return null;
-            return TimeGroups.HostOf(((ValuePattern)vp).Current.Value);
+            return ((ValuePattern)vp).Current.Value;
         }
         catch
         {

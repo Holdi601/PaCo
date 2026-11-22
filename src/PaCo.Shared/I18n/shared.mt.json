@@ -59,5 +59,8 @@
  "Serverzeit ohne gültige Signatur verworfen – möglicherweise ein gefälschter Server. PaCo rechnet mit der eigenen Uhr weiter.": "Il-ħin tas-server mingħajr firma valida ġie miċħud – forsi server falz. PaCo jibqa' jgħodd bl-arloġġ tiegħu.",
  "Kein Kontakt zum Server seit {0} – die Eltern wurden benachrichtigt.": "L-ebda kuntatt mas-server minn {0} – il-ġenituri ġew infurmati.",
  "Wieder Kontakt zum Server (davor zuletzt: {0}).": "Kuntatt mas-server mill-ġdid (kuntatt ta' qabel: {0}).",
- "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Mixgħul fin-netwerk tad-dar, iżda PaCo ma kkomunikax minn {0} – il-ġenituri ġew infurmati."
+ "Im Heimnetz eingeschaltet, aber PaCo meldet sich seit {0} nicht – die Eltern wurden benachrichtigt.": "Mixgħul fin-netwerk tad-dar, iżda PaCo ma kkomunikax minn {0} – il-ġenituri ġew infurmati.",
+ "Im Lernmodus geschlossen: {0}": "Magħluq fil-modalità tat-tagħlim: {0}",
+ "Lernmodus gestartet – nur Lern-Apps, Lern-Websites und Hilfsmittel": "Il-modalità tat-tagħlim bdiet – apps, siti tat-tagħlim u għajnuniet biss",
+ "Zeit für „{0}“ aufgebraucht – Browser neu gestartet, damit nichts im Hintergrund weiterläuft": "Il-ħin għal “{0}” spiċċa – il-browser reġa' nbeda biex xejn ma jibqa' jdoqq fl-isfond"
 }
