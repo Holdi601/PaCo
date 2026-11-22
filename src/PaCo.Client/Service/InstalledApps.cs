@@ -18,6 +18,13 @@ internal static class InstalledApps
 {
     private static readonly string[] Skip = ["uninstall", "deinstall", "unins0", "setup", "update", "readme", "help", "hilfe", "website", "paco"];
 
+    /// <summary>
+    /// From the Windows folder only tools that can be a learning aid; the rest there are admin tools (command prompt,
+    /// disk cleanup, …) that would only clutter the parents' pick list.
+    /// </summary>
+    private static readonly HashSet<string> WindowsAids = new(StringComparer.OrdinalIgnoreCase)
+        { "notepad", "mspaint", "charmap", "osk", "magnify", "narrator", "snippingtool", "calc", "wordpad", "write", "xpsrchvw", "soundrecorder", "stikynot" };
+
     public static List<InstalledApp> Scan(IEnumerable<string> childSids)
     {
         var dirs = new List<string>
@@ -40,6 +47,7 @@ internal static class InstalledApps
                 var target = Target(link);
                 if (target is null || !target.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) || !File.Exists(target)) continue;
                 var process = Path.GetFileNameWithoutExtension(target).ToLowerInvariant();
+                if (target.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows), StringComparison.OrdinalIgnoreCase) && !WindowsAids.Contains(process)) continue;
                 if (Skip.Any(s => process.Contains(s, StringComparison.OrdinalIgnoreCase)) || result.ContainsKey(process)) continue;
                 string? description = null;
                 try
