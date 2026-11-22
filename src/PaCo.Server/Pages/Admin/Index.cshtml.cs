@@ -131,6 +131,28 @@ public sealed class IndexModel(PaCoDb db, UserManager<ParentUser> users, Account
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostResetPasswordAsync(Guid userId)
+    {
+        var user = await ParentAsync(userId);
+        if (user is null) return NotFound();
+        InviteLink = await admin.ResetPasswordOnlyAsync(user, BaseUrl());
+        InviteFor = $"{user.DisplayName} ({user.Email})";
+        if (user.FamilyId is { } fid) await admin.NotifyFamilyAsync(fid, AccountAdmin.NewLinkTitle, AccountAdmin.NewLinkText, user.Email);
+        log.LogWarning("Passwort-Link für Konto {User} erstellt", user.Id);
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostResetTwoFactorAsync(Guid userId)
+    {
+        var user = await ParentAsync(userId);
+        if (user is null) return NotFound();
+        await admin.ResetTwoFactorOnlyAsync(user);
+        if (user.FamilyId is { } fid) await admin.NotifyFamilyAsync(fid, AccountAdmin.TwoFactorResetTitle, AccountAdmin.TwoFactorResetText, user.Email);
+        TempData["Message"] = Ui.F("Authenticator von {0} zurückgesetzt. Bei der nächsten Anmeldung (mit dem bisherigen Passwort) wird er neu eingerichtet.", user.Email);
+        log.LogWarning("2FA für Konto {User} zurückgesetzt", user.Id);
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostBlockAsync(Guid userId, bool blocked)
     {
         var user = await ParentAsync(userId);

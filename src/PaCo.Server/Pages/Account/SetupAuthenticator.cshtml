@@ -25,7 +25,8 @@
                     <h1 class="h4">@T("Zwei-Faktor-Anmeldung ist aktiv")</h1>
                     <p>@T("Neues Handy? Dann hier neu einrichten. Der alte Eintrag in der App funktioniert danach nicht mehr.")</p>
                     <div class="d-flex flex-wrap gap-2">
-                        <form method="post" asp-page-handler="Reset">
+                        <form method="post" asp-page-handler="Reset" class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="password" name="currentPassword" class="form-control w-auto" required autocomplete="current-password" placeholder="@T("Aktuelles Passwort")" aria-label="@T("Aktuelles Passwort")" />
                             <button type="submit" class="btn btn-outline-danger" data-confirm="@T("Authenticator neu einrichten? Der bisherige Eintrag in der App funktioniert danach nicht mehr.")"><span class="ico ico-refresh" aria-hidden="true"></span>@T("Authenticator neu einrichten")</button>
                         </form>
                         <a asp-page="./Manage" class="btn btn-link"><span class="ico ico-back" aria-hidden="true"></span>@T("Zurück zu Mein Konto")</a>

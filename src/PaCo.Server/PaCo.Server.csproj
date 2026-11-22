@@ -21,6 +21,8 @@
 
   <ItemGroup>
     <!-- Website translations server.{lang}.json (WithCulture=false: ".de" is not a satellite culture here). -->
+    <!-- Public half of the offline release signing key (tools/release/sign.cs). -->
+    <EmbeddedResource Include="release-signing.pub" LogicalName="PaCo.Server.release-signing.pub" />
     <EmbeddedResource Include="I18n\*.json" WithCulture="false" LogicalName="PaCo.Server.I18n.%(Filename)%(Extension)" />
   </ItemGroup>
 

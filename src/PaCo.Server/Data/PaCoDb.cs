@@ -57,6 +57,9 @@ public sealed class PaCoDb(DbContextOptions<PaCoDb> options, IFamilyContext? fam
     {
         base.OnModelCreating(b);
 
+        // The family's unlock key is stored encrypted (see SecretBox).
+        b.Entity<Family>().Property(f => f.UnlockKey).HasConversion(v => Services.SecretBox.Wrap(v), v => Services.SecretBox.Unwrap(v));
+
         b.Entity<ParentUser>().HasOne(u => u.Family).WithMany().HasForeignKey(u => u.FamilyId).OnDelete(DeleteBehavior.Restrict);
 
         b.Entity<Child>().HasOne<Family>().WithMany().HasForeignKey(c => c.FamilyId).OnDelete(DeleteBehavior.Cascade);

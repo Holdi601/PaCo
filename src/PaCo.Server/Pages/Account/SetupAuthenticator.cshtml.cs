@@ -39,10 +39,15 @@ public sealed class SetupAuthenticatorModel(UserManager<ParentUser> users, SignI
     }
 
     /// <summary>Re-setup (new phone): only allowed for signed-in users who are already fully authenticated.</summary>
-    public async Task<IActionResult> OnPostResetAsync()
+    public async Task<IActionResult> OnPostResetAsync(string? currentPassword)
     {
         var user = await users.GetUserAsync(User);
         if (user is null) return RedirectToPage("./Login");
+        if (!await users.CheckPasswordAsync(user, currentPassword ?? ""))
+        {
+            TempData["Error"] = Ui.T("Das Passwort stimmt nicht.");
+            return RedirectToPage();
+        }
         await users.SetTwoFactorEnabledAsync(user, false);
         await users.ResetAuthenticatorKeyAsync(user);
         log.LogWarning("2FA zurückgesetzt durch Benutzer {User}", user.Email);

@@ -49,10 +49,15 @@ public sealed class ManageModel(PaCoDb db, UserManager<ParentUser> users, SignIn
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostRecoveryCodesAsync()
+    public async Task<IActionResult> OnPostRecoveryCodesAsync(string? currentPassword)
     {
         var user = await users.GetUserAsync(User);
         if (user is null) return RedirectToPage("./Login");
+        if (!await users.CheckPasswordAsync(user, currentPassword ?? ""))
+        {
+            TempData["Error"] = Ui.T("Das Passwort stimmt nicht.");
+            return RedirectToPage();
+        }
         var codes = await users.GenerateNewTwoFactorRecoveryCodesAsync(user, 8) ?? [];
         TempData["RecoveryCodes"] = string.Join("\n", codes);
         return RedirectToPage("./SetupAuthenticator");

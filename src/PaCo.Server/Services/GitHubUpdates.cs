@@ -43,14 +43,17 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
         if (!UpdateManifest.IsNewer(version, client.Version))
             return new(true, Ui.F("Kein Update nötig: Version {0} ist aktuell (neuestes Release: {1}).", client.Version, version), client.Version);
 
-        string? exeUrl = null, shaUrl = null;
+        string? exeUrl = null, shaUrl = null, sigUrl = null;
         foreach (var a in release.GetProperty("assets").EnumerateArray())
         {
             var name = a.GetProperty("name").GetString();
             var url = a.GetProperty("browser_download_url").GetString();
             if (name == "PaCo-Setup.exe") exeUrl = url;
             if (name == "PaCo-Setup.exe.sha256") shaUrl = url;
+            if (name == "PaCo-Setup.exe.sig") sigUrl = url;
         }
+        // Only releases signed with the offline key (not stored on GitHub) are accepted.
+        if (sigUrl is null) return new(false, Ui.F("Release {0} ist (noch) nicht signiert – Update wird nicht übernommen.", tag));
         if (exeUrl is null || shaUrl is null) return new(false, Ui.F("Release {0} enthält nicht PaCo-Setup.exe und PaCo-Setup.exe.sha256.", tag));
 
         var expected = (await gh.GetStringAsync(shaUrl, ct)).Trim().Split(' ', 2)[0].ToLowerInvariant();
@@ -82,6 +85,13 @@ public sealed class GitHubUpdates(IHttpClientFactory http, ClientPackage client,
             {
                 log.LogError("Update {Version}: Prüfsumme falsch (erwartet {Expected}, erhalten {Actual})", version, expected, actual);
                 return new(false, Ui.T("Die Prüfsumme der heruntergeladenen Datei stimmt nicht – Update verworfen."));
+            }
+            var signature = await gh.GetStringAsync(sigUrl, ct);
+            var publicKey = string.IsNullOrWhiteSpace(options.Value.ReleasePublicKey) ? ServerOptions.BuiltInReleasePublicKey : options.Value.ReleasePublicKey;
+            if (!ReleaseSignature.Verify(publicKey, version, actual, signature))
+            {
+                log.LogError("Update {Version}: Signatur ungültig – verworfen", version);
+                return new(false, Ui.T("Die Signatur des Updates ist ungültig – Update verworfen."));
             }
             File.Move(tmp, Path.Combine(client.UpdatesDir, $"PaCo-Setup-{version}.exe"), overwrite: true);
             log.LogInformation("Client-Update {Version} von GitHub geladen und geprüft ({Sha})", version, actual);

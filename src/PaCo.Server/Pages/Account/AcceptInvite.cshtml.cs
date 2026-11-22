@@ -66,6 +66,13 @@ public sealed class AcceptInviteModel(UserManager<ParentUser> users, SignInManag
         await users.UpdateSecurityStampAsync(user); // link is now used up
         log.LogInformation("Einladung angenommen: {User}", user.Email);
 
+        if (await users.GetTwoFactorEnabledAsync(user))
+        {
+            // Only the password was reset: the normal sign-in (with the authenticator code) still applies – a reset link
+            // alone never opens an account.
+            TempData["Message"] = Ui.T("Neues Passwort gespeichert. Bitte jetzt mit Passwort und Code aus der Authenticator-App anmelden.");
+            return RedirectToPage("./Login");
+        }
         await signIn.SignInAsync(user, isPersistent: false);
         await LoginTracking.TouchAsync(users, user.Email!);
         return RedirectToPage("./SetupAuthenticator");
