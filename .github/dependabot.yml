@@ -6,6 +6,17 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # PaCo stays on .NET 10 (LTS). The runtime packages move to the next
+      # major only together with TargetFramework and the Docker images.
+      - dependency-name: "Microsoft.AspNetCore.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.EntityFrameworkCore*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -14,3 +25,7 @@ updates:
     directory: "/deploy"
     schedule:
       interval: weekly
+    ignore:
+      # The images follow the app's .NET version (10, LTS), see nuget above.
+      - dependency-name: "dotnet/*"
+        update-types: ["version-update:semver-major"]
